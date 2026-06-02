@@ -1,0 +1,37 @@
+/**
+ * Nexus-1MD Command Template
+ * Use this as a base for creating new commands.
+ */
+
+module.exports = {
+    name: "example",          // Main command trigger
+    aliases: ["ex", "test"], // Optional: Other triggers for this command
+    category: "general",      // Optional: Category name (defaults to folder name)
+    description: "An example command description",
+    cooldown: 3000,           // Optional: Cooldown in milliseconds (default 3000)
+
+    // Permission Flags (declarative style)
+    isOwnerOnly: false,       // Set to true for bot owner only
+    isAdminOnly: false,       // Set to true for admins/owner only
+    isGroupOnly: false,       // Set to true for group use only
+
+    /**
+     * @param {Object} ctx - The command context
+     * @param {import("@whiskeysockets/baileys").WASocket} ctx.sock - The socket instance
+     * @param {string} ctx.jid - The chat JID
+     * @param {string} ctx.sender - The sender's JID
+     * @param {string} ctx.text - The full message text
+     * @param {boolean} ctx.isGroup - Whether the chat is a group
+     * @param {Object} ctx.msg - The parsed message object
+     * @param {string[]} ctx.args - Command arguments
+     */
+    execute: async (ctx) => {
+        try {
+            await ctx.sock.sendMessage(ctx.jid, { 
+                text: "👋 This is an example command response!" 
+            });
+        } catch (err) {
+            console.error("Error in example command:", err);
+        }
+    }
+};
