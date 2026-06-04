@@ -16,6 +16,7 @@ module.exports = {
 
         await sock.sendMessage(jid, { 
             text,
+            /* 
             contextInfo: {
                 externalAdReply: {
                     title: "WHITE WIZARD",
@@ -26,6 +27,7 @@ module.exports = {
                     renderLargerThumbnail: true
                 }
             }
+            */
         }, { quoted: msg });
     }
 };
