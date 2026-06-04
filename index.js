@@ -152,6 +152,10 @@ async function connectionLogic() {
 // 🌐 Health Check Server (Required for Render/PaaS hosting)
 app.get("/", (req, res) => res.send("🤖 Nexus-1MD is Online and Healthy!"));
 app.listen(PORT, () => console.log(`🌍 Heartbeat server listening on port ${PORT}`));
+
+// 🌐 Health Check Server (Required for Render/PaaS hosting)
+app.get("/", (req, res) => res.send("🤖 Nexus-1MD is Online and Healthy!"));
+app.listen(PORT, () => console.log(`🌍 Heartbeat server listening on port ${PORT}`));
                     }, delay);
                 }
             } else {
@@ -167,8 +171,7 @@ app.listen(PORT, () => console.log(`🌍 Heartbeat server listening on port ${PO
         if (!m.message) return;
 
         // 🛡️ ROBUST SENDER DETECTION
-        const sender = m.key.remoteJidAlt || m.key.participant || m.key.remoteJid;
-        const cleanSender = (sender || "").replace(/[^0-9]/g, "");
+        const sender = m.key.fromMe ? (global.myJid || m.key.remoteJid) : (m.key.participant || m.key.remoteJid);
         const { isOwner } = require("./lib/middleware");
         const isOwnerStatus = isOwner(sender);
 
@@ -176,14 +179,15 @@ app.listen(PORT, () => console.log(`🌍 Heartbeat server listening on port ${PO
         const body = (m.message?.conversation || m.message?.extendedTextMessage?.text || m.message?.imageMessage?.caption || "");
         console.log("-----------------------------------------");
         console.log(JSON.stringify(m.key, null, 2));
+
         console.log("Sender:", sender);
         console.log("FromMe:", m.key.fromMe);
         console.log("IsOwner:", isOwnerStatus);
         console.log("Body:", body);
         console.log("-----------------------------------------");
 
-        // allow owner even if fromMe
-        // allow owner even if fromMe (Self-management)
+        // 🛡️ Loop Protection: Skip only if it's REALLY the bot (fromMe) AND NOT a human owner
+        // This ensures the bot responds to YOU even when you use it on a second phone
         if (m.key.fromMe && !isOwnerStatus) return;
 
         // 1. Background Automation (Anti-Delete, Status, logging)

@@ -3,7 +3,11 @@ module.exports = {
     version: "1.0.0",
 
     // Bot owners (Full JIDs or raw numbers)
-    ownerNumbers: ["254797715445@s.whatsapp.net", "147356636938389@lid"],
+    ownerNumbers: [
+        "254797715445@s.whatsapp.net", 
+        "147356636938389@lid",
+        ...(process.env.OWNERS ? process.env.OWNERS.split(",").map(num => num.trim().includes("@") ? num.trim() : `${num.trim()}@s.whatsapp.net`) : [])
+    ],
 
     // Command prefixes the bot will respond to
     prefixes: ["!", ".", "/"],
