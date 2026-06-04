@@ -33,14 +33,17 @@ module.exports = {
             setTimeout(async () => {
                 try {
                     const code = await pairSock.requestPairingCode(targetNumber);
+                    
                     await sock.sendMessage(jid, { 
-                        text: `🔗 *NEXUS-1MD PAIRING SYSTEM*\n\n` +
-                              `🔢 Code: *${code}*\n\n` +
-                              `1. Open WhatsApp > Linked Devices.\n` +
-                              `2. Tap 'Link with phone number instead'.\n` +
-                              `3. Enter the code above.\n\n` +
-                              `⚠️ *Note:* This code expires in 2 minutes. Once linked, I will send your Session ID here.`
+                        text: `🔗 *NEXUS-1MD PAIRING*\n\nEnter the code below on your phone:`
                     }, { quoted: msg });
+
+                    // Send code as separate message for 1-tap copy
+                    await sock.sendMessage(jid, { text: code });
+
+                    await sock.sendMessage(jid, { 
+                        text: `1. Open WhatsApp > Linked Devices.\n2. Tap 'Link with phone number instead'.\n3. Paste the code above.`
+                    });
                 } catch (e) {
                     console.error("Pairing Request Error:", e);
                 }
@@ -57,17 +60,18 @@ module.exports = {
                     const sessionId = "Nexus~" + Buffer.from(credsData).toString("base64");
 
                     await sock.sendMessage(jid, { 
-                        text: `✅ *Session Generated Successfully!*\n\n` +
-                              `📦 *Your Session ID:* \n\n\`${sessionId}\`\n\n` +
-                              `💎 *How to use:* \n` +
-                              `1. Copy the code above.\n` +
-                              `2. Paste it as \`SESSION_ID\` in your Render/Heroku environment variables.\n\n` +
-                              `_Keep this ID secret. It grants full access to your account!_`
+                        text: `✅ *Session Generated!*\nCopy the code below:`
+                    });
+
+                    // Send ID as separate message for 1-tap copy
+                    await sock.sendMessage(jid, { text: sessionId });
+
+                    await sock.sendMessage(jid, { 
+                        text: `💎 *How to use:* \n1. Copy the code above.\n2. Paste it as \`SESSION_ID\` in your Render/Heroku environment variables.`
                     });
 
                     // Cleanup
-                    pairSock.logout();
-                    pairSock.end();
+                    pairSock.ev.removeAllListeners();
                     setTimeout(() => {
                         fs.rmSync(tempSessionDir, { recursive: true, force: true });
                     }, 5000);
