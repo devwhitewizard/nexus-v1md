@@ -134,7 +134,30 @@ nexus-v1md/
 
 - **Never share your `session/` folder** — it contains your WhatsApp credentials.
 - **Never commit `.env`** — it contains your API keys.
-- The `database/database.db` file stores all economy and user data.
+
+### Option 2: Deployment with Docker (Recommended)
+If you have Docker installed, you can run the bot without worrying about dependencies.
+
+1. **Configure Environment**:
+   Update your `.env` file with your API keys.
+
+2. **Launch with Docker Compose**:
+   ```bash
+   docker compose up -d --build
+   ```
+
+3. **Link WhatsApp**:
+   Check the logs to see the QR code:
+   ```bash
+   docker logs -f nexus-1md
+   ```
+
+---
+
+### Phase 4: Customization
+- **Change Banner**: Replace `assets/Nexuspic.png` with your own image.
+- **Set Name**: Update `config.js` with your bot's name.
+The `database/database.db` file stores all economy and user data.
 
 ---
 

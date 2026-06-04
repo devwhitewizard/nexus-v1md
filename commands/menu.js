@@ -99,7 +99,7 @@ module.exports = {
             menuBody += `🏀 *SPORTS MENU*\n`;
             menuBody += `📦 *OWNER MENU*\n`;
             menuBody += `🌍 *GENERAL MENU*\n\n`;
-            menuBody += `💎 _Type .m <category> for speed_`;
+            menuBody += `💎 _Type .m <category> or 1-14 for speed_`;
 
             if (banner) {
                 return await sock.sendMessage(jid, {

@@ -1,0 +1,16 @@
+services:
+  nexus-bot:
+    build: .
+    container_name: nexus-1md
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./session:/app/session
+      - ./database:/app/database
+      - ./assets:/app/assets
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10mb"
+        max-file: "3"
