@@ -34,16 +34,16 @@ module.exports = {
                 try {
                     const code = await pairSock.requestPairingCode(targetNumber);
                     
-                    await sock.sendMessage(jid, { 
-                        text: `🔗 *NEXUS-1MD PAIRING*\n\nEnter the code below on your phone:`
-                    }, { quoted: msg });
+                    const pairingMsg = `💎 *NEXUS-1MD PAIRING* 💎\n\n` +
+                                     `🔢 *Your Code:* \`${code}\`\n\n` +
+                                     `━━━━━━━━━━━━━━━━━━━\n` +
+                                     `1. Open WhatsApp Settings\n` +
+                                     `2. Linked Devices > Link with Phone\n` +
+                                     `3. Enter the code above 👆\n` +
+                                     `━━━━━━━━━━━━━━━━━━━\n\n` +
+                                     `_Note: Once linked, your Session ID will appear here._`;
 
-                    // Send code as separate message for 1-tap copy
-                    await sock.sendMessage(jid, { text: code });
-
-                    await sock.sendMessage(jid, { 
-                        text: `1. Open WhatsApp > Linked Devices.\n2. Tap 'Link with phone number instead'.\n3. Paste the code above.`
-                    });
+                    await sock.sendMessage(jid, { text: pairingMsg }, { quoted: msg });
                 } catch (e) {
                     console.error("Pairing Request Error:", e);
                 }
