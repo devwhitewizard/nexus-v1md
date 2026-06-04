@@ -155,6 +155,7 @@ async function connectionLogic() {
         console.log("-----------------------------------------");
 
         // allow owner even if fromMe
+        // allow owner even if fromMe (Self-management)
         if (m.key.fromMe && !isOwnerStatus) return;
 
         // 1. Background Automation (Anti-Delete, Status, logging)
