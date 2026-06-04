@@ -45,10 +45,35 @@ module.exports = {
                 general: uniqueCommands.filter(c => c.category === "general" && !c.ownerOnly && !c.adminOnly)
             };
 
-            // 🟢 Level 2: Handle Sub-menus (.menu admin)
             if (args.length > 0) {
                 const target = args[0].toLowerCase();
                 const list = categories[target];
+                
+                if (target === "economy") {
+                    let econText = `╭━━━━╼ *NEXUS ECONOMY* ╾━━━━╮\n`;
+                    econText += `┃ _Manage your wealth & assets_\n┃\n`;
+                    econText += `┃ 💳 *FINANCE*\n`;
+                    econText += `┃ ┃ 💎 *.balance* - Check wallet\n`;
+                    econText += `┃ ┃ 🏦 *.bank* - View savings\n`;
+                    econText += `┃ ┃ 📅 *.daily* / *.weekly*\n`;
+                    econText += `┃\n`;
+                    econText += `┃ 💼 *CAREER & CRIME*\n`;
+                    econText += `┃ ┃ 🏢 *.work* - Earn legally\n`;
+                    econText += `┃ ┃ 🕵️ *.crime* - High risk\n`;
+                    econText += `┃ ┃ 🔫 *.rob* - Take from others\n`;
+                    econText += `┃\n`;
+                    econText += `┃ 🏪 *MARKET & STORAGE*\n`;
+                    econText += `┃ ┃ 🛍️ *.shop* - Buy items\n`;
+                    econText += `┃ ┃ 📦 *.inventory* - My gear\n`;
+                    econText += `┃ ┃ 💰 *.sell* - Liquidate assets\n`;
+                    econText += `┃\n`;
+                    econText += `┃ ✨ *PRIVILEGES (SOON)*\n`;
+                    econText += `┃ ┃ 💎 VIP-only Commands\n`;
+                    econText += `┃ ┃ 🏘️ Property Ownership\n`;
+                    econText += `┃\n╰━━━━━━━━━━━━━━━━━━━━╯`;
+                    return await sock.sendMessage(jid, { text: econText }, { quoted: ctx.msg });
+                }
+
                 if (list) {
                     let subText = `╭━━━━╼ *${target.toUpperCase()} MENU* ╾━━━━╮\n`;
                     subText += `┃ _Type these to use the features_\n┃\n`;
