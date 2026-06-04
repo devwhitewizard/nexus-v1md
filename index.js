@@ -149,14 +149,11 @@ async function connectionLogic() {
                         isReconnecting = false;
                         connectionLogic();
 
-// 🌐 Health Check Server (Required for Render/PaaS hosting)
-app.get("/", (req, res) => res.send("🤖 Nexus-1MD is Online and Healthy!"));
-app.listen(PORT, () => console.log(`🌍 Heartbeat server listening on port ${PORT}`));
-
-// 🌐 Health Check Server (Required for Render/PaaS hosting)
-app.get("/", (req, res) => res.send("🤖 Nexus-1MD is Online and Healthy!"));
-app.listen(PORT, () => console.log(`🌍 Heartbeat server listening on port ${PORT}`));
+                    setTimeout(() => {
+                        isReconnecting = false;
+                        connectionLogic();
                     }, delay);
+                }
                 }
             } else {
                 console.log("🔌 Connection closed. Not reconnecting.");
