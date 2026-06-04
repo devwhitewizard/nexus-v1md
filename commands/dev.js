@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 module.exports = {
     name: "dev",
     aliases: ["developer", "creator", "wizard"],
@@ -17,7 +20,7 @@ module.exports = {
                 externalAdReply: {
                     title: "WHITE WIZARD",
                     body: "I Like Coding! 💻🚀",
-                    thumbnailUrl: "https://files.catbox.moe/p9pntu.jpg",
+                    thumbnail: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.png")),
                     sourceUrl: "https://jonathanmwanza.vercel.app/",
                     mediaType: 1,
                     renderLargerThumbnail: true

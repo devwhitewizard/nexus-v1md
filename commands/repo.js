@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 module.exports = {
     name: "repo",
     aliases: ["github", "source", "script"],
@@ -17,7 +20,7 @@ module.exports = {
                 externalAdReply: {
                     title: "GET NEXUS-1MD SCRIPT",
                     body: "Official GitHub Repository",
-                    thumbnailUrl: "https://files.catbox.moe/p9pntu.jpg", // reuse existing banner
+                    thumbnail: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.png")),
                     sourceUrl: "https://github.com/devwhitewizard/nexus-v1md",
                     mediaType: 1,
                     renderLargerThumbnail: true

@@ -1,4 +1,6 @@
 const os = require("os");
+const fs = require("fs");
+const path = require("path");
 const { version } = require("../config");
 
 module.exports = {
@@ -35,7 +37,7 @@ module.exports = {
                 externalAdReply: {
                     title: "NEXUS-1MD ACTIVE",
                     body: "Premium WhatsApp Experience",
-                    thumbnailUrl: "https://files.catbox.moe/p9pntu.jpg",
+                    thumbnail: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.png")),
                     sourceUrl: "https://github.com/devwhitewizard/nexus-v1md",
                     mediaType: 1,
                     renderLargerThumbnail: true
