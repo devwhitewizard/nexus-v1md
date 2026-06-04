@@ -15,16 +15,8 @@ module.exports = {
                      `_Don't forget to give a ⭐ if you like the project!_`;
 
         await sock.sendMessage(jid, { 
-            text,
-            contextInfo: {
-                externalAdReply: {
-                    title: "GET NEXUS-1MD SCRIPT",
-                    body: "Official GitHub Repository",
-                    thumbnail: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.png")),
-                    sourceUrl: "https://github.com/devwhitewizard/nexus-v1md",
-                    mediaType: 1
-                }
-            }
+            image: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.png")),
+            caption: repoInfo
         }, { quoted: msg });
     }
 };

@@ -15,16 +15,9 @@ module.exports = {
                      `_\"Magic is just science we don't understand yet, and code is the closest thing to magic I've found.\"_`;
 
         await sock.sendMessage(jid, { 
-            text,
-            contextInfo: {
-                externalAdReply: {
-                    title: "WHITE WIZARD",
-                    body: "I Like Coding! 💻🚀",
-                    thumbnail: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.png")),
-                    sourceUrl: "https://jonathanmwanza.vercel.app/",
-                    mediaType: 1
-                }
-            }
+            image: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.png")),
+            caption: text,
+            headerType: 4
         }, { quoted: msg });
     }
 };

@@ -32,16 +32,8 @@ module.exports = {
                      `_Type .menu to see what I can do!_`;
 
         await sock.sendMessage(jid, { 
-            text,
-            contextInfo: {
-                externalAdReply: {
-                    title: "NEXUS-1MD ACTIVE",
-                    body: "Premium WhatsApp Experience",
-                    thumbnail: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.png")),
-                    sourceUrl: "https://github.com/devwhitewizard/nexus-v1md",
-                    mediaType: 1
-                }
-            }
+            image: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.png")),
+            caption: aliveMessage
         }, { quoted: msg });
     }
 };
