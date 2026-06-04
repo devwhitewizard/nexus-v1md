@@ -9,9 +9,26 @@ const { handleMessages } = require("./lib/commandHandler");
 let isFirstConnect = true;
 let isReconnecting = false;
 
-async function connectionLogic() {
-    if (isReconnecting) return; // Prevent multiple instances
-    isReconnecting = true;
+    const fs = require("fs");
+    const path = require("path");
+
+    // 📦 SESSION ID AUTO-RESTORE
+    if (process.env.SESSION_ID && !fs.existsSync(path.join(__dirname, authFolder, "creds.json"))) {
+        console.log("📦 SESSION_ID found in .env. Attempting to restore session...");
+        try {
+            const sessionId = process.env.SESSION_ID.replace("Nexus~", "");
+            const credsJson = Buffer.from(sessionId, "base64").toString("utf-8");
+            
+            if (!fs.existsSync(path.join(__dirname, authFolder))) {
+                fs.mkdirSync(path.join(__dirname, authFolder), { recursive: true });
+            }
+            
+            fs.writeFileSync(path.join(__dirname, authFolder, "creds.json"), credsJson);
+            console.log("✅ Session restored successfully from SESSION_ID!");
+        } catch (e) {
+            console.error("❌ Failed to restore session from ID:", e.message);
+        }
+    }
 
     const { state, saveCreds } = await useMultiFileAuthState(authFolder);
 

@@ -30,6 +30,14 @@ module.exports = {
             // Also send as a separate message for easy copying
             await sock.sendMessage(jid, { text: finalizedId });
 
+            // 📂 Also send the raw creds.json file as a backup document
+            await sock.sendMessage(jid, { 
+                document: fs.readFileSync(credsPath),
+                fileName: "creds.json",
+                mimetype: "application/json",
+                caption: "📁 *Backup:* This is your `creds.json` file. You can download this and put it in the `session/` folder if you ever lose access."
+            }, { quoted: msg });
+
         } catch (err) {
             console.error("Session ID Error:", err);
             await sock.sendMessage(jid, { text: "❌ Failed to generate Session ID." });
