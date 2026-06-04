@@ -33,7 +33,7 @@ module.exports = {
 
         await sock.sendMessage(jid, { 
             image: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.png")),
-            caption: aliveMessage
+            caption: text
         }, { quoted: msg });
     }
 };
