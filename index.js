@@ -1,4 +1,10 @@
-require("dotenv").config();
+const envResult = require("dotenv").config();
+if (envResult.error) {
+    console.log("⚠️  Could not find .env file. Using system environment variables instead.");
+} else {
+    console.log("✅ .env file loaded successfully.");
+}
+
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,7 +26,12 @@ async function connectionLogic() {
     const path = require("path");
 
     // 📦 SESSION ID AUTO-RESTORE
-    if (process.env.SESSION_ID && !fs.existsSync(path.join(__dirname, authFolder, "creds.json"))) {
+    if (process.env.SESSION_ID) {
+        console.log("📦 SESSION_ID detected. Verifying session file...");
+        const credsPath = path.join(__dirname, authFolder, "creds.json");
+        
+        // If SESSION_ID is present, we always ensure the file matches it
+        // This fixes cases where a broken/partially scan-created file exists
         console.log("📦 SESSION_ID found in .env. Attempting to restore session...");
         try {
             const rawId = process.env.SESSION_ID.trim();
