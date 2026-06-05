@@ -35,27 +35,57 @@ async function connectionLogic() {
         console.log("📦 SESSION_ID found in .env. Attempting to restore session...");
         try {
             const rawId = process.env.SESSION_ID.trim();
-            const sessionId = rawId.includes("~") ? rawId.split("~")[1] : rawId;
+            const sessionId = rawId.includes("~") ? rawId.split("~")[1] : (rawId.startsWith("BWM") || rawId.startsWith("XMD") ? rawId.slice(4) : rawId);
             const buffer = Buffer.from(sessionId, "base64");
-            const credsJson = buffer.toString("utf-8");
+            const zlib = require("zlib");
             
-            console.log(`📦 Decoded SESSION_ID (first 20 chars): ${credsJson.substring(0, 20)}`);
-
-            if (!credsJson.trim().startsWith("{")) {
-                console.warn("⚠️  Warning: Decoded SESSION_ID does not look like valid JSON. Searching for JSON start...");
-                const jsonStart = credsJson.indexOf("{");
-                if (jsonStart !== -1) {
-                    const cleanJson = credsJson.substring(jsonStart);
-                    console.log("✅ Found JSON start. Attempting to use cleaned data.");
-                    fs.writeFileSync(path.join(__dirname, authFolder, "creds.json"), cleanJson);
-                } else {
-                    console.error("❌ Error: No JSON metadata found in the Session ID. Saving raw data as fallback.");
-                    fs.writeFileSync(path.join(__dirname, authFolder, "creds.json"), credsJson);
+            let credsJson = "";
+            
+            // 1. Try Gzip/Deflate Decompression
+            try {
+                credsJson = zlib.gunzipSync(buffer).toString("utf-8");
+            } catch (e) {
+                try {
+                    credsJson = zlib.inflateSync(buffer).toString("utf-8");
+                } catch (e2) {
+                    credsJson = buffer.toString("utf-8");
                 }
+            }
+
+            // 2. Smart JSON Search & Validation
+            console.log(`📦 Decoded SESSION_ID (Length: ${credsJson.length})`);
+
+            const extractValidJson = (str) => {
+                const startIndex = str.indexOf("{");
+                if (startIndex === -1) return null;
+                
+                // Try from every { until we find one that parses
+                for (let i = startIndex; i < str.length; i++) {
+                    if (str[i] === "{") {
+                        try {
+                            const segment = str.substring(i);
+                            // Find matching } or just try to parse the rest
+                            JSON.parse(segment);
+                            return segment;
+                        } catch (err) {
+                            // try next {
+                        }
+                    }
+                }
+                return null;
+            };
+
+            const finalJson = extractValidJson(credsJson);
+
+            if (finalJson) {
+                console.log("✅ Valid JSON Session found and verified.");
+                fs.writeFileSync(path.join(__dirname, authFolder, "creds.json"), finalJson);
             } else {
+                console.error("❌ Error: Could not find valid JSON in Session ID.");
+                // Fallback: save as is, maybe it's raw
                 fs.writeFileSync(path.join(__dirname, authFolder, "creds.json"), credsJson);
             }
-            console.log("✅ Session file created from SESSION_ID.");
+            console.log("✅ Session file process finished.");
         } catch (e) {
             console.error("❌ Failed to restore session from ID:", e.message);
         }
