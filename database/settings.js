@@ -62,6 +62,22 @@ const SettingsDB = sequelize.define('settings', {
  * Initializes the settings record if it doesn't exist
  */
 const getBotSettings = async () => {
+    const { isOnline } = require('../lib/db');
+    const jsonStore = require('../lib/jsonStore');
+
+    if (!isOnline()) {
+        const [settings] = await jsonStore.findOrCreate({
+            where: { id: 1 },
+            defaults: { 
+                publicMode: false,
+                antiDelete: true,
+                autoViewStatus: true,
+                lockedCommands: ""
+            }
+        });
+        return settings;
+    }
+
     try {
         const [settings] = await SettingsDB.findOrCreate({
             where: { id: 1 },
