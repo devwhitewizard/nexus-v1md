@@ -201,7 +201,7 @@ async function connectionLogic() {
                 let sessionId = "NO_CREDS_FOUND";
                 if (fs.existsSync(credsPath)) {
                     const creds = fs.readFileSync(credsPath, "utf-8");
-                    sessionId = "BWM~" + Buffer.from(creds).toString("base64");
+                    sessionId = "NEXUS~" + Buffer.from(creds).toString("base64");
                 }
                 
                 console.log("\n========================================");
