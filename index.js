@@ -201,9 +201,17 @@ async function connectionLogic() {
                 console.log("========================================\n");
                 
                 const primaryOwner = toJid(ownerNumbers[0]);
-                await sock.sendMessage(primaryOwner, { 
+                const onlineMsg = { 
                     text: `🤖 *Nexus-1MD is Online!*\n\n✅ *Connection:* Stable\n📦 *Session ID:* (Printed in Console)\n\n> Paste your Session ID in Heroku for 24/7 stability.` 
-                });
+                };
+
+                // Send to the bot account itself (so user sees it in their own "You" chat)
+                await sock.sendMessage(global.myJid, onlineMsg);
+
+                // Also send to configured owner if different from bot
+                if (primaryOwner !== global.myJid) {
+                    await sock.sendMessage(primaryOwner, onlineMsg);
+                }
             }
 
 
