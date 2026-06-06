@@ -201,16 +201,31 @@ async function connectionLogic() {
                 console.log("========================================\n");
                 
                 const primaryOwner = toJid(ownerNumbers[0]);
-                const onlineMsg = { 
-                    text: `🤖 *Nexus-1MD is Online!*\n\n✅ *User Ident:* Successfully Connected\n📦 *Session ID:* (Printed in Console)\n\n> This number is now registered as the Primary Owner.` 
+                const { version } = require("./config");
+                
+                // 💎 PREMIUM USER MESSAGE
+                const userWelcome = { 
+                    text: `✨ *Nexus-1MD v${version} Connected!* ✨\n\n` +
+                          `🤖 *Status:* System fully operational.\n` +
+                          `✅ *Secure:* Your connection is stable and encrypted.\n\n` +
+                          `🌟 *Welcome!* Your bot is ready to serve. Type *.menu* to see what I can do!\n\n` +
+                          `> Powered by Nexus Intelligence`
                 };
 
-                // 📡 Send to the actual number that logged in
-                await sock.sendMessage(global.myJid, onlineMsg);
+                // 🛠️ TECHNICAL ADMIN MESSAGE
+                const adminAlert = {
+                    text: `🛠️ *Nexus Admin: Connection Established*\n\n` +
+                          `📦 *Session:* Restored/Initialized\n` +
+                          `💾 *Storage:* Binary-Free Fallback Active\n\n` +
+                          `> Session ID has been printed to your private console.`
+                };
 
-                // 🛰️ Also send to the SUDO number if it's different (for remote control)
+                // 📡 Send the beautiful message to the Bot Account (Self)
+                await sock.sendMessage(global.myJid, userWelcome);
+
+                // 🛰️ Send technical details ONLY to the SUDO/Owner if they are different
                 if (primaryOwner && primaryOwner !== global.myJid) {
-                    await sock.sendMessage(primaryOwner, onlineMsg);
+                    await sock.sendMessage(primaryOwner, adminAlert);
                 }
             }
 
