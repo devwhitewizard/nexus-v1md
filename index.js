@@ -119,7 +119,7 @@ async function connectionLogic() {
         keepAliveIntervalMs: 30000,
     });
 
-    if (usePairingCode && !state.creds.registered) {
+    if (usePairingCode && !state.creds.registered && !process.env.SESSION_ID) {
         setTimeout(async () => {
             try {
                 let pNumber = process.env.PAIRING_NUMBER.replace(/[^0-9]/g, "");
@@ -143,7 +143,7 @@ async function connectionLogic() {
     sock.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
-        if (qr) {
+        if (qr && !process.env.SESSION_ID) {
             console.clear();
             console.log("📲 Scan this QR to login:\n");
             qrcode.generate(qr, { small: true });
