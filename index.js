@@ -86,20 +86,24 @@ async function connectionLogic() {
             if (finalJson) {
                 console.log("✅ Valid JSON Session found and verified.");
                 try {
-                    const parsed = JSON.parse(finalJson);
-                    console.log(`📦 Session structure keys: ${Object.keys(parsed).join(", ")}`);
-                    if (parsed.creds && parsed.keys) {
-                        console.log("ℹ️  Detected Legacy Single-File Session. Converting to Multi-File...");
-                        fs.writeFileSync(path.join(__dirname, authFolder, "creds.json"), JSON.stringify(parsed.creds));
-                        // Note: Multi-file keys are handled per-request by baileys, 
-                        // but for now we just ensure creds are there.
+                    let parsed = JSON.parse(finalJson);
+                    let creds = parsed.creds || (parsed.noiseKey ? parsed : null);
+
+                    if (creds) {
+                        console.log("ℹ️  Structuring credentials with registration safety...");
+                        // 🛡️ FORCE REGISTERED STATUS TO BYPASS LOOP
+                        creds.registered = true;
+                        
+                        // Ensure it's the root object being written
+                        fs.writeFileSync(path.join(__dirname, authFolder, "creds.json"), JSON.stringify(creds));
                     } else {
                         fs.writeFileSync(path.join(__dirname, authFolder, "creds.json"), finalJson);
                     }
                 } catch (e) {
                     fs.writeFileSync(path.join(__dirname, authFolder, "creds.json"), finalJson);
                 }
-            } else {
+            }
+ else {
                 console.error("❌ Error: Could not find valid JSON in Session ID.");
                 fs.writeFileSync(path.join(__dirname, authFolder, "creds.json"), buffer);
             }
@@ -133,6 +137,17 @@ async function connectionLogic() {
         keepAliveIntervalMs: 30000,
     });
 
+    // ⌚ WATCHDOG: If SESSION_ID is present but fails to connect within 30s, enable QR.
+    let connectionTimeout = null;
+    if (process.env.SESSION_ID) {
+        connectionTimeout = setTimeout(() => {
+            if (!sock.user) {
+                console.log("⚠️  Session ID failed to connect within 30s. Enabling QR fallback...");
+                process.env.SESSION_ID_FAILED = "true";
+            }
+        }, 30000);
+    }
+
     if (usePairingCode && !state.creds.registered && !process.env.SESSION_ID) {
         setTimeout(async () => {
             try {
@@ -157,7 +172,7 @@ async function connectionLogic() {
     sock.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
-        if (qr && !process.env.SESSION_ID) {
+        if (qr && (!process.env.SESSION_ID || process.env.SESSION_ID_FAILED)) {
             console.clear();
             console.log("📲 Scan this QR to login:\n");
             qrcode.generate(qr, { small: true });
