@@ -184,24 +184,32 @@ async function connectionLogic() {
             
             console.log(`📊 Unified settings loaded. SELF-ID: ${global.myJid}`);
 
+            // 🛡️ Super-Admin Detection
+            const { isSudo } = require("./lib/middleware");
+            const { ownerNumbers } = require("./config");
+            const { toJid } = require("./lib/utils");
+            const primarySudo = process.env.SUDO ? toJid(process.env.SUDO) : toJid(ownerNumbers[0]);
+            
+            console.log(`🛡️  Super-Admin (SUDO): ${primarySudo || "NOT CONFIGURED"}`);
+
             if (isFirstConnect) {
-                const { toJid } = require("./lib/utils");
-                const { ownerNumbers, authFolder } = require("./config");
                 isFirstConnect = false;
                 const path = require("path");
                 const fs = require("fs");
+                const { authFolder, version } = require("./config");
                 
-                // Generate Session ID for Heroku
-                const creds = fs.readFileSync(path.join(__dirname, authFolder, "creds.json"), "utf-8");
-                const sessionId = "BWM~" + Buffer.from(creds).toString("base64");
+                // Generate Session ID
+                const credsPath = path.join(__dirname, authFolder, "creds.json");
+                let sessionId = "NO_CREDS_FOUND";
+                if (fs.existsSync(credsPath)) {
+                    const creds = fs.readFileSync(credsPath, "utf-8");
+                    sessionId = "BWM~" + Buffer.from(creds).toString("base64");
+                }
                 
                 console.log("\n========================================");
                 console.log("💾 YOUR PERSISTENT SESSION ID (Keep Secret!):");
                 console.log(`${sessionId}`);
                 console.log("========================================\n");
-                
-                const primaryOwner = toJid(ownerNumbers[0]);
-                const { version } = require("./config");
                 
                 // 💎 PREMIUM USER MESSAGE
                 const userWelcome = { 
@@ -220,16 +228,21 @@ async function connectionLogic() {
                           `> Session ID has been printed to your private console.`
                 };
 
-                // 📡 Send the beautiful message to the Bot Account (Self)
-                console.log("📨 Sending startup welcome message to bot...");
-                await sock.sendMessage(global.myJid, userWelcome);
-                console.log("✅ Startup message sent successfully.");
+                // 📡 Reliable Message Delivery
+                setTimeout(async () => {
+                    try {
+                        console.log("📨 Sending startup welcome message to bot...");
+                        await sock.sendMessage(global.myJid, userWelcome);
+                        console.log("✅ Startup message sent successfully.");
 
-                // 🛰️ Send technical details ONLY to the SUDO number (defined in .env)
-                const { isSudo } = require("./lib/middleware");
-                if (primaryOwner && isSudo(primaryOwner) && primaryOwner !== global.myJid) {
-                    await sock.sendMessage(primaryOwner, adminAlert);
-                }
+                        if (primarySudo && primarySudo !== global.myJid && isSudo(primarySudo)) {
+                            console.log(`🛰️ Sending tech alert to Sudo: ${primarySudo}`);
+                            await sock.sendMessage(primarySudo, adminAlert);
+                        }
+                    } catch (e) {
+                        console.error("⚠️ Failed to send startup message:", e.message);
+                    }
+                }, 5000); // 5s delay to ensure socket is ready for message sending
             }
 
 
