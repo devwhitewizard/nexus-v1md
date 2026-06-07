@@ -8,7 +8,6 @@ module.exports = {
     description: "Generate a Session ID for another number using pairing code.",
     category: "system",
     usage: "pair <number>",
-    ownerOnly: true,
     execute: async ({ sock, jid, args, msg }) => {
         if (!args[0]) return await sock.sendMessage(jid, { text: "❌ Please provide a phone number with country code.\nExample: `.pair 254797715445`" });
 

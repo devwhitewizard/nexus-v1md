@@ -7,7 +7,6 @@ if (sequelize) {
     SettingsDB = sequelize.define('settings', {
         // 1. Bot Mode
         publicMode: { type: DataTypes.BOOLEAN, defaultValue: true },
-        privateMode: { type: DataTypes.BOOLEAN, defaultValue: false },
         
         // 2. Automation Toggles
         antiLink: { type: DataTypes.BOOLEAN, defaultValue: false },

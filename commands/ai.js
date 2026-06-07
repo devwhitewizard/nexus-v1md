@@ -6,7 +6,7 @@ module.exports = {
     description: "Ask Nexus AI any question.",
     category: "ai",
     execute: async (ctx) => {
-        const { sock, jid, args, msg, sender } = ctx;
+        const { sock, jid, args, msg } = ctx;
         const query = args.join(" ").trim();
 
         if (!query) {

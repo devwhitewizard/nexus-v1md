@@ -31,10 +31,9 @@ module.exports = {
             dashboard += `13. *Auto Status Like* — ${settings.autoLikeStatus ? on : off}\n`;
             dashboard += `14. *Chatbot (AI)* — ${settings.chatbotAI ? on : off}\n`;
             dashboard += `15. *Greet DM* — ${settings.greetDM ? on : off}\n`;
-            dashboard += `16. *Privacy Mode* — ${settings.privateMode ? on : off}\n`;
 
             
-            dashboard += `\n💡 *Tip:* Use \`.settings <number>\` to toggle.\nExample: \`.settings 16\` for Privacy Mode.`;
+            dashboard += `\n💡 *Tip:* Use \`.settings <number>\` to toggle.\nExample: \`.settings 10\` for Auto-Delete.`;
             
             return await sock.sendMessage(jid, { text: dashboard });
         }
@@ -59,9 +58,8 @@ module.exports = {
             case 13: settings.autoLikeStatus = !settings.autoLikeStatus; msg = `Auto Status Like is now ${settings.autoLikeStatus ? "ON" : "OFF"}`; break;
             case 14: settings.chatbotAI = !settings.chatbotAI; msg = `Chatbot AI is now ${settings.chatbotAI ? "ON" : "OFF"}`; break;
             case 15: settings.greetDM = !settings.greetDM; msg = `Greet DM is now ${settings.greetDM ? "ON" : "OFF"}`; break;
-            case 16: settings.privateMode = !settings.privateMode; msg = `Privacy Mode is now ${settings.privateMode ? "ON" : "OFF"}`; break;
             default:
-                return await sock.sendMessage(jid, { text: "⚠️ Invalid choice. Use numbers 1-16." });
+                return await sock.sendMessage(jid, { text: "⚠️ Invalid choice. Use numbers 1-15." });
 
         }
 

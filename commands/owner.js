@@ -1,5 +1,4 @@
 const { ownerNumbers } = require("../config");
-const { getSettings } = require("../lib/settings");
 
 module.exports = {
     name: "owner",
@@ -8,17 +7,7 @@ module.exports = {
     category: "general",
     async execute({ sock, jid, msg }) {
         try {
-            const settings = getSettings();
-            const hasOwner = ownerNumbers && ownerNumbers.length > 0;
-            const primaryOwner = hasOwner ? ownerNumbers[0].split("@")[0] : null;
-
-            if (settings.privateMode || !primaryOwner) {
-                // 🔒 PRIVACY MODE: Hide the phone number
-                return await sock.sendMessage(jid, { 
-                    text: `👑 *NEXUS-1MD OWNER*\n\nMy master is *WHITE WIZARD*.\n\n🌐 *GitHub:* github.com/devwhitewizard\n\n_Note: Owner's phone number is hidden for privacy. Type .dev for more details._`
-                }, { quoted: msg });
-            }
-
+            const primaryOwner = ownerNumbers[0].split("@")[0];
             const vcard = 'BEGIN:VCARD\n' // metadata of the contact card
                 + 'VERSION:3.0\n' 
                 + 'FN:WHITE WIZARD\n' // full name

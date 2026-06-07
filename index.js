@@ -8,14 +8,6 @@ if (envResult.error) {
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-process.on('uncaughtException', (err) => {
-    console.error('💥 CRITICAL UNCAUGHT EXCEPTION:', err);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('💥 CRITICAL UNHANDLED REJECTION:', reason);
-});
 const { DisconnectReason, useMultiFileAuthState } = require("@whiskeysockets/baileys");
 const makeWASocket = require("@whiskeysockets/baileys").default;
 const qrcode = require("qrcode-terminal");
@@ -23,15 +15,6 @@ const zlib = require("zlib");
 
 const { authFolder } = require("./config");
 const { handleMessages } = require("./lib/commandHandler");
-
-const maskJid = (jid) => {
-    if (!jid || typeof jid !== "string") return jid;
-    const parts = jid.split("@");
-    if (parts.length < 2) return jid;
-    const num = parts[0];
-    if (num.length <= 4) return `****@${parts[1]}`;
-    return `${num.slice(0, 4)}****${num.slice(-2)}@${parts[1]}`;
-};
 
 let isFirstConnect = true;
 let isReconnecting = false;
@@ -45,57 +28,61 @@ async function connectionLogic() {
 
     // 📦 SESSION ID AUTO-RESTORE
     if (process.env.SESSION_ID) {
+        console.log("📦 SESSION_ID detected. Verifying session file...");
         const credsPath = path.join(__dirname, authFolder, "creds.json");
         
-        if (fs.existsSync(credsPath)) {
-            console.log("📦 Local session found. Skipping .env restore to maintain session health.");
-        } else {
-            console.log("📦 SESSION_ID found in .env and local session is missing. Attempting to restore...");
-            try {
-                const zlib = require("zlib");
-                const rawId = process.env.SESSION_ID.trim();
-                const sessionId = rawId.includes("~") ? rawId.split("~")[1] : (rawId.startsWith("BWM") || rawId.startsWith("XMD") ? rawId.slice(4) : rawId);
-                const buffer = Buffer.from(sessionId, "base64");
-                
-                let credsJson = "";
-                const decodeBuffer = (buf) => {
-                    try { return zlib.gunzipSync(buf).toString("utf-8"); } catch {
-                        try { return zlib.inflateSync(buf).toString("utf-8"); } catch {
-                            return buf.toString("utf-8");
-                        }
+        // If SESSION_ID is present, we always ensure the file matches it
+        // This fixes cases where a broken/partially scan-created file exists
+        console.log("📦 SESSION_ID found in .env. Attempting to restore session...");
+        try {
+            const rawId = process.env.SESSION_ID.trim();
+            const sessionId = rawId.includes("~") ? rawId.split("~")[1] : (rawId.startsWith("BWM") || rawId.startsWith("XMD") ? rawId.slice(4) : rawId);
+            const buffer = Buffer.from(sessionId, "base64");
+            
+            let credsJson = "";
+            const decodeBuffer = (buf) => {
+                try { return zlib.gunzipSync(buf).toString("utf-8"); } catch {
+                    try { return zlib.inflateSync(buf).toString("utf-8"); } catch {
+                        return buf.toString("utf-8");
                     }
-                };
-
-                credsJson = decodeBuffer(buffer);
-                if (!credsJson.includes("{") && /^[a-zA-Z0-9+/=]+$/.test(credsJson.trim())) {
-                    const nestedBuffer = Buffer.from(credsJson.trim(), "base64");
-                    credsJson = decodeBuffer(nestedBuffer);
                 }
+            };
 
-                const extractValidJsonFromBuffer = (buf) => {
-                    const text = buf.toString("utf-8");
-                    const firstBrace = text.indexOf("{");
-                    if (firstBrace === -1) return null;
-                    for (let i = 0; i < text.length; i++) {
-                        if (text[i] === "{") {
-                            try {
-                                const candidate = text.substring(i, text.lastIndexOf("}") + 1);
-                                if (candidate.includes("noiseKey") || candidate.includes("creds")) {
-                                    JSON.parse(candidate);
-                                    return candidate;
-                                }
-                            } catch (e) {}
-                        }
+            credsJson = decodeBuffer(buffer);
+            // Check for double base64
+            if (!credsJson.includes("{") && /^[a-zA-Z0-9+/=]+$/.test(credsJson.trim())) {
+                const nestedBuffer = Buffer.from(credsJson.trim(), "base64");
+                credsJson = decodeBuffer(nestedBuffer);
+            }
+
+            // 2. Smart Binary Search & Validation
+            const extractValidJsonFromBuffer = (buf) => {
+                const text = buf.toString("utf-8");
+                const firstBrace = text.indexOf("{");
+                if (firstBrace === -1) return null;
+                
+                // Scan for valid JSON blocks
+                for (let i = 0; i < text.length; i++) {
+                    if (text[i] === "{") {
+                        try {
+                            const candidate = text.substring(i, text.lastIndexOf("}") + 1);
+                            if (candidate.includes("noiseKey") || candidate.includes("creds")) {
+                                JSON.parse(candidate);
+                                return candidate;
+                            }
+                        } catch (e) {}
                     }
-                    return null;
-                };
+                }
+                return null;
+            };
 
-                const finalJson = extractValidJsonFromBuffer(Buffer.from(credsJson)) || extractValidJsonFromBuffer(buffer);
+            const finalJson = extractValidJsonFromBuffer(Buffer.from(credsJson)) || extractValidJsonFromBuffer(buffer);
 
-                if (finalJson) {
-                    console.log(`✅ Session JSON recovered (Size: ${finalJson.length} bytes)`);
-                    const parsed = JSON.parse(finalJson);
-                    const creds = parsed.creds || (parsed.noiseKey ? parsed : null);
+            if (finalJson) {
+                console.log(`✅ Session JSON recovered (Size: ${finalJson.length} bytes)`);
+                try {
+                    let parsed = JSON.parse(finalJson);
+                    let creds = parsed.creds || (parsed.noiseKey ? parsed : null);
 
                     if (creds) {
                         creds.registered = true;
@@ -104,13 +91,15 @@ async function connectionLogic() {
                         fs.writeFileSync(finalPath, JSON.stringify(creds));
                         console.log(`✅ Credentials written to: ${finalPath}`);
                     }
-                } else {
-                    console.error("❌ Error: Could not find valid JSON in Session ID.");
+                } catch (e) {
+                    console.error("❌ Session JSON parse failed:", e.message);
                 }
-            } catch (e) {
-                console.error("❌ Failed to restore session from ID:", e.message);
+            } else {
+                console.error("❌ Error: Could not find valid JSON in Session ID.");
             }
             console.log("✅ Session restoration flow complete.");
+        } catch (e) {
+            console.error("❌ Failed to restore session from ID:", e.message);
         }
     }
 
@@ -191,7 +180,7 @@ async function connectionLogic() {
             const myJid = sock.authState.creds.me.lid || sock.authState.creds.me.id || sock.user.id;
             global.myJid = myJid.includes(":") ? myJid.split(":")[0] + "@s.whatsapp.net" : (myJid.includes("@") ? myJid : myJid + "@s.whatsapp.net");
             
-            console.log(`📊 Unified settings loaded. SELF-ID: ${maskJid(global.myJid)}`);
+            console.log(`📊 Unified settings loaded. SELF-ID: ${global.myJid}`);
 
             // 🛡️ Super-Admin Detection
             const { isSudo } = require("./lib/middleware");
@@ -199,7 +188,7 @@ async function connectionLogic() {
             const { toJid } = require("./lib/utils");
             const primarySudo = process.env.SUDO ? toJid(process.env.SUDO) : toJid(ownerNumbers[0]);
             
-            console.log(`🛡️  Super-Admin (SUDO): ${primarySudo ? maskJid(primarySudo) : "NOT CONFIGURED"}`);
+            console.log(`🛡️  Super-Admin (SUDO): ${primarySudo || "NOT CONFIGURED"}`);
 
             if (isFirstConnect) {
                 isFirstConnect = false;
@@ -280,21 +269,16 @@ async function connectionLogic() {
 
     const { handleAutomation } = require("./lib/automation");
     sock.ev.on("messages.upsert", async (upsert) => {
-        try {
-            const m = upsert.messages[0];
-            if (!m || !m.message) return;
+        const m = upsert.messages[0];
+        if (!m.message) return;
 
-            const sender = m.key.fromMe ? (global.myJid || m.key.remoteJid) : (m.key.participant || m.key.remoteJid);
-            
-            if (m.key.fromMe) {
-                // Special handling for self-messages if needed
-            }
+        const sender = m.key.fromMe ? (global.myJid || m.key.remoteJid) : (m.key.participant || m.key.remoteJid);
+        const { isOwner } = require("./lib/middleware");
+        
+        if (m.key.fromMe && !isOwner(sender)) return;
 
-            await handleAutomation(sock, m);
-            await handleMessages(sock, upsert);
-        } catch (err) {
-            console.error("📩 Message Processing Error (Decryption issue?):", err.message);
-        }
+        await handleAutomation(sock, m);
+        await handleMessages(sock, upsert); 
     });
 
     const { handleMessageDelete } = require("./lib/automation");
