@@ -269,14 +269,16 @@ async function connectionLogic() {
 
     const { handleAutomation } = require("./lib/automation");
     sock.ev.on("messages.upsert", async (upsert) => {
+        console.log(`📩 Raw event received: ${upsert.type}`);
         const m = upsert.messages[0];
-        if (!m.message) return;
+        if (!m.message) {
+            console.log("📩 Event has no message content, skipping.");
+            return;
+        }
 
         const sender = m.key.fromMe ? (global.myJid || m.key.remoteJid) : (m.key.participant || m.key.remoteJid);
         const { isOwner } = require("./lib/middleware");
         
-        if (m.key.fromMe && !isOwner(sender)) return;
-
         await handleAutomation(sock, m);
         await handleMessages(sock, upsert); 
     });
