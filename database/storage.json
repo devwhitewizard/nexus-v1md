@@ -22,16 +22,232 @@
   },
   "user_194966231974136@s.whatsapp.net": {
     "id": "194966231974136@s.whatsapp.net",
-    "xp": 24,
+    "xp": 27,
     "level": 1,
     "coins": 0,
     "inventory": "[]"
   },
   "user_147356636938389@lid": {
     "id": "147356636938389@lid",
-    "xp": 9,
+    "xp": 11,
     "level": 1,
     "coins": 0,
     "inventory": "[]"
-  }
+  },
+  "user_161912130130083@lid": {
+    "id": "161912130130083@lid",
+    "xp": 1,
+    "level": 1,
+    "coins": 0,
+    "inventory": "[]"
+  },
+  "history_194966231974136@s.whatsapp.net": [
+    {
+      "name": "User",
+      "text": "✨ *Nexus-1MD v1.0.0 Connected!* ✨\n\n🤖 *Status:* System fully operational.\n✅ *Secure:* Your connection is stable and encrypted.\n\n🌟 *Welcome!* Your bot is ready to serve. Type *.menu* to see what I can do!\n\n> Powered by Nexus Intelligence",
+      "time": {
+        "low": 1780757673,
+        "high": 0,
+        "unsigned": true
+      }
+    },
+    {
+      "name": "User",
+      "text": "✨ *Nexus-1MD v1.0.0 Connected!* ✨\n\n🤖 *Status:* System fully operational.\n✅ *Secure:* Your connection is stable and encrypted.\n\n🌟 *Welcome!* Your bot is ready to serve. Type *.menu* to see what I can do!\n\n> Powered by Nexus Intelligence",
+      "time": {
+        "low": 1780773617,
+        "high": 0,
+        "unsigned": true
+      }
+    }
+  ],
+  "history_194966231974136@lid": [
+    {
+      "name": "White Wizard",
+      "text": ".mode",
+      "time": 1780757722
+    },
+    {
+      "name": "User",
+      "text": "✅ *Bot Mode Updated*\n\nThe bot is now in 🔒 *PRIVATE* mode.\n_Only owners can use commands._",
+      "time": {
+        "low": 1780757722,
+        "high": 0,
+        "unsigned": true
+      }
+    },
+    {
+      "name": "White Wizard",
+      "text": ".mode",
+      "time": 1780757730
+    },
+    {
+      "name": "User",
+      "text": "✅ *Bot Mode Updated*\n\nThe bot is now in 🔓 *PUBLIC* mode.\n_Everyone can now use commands._",
+      "time": {
+        "low": 1780757729,
+        "high": 0,
+        "unsigned": true
+      }
+    }
+  ],
+  "history_120363257969673883@newsletter": [
+    {
+      "name": "User",
+      "text": "🔥Buy data even with the outstanding okoa jahazi(*share with friends*)\n\n‼️ *PAYMENT TILL*: 3016864 ‼️\n🔥*DATA DEALS* ~*choose one daily* \nsh55=1.25gb upto midnyt \nSH20=250mbs 24hrs\nsh19=1gb 1hr\nSh49=1.5gb 3Hrs\nSh99=1Gb 24hrs\nSh47=350mbs 24hrs\n\n🔥 *MINUTES* ~*Buy many times as you wish*\nSh22=45min~3hrs\nSh52=50min~Midnight\nSh54=60mins~Midnight \n\n🔥*DATA*~*Buy many times as you wish*\nSh21=1GB~1hr\nSh110=2GB~24hrs\nSh53=1.5GB~3hrs\n\n🔥*SMS*~*Buy many times as you wish*\nSh5=20sms~1dy\nSh10=200sms~1dy\nSh30=1000sms~7dys\n\nhelp line. #0707832699\n*Till 3016864*\n‼️~*Buy for another number use paybill 4565487 ,account number is the number to receive offer 07……….*‼️",
+      "time": 1780760301
+    },
+    {
+      "name": "User",
+      "text": "🔥📶 RUNNING LOW ON DATA OR MINUTES?\nUsikwame 😄 🔥 SALINE BINGWA SERVICES got you covered instantly!\n\nPata offer hata ukiwa na Okoa!\nFast activation\nAffordable deals daily\n\n📞 NEW HOT OFFER!\n🔥 50 Minutes — KSH 53 (Till Midnight)\n\n📡 ONCE DAILY DEALS (Per Line)\n• 55 = 1.25GB (Midnight)\n• 19 = 1GB (1Hr)\n• 20 = 250MB (24Hrs)\n• 49 = 350MB (7 Days)\n• 52 = 1.5GB (3Hrs)\n• 99 = 1GB (24Hrs)\n• 300 = 2.5GB (7 Days)\n• 700 = 6GB (7 Days)\n\n⚡ TUNUKIWA DEALS\n• 23 = 1GB (1Hr)\n• 52 = 1.5GB (3Hrs)\n• 110 = 2GB (24Hrs)\n\n📞 MINUTES DEALS\n• 22 = 43 Mins (3Hrs)\n• 53 = 50 Mins (Midnight)\n• 54 = 200 Mins (Midnight)\n\n💳 BUY NOW\nLipa na M-PESA → Till 3364683\n📲 Call/WhatsApp: 0700135077\n\n⚠️ Haraka upate offer kabla ziishe!",
+      "time": 1780765416
+    },
+    {
+      "name": "User",
+      "text": "*HELB SUBSEQUENT APPLICATIONS UPDATE (2026/2027 ACADEMIC YEAR)*\n\nThe following HELB Subsequent Application windows are currently open:\n\n• Undergraduate Subsequent – Closes on 31st August 2026\n• TVET Subsequent – Closes on 31st July 2026\n• Diploma Level 6 Subsequent – Closes on 31st August 2026\n• TVET Craft Certificate (Level 5) Subsequent – Closes on 31st August 2026\n\nHELB funding is limited to the official duration of your programme. For example:\n\n• 4-year programme – Up to 4 loan applications\n• 3-year programme – Up to 3 loan applications\n• 2-year programme – Up to 2 loan applications\n• 5-year programme – Up to 5 loan applications\n\nStudents are encouraged to submit their applications early to avoid last-minute challenges and delays in processing.\n\nApply through the HELB App or by dialing *642# or *334#.",
+      "time": 1780765483
+    },
+    {
+      "name": "User",
+      "text": "Filling kra nill returns now \n0700135077",
+      "time": 1780769880
+    },
+    {
+      "name": "User",
+      "text": "Subsequent application \n0700135077",
+      "time": 1780772983
+    }
+  ],
+  "history_161912130130083@lid": [
+    {
+      "name": "White Wizard",
+      "text": "8",
+      "time": 1780761165
+    },
+    {
+      "name": "User",
+      "text": "👨‍💻 *THE WIZARD'S PROFILE*\n\n✨ *Name:* White Wizard\n👨‍💻 *Bio:* My passion and only purpose here is coding. I love building tools that make life easier and more fun!\n\n🌐 *Portfolio:* https://jonathanmwanza.vercel.app/\n📂 *GitHub:* https://github.com/devwhitewizard\n\n_\"Magic is just science we don't understand yet, and code is the closest thing to magic I've found.\"_",
+      "time": {
+        "low": 1780761169,
+        "high": 0,
+        "unsigned": true
+      }
+    },
+    {
+      "name": "White Wizard",
+      "text": "Andika jina,bio, any other info na unitumie. Command n .rugut",
+      "time": 1780761254
+    },
+    {
+      "name": "1%",
+      "text": "Waziii",
+      "time": 1780761355
+    },
+    {
+      "name": "1%",
+      "text": "Imperator Rugut",
+      "time": 1780762642
+    },
+    {
+      "name": "1%",
+      "text": "I don’t settle for average, I don’t wait for permission, and I don’t compete with each other — we raise each other. Built on discipline, vision, and action, the Coalition exists to push limits, turn ideas into impact, and prove that greatness isn’t a solo act. It’s a mindset, a standard, and a responsibility. When we come together, colliding with White Wizard in tech,I don’t just chase success — I define it, we build it, and we leave the world better than we found it. Ordinary is not in our vocabulary.",
+      "time": 1780762646
+    },
+    {
+      "name": "White Wizard",
+      "text": "Unataka pic gani",
+      "time": 1780762712
+    },
+    {
+      "name": "White Wizard",
+      "text": "Nitumie yeyote tu, ur favourite",
+      "time": 1780762726
+    },
+    {
+      "name": "1%",
+      "text": "Acha nitafure",
+      "time": 1780763080
+    },
+    {
+      "name": "1%",
+      "text": "Any other info....weka ,Surviving is equal to winning and it always conquers",
+      "time": 1780765561
+    }
+  ],
+  "history_120363405335272572@g.us": [
+    {
+      "name": "_Crüzê ♥️🇲🇫",
+      "text": "You are warmly invited to our Sunday Service \n\nJoin us as we gather for worship, fellowship and a life transforming message.\n\n📖 Topic: THE GOSPEL\n🎤 Speaker: PAUL EMALI\n📍 Venue: MCU 001\n\n⏰ Morning Devotion: 7:00 AM – 8:00 AM\n⏰ Main Service: 8:00 AM – 10:40 AM\n\nInvite a friend, classmate, roommate, or colleague, and let us grow together in Christ.\nSee you there🫵😊",
+      "time": 1780761916
+    },
+    {
+      "name": "ShirtGPT",
+      "text": "Thank you everyone for all the birthday wishes today 🎁🎉 You made my day special. I’m truly grateful for each of you. Love you all ❤️",
+      "time": 1780770016
+    },
+    {
+      "name": "_Crüzê ♥️🇲🇫",
+      "text": "Happiest birthday  my V.C 😊🎂\nSaving the best for the last😁",
+      "time": 1780772442
+    },
+    {
+      "name": "~black_heart🖤",
+      "text": "Happy Birthday mkuu🥳🥰",
+      "time": 1780774003
+    }
+  ],
+  "history_120363360675955368@g.us": [
+    {
+      "name": "D.E.N.N.I.S",
+      "text": "🚀 OKOA ISIKUSTRESS, BUY ATA NA OKOA 🚀 PAY TO TILL (6312646)\n\n🔥Pata offers kali hata ukiwa na Okoa!\n\n📶 TOP DATA DEALS(choose one daily)\n✔ Ksh 19 = 1GB (1 Hour)\n✔ Ksh 55 = 1.25GB (Till Midnight)\n✔ Ksh 49 = 1.5GB (3 Hours)\n✔ Ksh 99 = 1GB (24 Hours)\n✔ Ksh 20 = 250 Mbs 24hrs.  \n\n⚡ TUNUKIWA (MANY TIMES DEALS)\n✔ Ksh 22 = 1GB (1 Hour)\n✔ Ksh 52 = 1.5GB (3 Hours)\n✔ Ksh 110 = 2GB (24 Hours)\n\n📞 CALL MINUTES (6312646)\n✔ Ksh 21  = 43 mins 3hrs\n✔ Ksh 203 = 250 mins\n✔ Ksh 51 = 50 mins till midnight \n\n\n✉️ SMS OFFERS\n      Ksh 5= 20 sms daily.\n✔ Ksh 10 = 200 SMS (24hrs)\n✔ Ksh 30 = 1000 SMS (7 Days)\n\n💳 HOW TO BUY (FAST & EASY)\n1️⃣ M-PESA Menu\n2️⃣ Lipa na M-PESA → Buy Goods\n3️⃣ Till Number: 6312646\n4️⃣ Enter Amount & PIN\n\n✅ Activated instantly!\n\n📲 Customer Care: 0726515488",
+      "time": 1780763287
+    },
+    {
+      "name": "Dr",
+      "text": "🔥📶 RUNNING LOW ON DATA OR MINUTES?\nUsikwame 😄 🔥 SALINE BINGWA SERVICES got you covered instantly!\n\nPata offer hata ukiwa na Okoa!\nFast activation\nAffordable deals daily\n\n📞 NEW HOT OFFER!\n🔥 50 Minutes — KSH 53 (Till Midnight)\n\n📡 ONCE DAILY DEALS (Per Line)\n• 55 = 1.25GB (Midnight)\n• 19 = 1GB (1Hr)\n• 20 = 250MB (24Hrs)\n• 49 = 350MB (7 Days)\n• 52 = 1.5GB (3Hrs)\n• 99 = 1GB (24Hrs)\n• 300 = 2.5GB (7 Days)\n• 700 = 6GB (7 Days)\n\n⚡ TUNUKIWA DEALS\n• 23 = 1GB (1Hr)\n• 52 = 1.5GB (3Hrs)\n• 110 = 2GB (24Hrs)\n\n📞 MINUTES DEALS\n• 22 = 43 Mins (3Hrs)\n• 53 = 50 Mins (Midnight)\n• 54 = 200 Mins (Midnight)\n\n💳 BUY NOW\nLipa na M-PESA → Till 3364683\n📲 Call/WhatsApp: 0700135077\n\n⚠️ Haraka upate offer kabla ziishe!",
+      "time": 1780763908
+    }
+  ],
+  "history_120363425425938053@g.us": [
+    {
+      "name": "Mr Robert",
+      "text": "🎓 KUCCPS UPDATE 2026 🎓\n\n📢 Placement is expected to be finalized this month, after which the Transfer Application Window is expected to open in July 2026.\n\n📌 What should you do now?\n\n✅ Prepare all the required documents for:\n• Government Funding\n• HELB Loan Application\n\n⚡ HELB applications are often processed on a first-come, first-served basis, so early preparation is important.\n\n👶 Below 18 years of age?\n✅ Open a Junior Bank Account as early as possible.\n\n🆔 Do you have an ID Card?\n✅ Register for a KRA PIN.\n✅ Open a bank account if you wish.\n✅ M-PESA can still be used as a mode of payment.\n\n🏫 TVET Students\n✅ You are eligible for both Government Funding and HELB Loan.\n⏳ Course applications are closing soon—don't miss out.\n\n━━━━━━━━━━━━━━━━━━\n\n⚠️ IMPORTANT NOTICE\n\n🟢 Government Funding Application – COMPULSORY for all eligible students.\n\n🔵 HELB Loan Application – OPTIONAL, but highly recommended for students who need financial support.\n\n📂 Prepare early.\n📋 Keep your documents ready.\n🎯 Stay alert for official KUCCPS",
+      "time": 1780765648
+    }
+  ],
+  "history_120363404376325576@g.us": [
+    {
+      "name": "SethG",
+      "text": "If I fall, don’t bring me back. There is a strange poetry in the descent, a freedom in surrendering to gravity’s gentle insistence. Every stumble writes a story on the skin, every tumble teaches a lesson the mind can’t invent. To catch me would be to deny the art of breaking, the elegance of learning to rise alone. Life isn’t measured by how often we avoid falling, but by the courage to let ourselves fall, knowing we might soar higher than ever imagined afterward. Sometimes, falling is the only way to truly fly.",
+      "time": 1780769149
+    }
+  ],
+  "history_147356636938389@lid": [
+    {
+      "name": "White Wizard",
+      "text": "Imperator Rugut",
+      "time": 1780773172
+    },
+    {
+      "name": "White Wizard",
+      "text": "Nitumie yeyote tu, ur favourite",
+      "time": 1780773229
+    }
+  ],
+  "history_120363418783565520@g.us": [
+    {
+      "name": "White Wizard",
+      "text": ".rugut",
+      "time": 1780773651
+    },
+    {
+      "name": "User",
+      "text": "👑 *IMPERATOR RUGUT* 👑\n━━━━━━━━━━━━━━━━━━━\n\n\"I don’t settle for average, I don’t wait for permission, and I don’t compete with others — we raise each other. Built on discipline, vision, and action, the Coalition exists to push limits, turn ideas into impact, and prove that greatness isn’t a solo act.\n\nIt’s a mindset, a standard, and a responsibility. When we come together, colliding with White Wizard in tech, I don’t just chase success — I define it, we build it, and we leave the world better than we found it. Ordinary is not in our vocabulary.\"\n\n⚔️ *Surviving is equal to winning and it always conquers.*\n\n━━━━━━━━━━━━━━━━━━━\n🔱 *NEXUS-1MD ELITE COALITION*",
+      "time": {
+        "low": 1780773652,
+        "high": 0,
+        "unsigned": true
+      }
+    }
+  ]
 }
