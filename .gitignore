@@ -33,9 +33,11 @@ desktop.ini
 
 # Temporary / Downloaded Files
 database/*.db
+database/storage.json
 temp/
 tmp/
 downloads/
+temp_media/
 * .download
 * .cache
 
