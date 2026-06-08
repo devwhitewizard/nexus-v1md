@@ -25,7 +25,7 @@ async function connectionLogic() {
 
     // Prune stale temporary session files on startup to prevent disk bottlenecks
     const { cleanSessionFolder } = require("./lib/sessionCleaner");
-    cleanSessionFolder();
+    cleanSessionFolder(24, true);
 
     // Run automatic session pruning every 2 hours
     setInterval(() => {
@@ -169,7 +169,7 @@ async function connectionLogic() {
     sock.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
-        if (qr && (!process.env.SESSION_ID || process.env.SESSION_ID_FAILED)) {
+        if (qr && (!process.env.SESSION_ID || process.env.SESSION_ID_FAILED) && !usePairingCode) {
             console.clear();
             console.log("📲 Scan this QR to login:\n");
             qrcode.generate(qr, { small: true });
@@ -186,8 +186,10 @@ async function connectionLogic() {
             const { loadSettings } = require("./lib/settings");
             await loadSettings(); 
 
-            const myJid = sock.authState.creds.me.lid || sock.authState.creds.me.id || sock.user.id;
-            global.myJid = myJid.includes(":") ? myJid.split(":")[0] + "@s.whatsapp.net" : (myJid.includes("@") ? myJid : myJid + "@s.whatsapp.net");
+            const myJid = (sock.user && sock.user.id) || (sock.authState.creds.me && sock.authState.creds.me.id) || (sock.authState.creds.me && sock.authState.creds.me.lid) || "";
+            const cleanJid = myJid.split(":")[0];
+            const domain = myJid.includes("@lid") ? "@lid" : "@s.whatsapp.net";
+            global.myJid = cleanJid ? cleanJid + domain : "";
             
             console.log(`📊 Unified settings loaded. SELF-ID: ${global.myJid}`);
 
@@ -285,9 +287,6 @@ async function connectionLogic() {
             return;
         }
 
-        const sender = m.key.fromMe ? (global.myJid || m.key.remoteJid) : (m.key.participant || m.key.remoteJid);
-        const { isOwner } = require("./lib/middleware");
-        
         await handleAutomation(sock, m);
         await handleMessages(sock, upsert); 
     });
