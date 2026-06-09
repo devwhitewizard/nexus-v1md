@@ -5,6 +5,14 @@ if (envResult.error) {
     console.log("✅ .env file loaded successfully.");
 }
 
+// Global Exception Handlers to prevent process crashes on Baileys/libsignal socket errors
+process.on("unhandledRejection", (reason, promise) => {
+    console.error("⚠️ Unhandled Promise Rejection:", reason);
+});
+process.on("uncaughtException", (error) => {
+    console.error("⚠️ Uncaught Exception:", error);
+});
+
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -121,9 +129,14 @@ async function connectionLogic() {
     const NodeCache = require("node-cache");
     const msgRetryCounterCache = new NodeCache();
     
+    // Standard Pino logger configured for error logs only to keep terminal clean
+    const P = require("pino");
+    const logger = P({ level: "error" });
+
     const sock = makeWASocket({
         auth: state,
-        markOnline: false, // Don't force online status immediately
+        logger,
+        markOnline: true, // Mark online to ensure real-time message delivery
         browser: ["Windows", "Chrome", "110.0.5481.178"], // More common modern browser
         msgRetryCounterCache,
         defaultQueryTimeoutMs: undefined,
@@ -255,6 +268,24 @@ async function connectionLogic() {
             }
 
 
+            // 🩺 Active Connection Watchdog (Detects silent zombie connections)
+            if (global.healthCheckInterval) {
+                clearInterval(global.healthCheckInterval);
+            }
+            global.healthCheckInterval = setInterval(async () => {
+                try {
+                    if (sock && sock.ws && sock.ws.readyState === 1) { // WebSocket is OPEN
+                        await sock.sendPresenceUpdate("available");
+                    } else {
+                        throw new Error("WebSocket not open");
+                    }
+                } catch (err) {
+                    console.error("⚠️ [Watchdog] Active connection health check failed:", err.message);
+                    clearInterval(global.healthCheckInterval);
+                    try { sock.end(); } catch (e) {}
+                }
+            }, 5 * 60 * 1000); // check every 5 minutes
+
             setInterval(async () => {
                 const { MessageLog } = require("./lib/messageModel");
                 const { Op } = require("sequelize");
@@ -267,10 +298,33 @@ async function connectionLogic() {
 
         if (connection === "close") {
             isReconnecting = false;
+            if (global.healthCheckInterval) {
+                clearInterval(global.healthCheckInterval);
+            }
             const statusCode = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode;
-            const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-
-            if (shouldReconnect) {
+            
+            console.log(`🔌 Connection closed. Status Code: ${statusCode}`);
+            
+            if (statusCode === DisconnectReason.loggedOut) {
+                console.log("⚠️ [Self-Healing] Bot was logged out or unlinked. Wiping credentials and restarting connection to show fresh login...");
+                const fs = require("fs");
+                const path = require("path");
+                const { authFolder } = require("./config");
+                const credsPath = path.join(__dirname, authFolder, "creds.json");
+                try {
+                    if (fs.existsSync(credsPath)) fs.unlinkSync(credsPath);
+                    const sessionDir = path.join(__dirname, authFolder);
+                    if (fs.existsSync(sessionDir)) {
+                        fs.readdirSync(sessionDir).forEach(file => {
+                            try { fs.unlinkSync(path.join(sessionDir, file)); } catch(e){}
+                        });
+                    }
+                } catch(e) {
+                    console.error("Failed to clean session directory:", e.message);
+                }
+                
+                setTimeout(() => connectionLogic(), 5000);
+            } else {
                 const delay = 10000;
                 console.log(`🔌 Disconnected. Reconnecting in ${delay/1000}s...`);
                 setTimeout(() => connectionLogic(), delay);
