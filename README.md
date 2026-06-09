@@ -1,55 +1,128 @@
-# 💎 Nexus-1MD: The Ultimate WhatsApp Power-Bot
+<p align="center">
+  <img src="assets/nexus-logo.svg" alt="Nexus-1MD Banner" width="100%">
+</p>
 
-> **Production-Ready | Binary-Free | Multi-User | Ultra-Stealth**
+<p align="center">
+  <marquee behavior="alternate" scrollamount="2" width="60%">
+    <font color="#00e5ff" size="3"><b>✨ ONLINE ✨</b></font>
+  </marquee>
+</p>
 
-Nexus-1MD is a high-performance, professional-grade WhatsApp automation bot designed for stability, security, and a premium user experience. Built with a "Zero-Headache" architecture, it runs anywhere without complex dependencies.
+> **Production-Ready | Binary-Free | Multi-User | Ultra-Stealth | Self-Healing**
+
+Nexus-1MD is a high-performance, enterprise-grade WhatsApp automation framework designed for absolute stability, high security, and premium user experience. Powered by the **Nexus Intelligence Architecture** and built on top of Baileys, it is engineered to run seamlessly on servers, VPS, or local environments without any complex native dependencies.
 
 ---
 
-## ✨ Key Features
+## 🚀 Key Features & Architectural Design
 
 ### 🛡️ Secure Identity System
-- **Super-Admin (SUDO)**: Primary owner with strict hardware-level identity protection.
-- **Tiered Permissions**: Separate access for Owners, Admins, and regular Users.
-- **Stealth Mode**: Human-emulated presence and randomized interaction delays to protect your account.
+- **Super-Admin (SUDO)**: Complete system-level command capabilities protected with strict identity verification.
+- **Role-Based Access Control (RBAC)**: Distinct permissions for Owners, Admins, and regular Users.
+- **Stealth Engine**: Human-like emulated presence, custom browser identifiers, and randomized interaction delays to keep your WhatsApp account safe.
 
-### 💾 Modern Infrastructure
-- **Binary-Free Storage**: High-speed JSON fallback system (No SQL/SQLite dependencies).
-- **Force-Sync Updates**: Update your bot to the latest version directly via WhatsApp with `.update now`.
-- **Hybrid Connection**: Supports both QR Scanning and Pairing Codes.
+### 🩺 Enterprise-Grade Self-Healing Engine
+Nexus-1MD is built with a resilient "Zero-Headache" architecture to eliminate manual debugging and connection freezing:
+- **Active Connection Watchdog**: Periodically monitors the WebSocket state every 5 minutes, triggering automated restarts for zombie/frozen sockets.
+- **Uncaught Exception Shield**: Traps uncaught promise rejections and signal errors to prevent process crashes during delayed history synchronization.
+- **Auto-Reset on Logout**: Detects unlinking events (`loggedOut` status code), purges credentials, and restarts the console instance to instantly generate a clean QR code.
+- **E2E Decryption-Safe Directory Management**: Prunes only stale metadata while protecting E2E encryption pre-keys, preventing cryptography mismatch errors (`PreKeyError` or `Bad MAC`).
+- **Owner Self-Chat Support**: Captures `append` events alongside standard `notify` updates, allowing you to run commands inside your personal chat.
+- **Dynamic Session Fallback**: Auto-compresses, base64 encodes, and recovers session files (`creds.json`) directly from environment variables.
 
-### 🌌 Advanced Automation
-- **Anti-Delete & Edit**: Recover deleted/edited messages instantly (SUDO-only reports).
-- **Auto-Status System**: Human-like status viewing and reaction (Stealth-optimized).
-- **Group Guard**: Anti-Link, Anti-Spam, and Anti-Badword protection.
+---
+
+## 🛠️ Configuration Checklist
+
+To configure Nexus-1MD, duplicate the `.env.example` file, rename it to `.env`, and customize the variables.
+
+| Variable | Description | Mandatory | Default |
+| :--- | :--- | :--- | :--- |
+| `SUDO` | Primary manager WhatsApp number with country code (e.g., `254797715445`) | **YES** | - |
+| `OWNERS` | Comma-separated list of secondary owner numbers | No | - |
+| `SESSION_ID` | Base64 gzip-compressed session credentials fallback string | No | - |
+| `PAIRING_NUMBER` | Number with country code to request pairing codes instead of QR | No | - |
+| `PREFIX` | Command trigger prefix | No | `.` |
+| `MODE` | Set bot visibility (`public` or `private`) | No | `public` |
+| `DATABASE_URL` | PostgreSQL or custom SQL server connection string | No | SQLite local fallback |
+| `GROQ_API_KEY` | GROQ API credential for high-speed AI queries | No | - |
+| `OPENAI_API_KEY`| OpenAI developer key for advanced AI features | No | - |
+
+---
+
+## 📂 Command Category Suite
+
+Nexus-1MD has over **165+ production commands** categorized for fast indexing. Type `.menu <category>` to view subcommands directly.
+
+### 👥 Group & Admin Commands
+- **Moderation**: `.add`, `.kick`, `.promote`, `.demote`, `.mute`, `.unmute`, `.lock`, `.unlock`
+- **Toxicity Guards**: `.antilink`, `.antispam`, `.antibadword` (Automatically warning and kicking offenders)
+- **Activity Tracker**: Detailed metrics for inactive group members and tag capabilities (`.tagall`, `.tagadmins`).
+
+### 🤖 AI, Media & Converters
+- **Generative AI**: `.ai` (supports GROQ/OpenAI models) and `.imagine` (image generation).
+- **Stickers & Media**: Convert any image, video, or GIF into WhatsApp stickers (`.sticker`), change videos to audio (`.toaudio`, `.tomp3`), and convert view-once media (`.viewonce`).
+- **Summarization**: Long text/chat logging summary tools (`.summarize`).
+
+### ⛪ Religion Suite
+- **Bible (.bible)**: Instantly search bible scriptures or view verses (`.bible John 3:16`, `.bible search faith`).
+- **Quran (.quran)**: Retrieve Arabic verses with Sahih translation or search text (`.quran 2:255`, `.quran search patience`).
+
+### 💰 Economy & Interactive Gaming
+- **Economy RPG**: Work legally (`.work`), commit crimes (`.crime`), check bank reserves (`.balance`), purchase boosters (`.shop`, `.buy`), or rob other players (`.rob`).
+- **Interactive Games**: Host chats with `.trivia`, `.quiz`, `.hangman`, `.tictactoe`, `.mathgame`, `.guess`, or `.wouldyourather`.
+
+### 🛰️ System & Utilities
+- **Diagnostic Panel**: `.ping`, `.uptime`, `.systemstatus`, `.botinfo`, `.repo`.
+- **API Utilities**: Live weather forecasts (`.weather`), Wikipedia scraper (`.wiki`), inline calculator (`.calc`), translation services (`.translate`), and shortened link generation (`.shortlink`).
 
 ---
 
 ## 🚀 Quick Start (Deployment)
 
-1. **Fork this repository.**
-2. **Setup your Environment**:
-   - Create a `.env` file from the `.env.example`.
-   - **SUDO**: Add your primary number with country code (e.g., `254...`).
-3. **Deploy**:
-   - **Local/VPS**: `npm install && npm start`
-   - **Panel**: Upload files, fill Env variables, and Start.
-4. **Link**: Scan the QR code or use the Pairing Code from your console.
+### System Requirements
+- **Node.js**: `v18.x` or higher
+- **Package Manager**: `npm`
+- **Optional**: `PM2` (for persistent background process management)
 
----
+### 1. Installation
+Clone the repository and install all required modules:
+```bash
+git clone https://github.com/DevWhiteWizard/Nexus-1MD.git
+cd Nexus-1MD
+npm install
+```
 
-## 🛠️ Configuration Checklist
-| Variable | Description | Mandatory |
-| :--- | :--- | :--- |
-| `SUDO` | Your primary managerial WhatsApp number | **YES** |
-| `SESSION_ID` | Your unique NEXUS~ session string | No (Fallback to QR) |
-| `PREFIX` | Command prefix (Default: `.`) | No |
-| `MODE` | `public` or `private` (Default: `public`) | No |
+### 2. Environment Configuration
+Create your configuration file:
+```bash
+cp .env.example .env
+```
+Open `.env` and fill out your `SUDO` manager number. If you prefer pairing code links over QR codes, add your phone number to `PAIRING_NUMBER`.
+
+### 3. Execution
+Choose your preferred launch method:
+
+#### Development (Auto-Reload on Code Change)
+```bash
+npm run dev
+```
+
+#### Production (Standard Server)
+```bash
+npm start
+```
+
+#### PM2 Background Manager (Highly Recommended)
+```bash
+npm run pm2
+npm run logs
+```
 
 ---
 
 ## 📜 License & Credits
 Developed by **DevWhiteWizard**.  
-Powered by **Nexus Intelligence Architecture**.
+Powered by the **Nexus Intelligence Architecture**.
 
-*Nexus-1MD is for educational and administrative purposes. Use responsibly.*
+*Nexus-1MD is meant for educational, backup, and group administrative tasks. Please respect WhatsApp's Terms of Service.*
