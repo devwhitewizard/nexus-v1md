@@ -71,11 +71,36 @@ const getBotSettings = async () => {
 
     const defaults = { 
         publicMode: true,
+        antiLink: false,
+        antiTag: false,
+        antiBadword: false,
+        antiSpam: true,
         antiDelete: true,
         antiEdit: true,
-        antiSpam: true,
+        antiCall: false,
+        statusAntiDelete: false,
+        autoDelete: false,
+        autoDeleteTime: 30000,
         autoViewStatus: false,
-        lockedCommands: ""
+        autoLikeStatus: false,
+        autoReplyStatus: false,
+        statusReplyText: 'Nice status! ✨',
+        statusLikeEmojis: '❤️,✨,🔥,🙌',
+        autoRead: false,
+        autoBio: false,
+        dmPresence: false,
+        groupPresence: false,
+        chatbotAI: false,
+        greetDM: false,
+        autoReactDM: false,
+        welcome: false,
+        goodbye: false,
+        welcomeMsg: 'Hi @user, welcome to *@group*! 👋',
+        goodbyeMsg: 'Goodbye @user, we hope to see you back soon! 😢',
+        antiDeleteNotification: '🕵️ *Nexus Anti-Delete Update*',
+        footer: '© Nexus-1MD',
+        ownerNumber: '',
+        lockedCommands: ''
     };
 
     if (!isOnline() || !SettingsDB) {

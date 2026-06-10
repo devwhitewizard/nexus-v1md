@@ -76,6 +76,36 @@ module.exports = {
                     return await sock.sendMessage(jid, { text: econText }, { quoted: ctx.msg });
                 }
 
+                if (target === "fun") {
+                    let funText = `╭━━━━╼ *NEXUS FUN & GAMES* ╾━━━━╮\n`;
+                    funText += `┃ _Bring excitement to the chats!_\n┃\n`;
+                    funText += `┃ 🎭 *LAUGHTER & HUMOUR*\n`;
+                    funText += `┃ ┃ 😂 *.joke* - Random clean joke\n`;
+                    funText += `┃ ┃ 🖤 *.darkjoke* - Dark humour\n`;
+                    funText += `┃ ┃ 🖼️ *.meme* - Fetch a random meme\n`;
+                    funText += `┃ ┃ 🗣️ *.roast* - Roast someone\n`;
+                    funText += `┃ ┃ 🤬 *.insult* - Throw an insult\n`;
+                    funText += `┃\n`;
+                    funText += `┃ 💘 *ROMANCE & RELATIONSHIPS*\n`;
+                    funText += `┃ ┃ 💌 *.pickup* - Smooth pickup lines\n`;
+                    funText += `┃ ┃ ❤️ *.lovetest* - Test love percentage\n`;
+                    funText += `┃ ┃ 🤝 *.bestfriend* - Find your soulmate\n`;
+                    funText += `┃ ┃ 💬 *.compliment* - Hype someone up\n`;
+                    funText += `┃\n`;
+                    funText += `┃ 🕹️ *INTERACTIVE GAMES*\n`;
+                    funText += `┃ ┃ 🎱 *.8ball* - Ask the magic ball\n`;
+                    funText += `┃ ┃ ❓ *.truth* / *.dare* - Classic game\n`;
+                    funText += `┃ ┃ 🤔 *.wyr* - Would You Rather\n`;
+                    funText += `┃\n`;
+                    funText += `┃ 🧠 *CURIOSITY & PRANKS*\n`;
+                    funText += `┃ ┃ 💡 *.fact* - Random interesting fact\n`;
+                    funText += `┃ ┃ 💬 *.quote* - Daily wisdom\n`;
+                    funText += `┃ ┃ 💻 *.hack* - Prank hack a user\n`;
+                    funText += `┃ ┃ 🔍 *.scan* - Scan user data\n`;
+                    funText += `┃\n╰━━━━━━━━━━━━━━━━━━━━╯`;
+                    return await sock.sendMessage(jid, { text: funText }, { quoted: ctx.msg });
+                }
+
                 if (list) {
                     let subText = `╭━━━━╼ *${target.toUpperCase()} MENU* ╾━━━━╮\n`;
                     subText += `┃ _Type these to use the features_\n┃\n`;

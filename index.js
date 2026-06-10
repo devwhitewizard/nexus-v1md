@@ -139,12 +139,22 @@ async function connectionLogic() {
         markOnline: true, // Mark online to ensure real-time message delivery
         browser: ["Windows", "Chrome", "110.0.5481.178"], // More common modern browser
         msgRetryCounterCache,
-        defaultQueryTimeoutMs: undefined,
+        defaultQueryTimeoutMs: 60000, // Prevent queries from hanging indefinitely
         syncFullHistory: false,
+        shouldSyncHistoryMessage: () => false, // Disable history syncing to save RAM and avoid memory leaks
         linkPreviewHighQuality: false,
         generateHighQualityLinkPreview: false,
         connectTimeoutMs: 60000,
         keepAliveIntervalMs: 30000,
+        getMessage: async (key) => {
+            try {
+                const { getMessage } = require("./lib/messageModel");
+                const msg = await getMessage(key.id);
+                return msg ? msg.content : undefined;
+            } catch (e) {
+                return undefined;
+            }
+        }
     });
 
     // ⌚ WATCHDOG: If SESSION_ID is present but fails to connect within 30s, enable QR.
@@ -275,7 +285,11 @@ async function connectionLogic() {
             global.healthCheckInterval = setInterval(async () => {
                 try {
                     if (sock && sock.ws && sock.ws.readyState === 1) { // WebSocket is OPEN
-                        await sock.sendPresenceUpdate("available");
+                        // Query the blocklist to ensure socket responds and is not a zombie
+                        await Promise.race([
+                            sock.fetchBlocklist().catch(() => null),
+                            new Promise((_, reject) => setTimeout(() => reject(new Error("Socket query timeout")), 15000))
+                        ]);
                     } else {
                         throw new Error("WebSocket not open");
                     }
@@ -284,7 +298,7 @@ async function connectionLogic() {
                     clearInterval(global.healthCheckInterval);
                     try { sock.end(); } catch (e) {}
                 }
-            }, 5 * 60 * 1000); // check every 5 minutes
+            }, 3 * 60 * 1000); // check every 3 minutes
 
             setInterval(async () => {
                 const { MessageLog } = require("./lib/messageModel");
@@ -341,7 +355,8 @@ async function connectionLogic() {
             return;
         }
 
-        await handleAutomation(sock, m);
+        // Run automation in background to prevent blocking command replies (e.g. status-view delays)
+        handleAutomation(sock, m).catch(err => console.error("⚠️ Automation Error:", err));
         await handleMessages(sock, upsert); 
     });
 
