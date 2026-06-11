@@ -119,6 +119,34 @@ npm run pm2
 npm run logs
 ```
 
+<details>
+<summary><b>🚀 Deploy on Render.com (Collapsible Setup Guide)</b></summary>
+
+### 1. Push to GitHub
+Fork or push this repository to your own GitHub account.
+
+### 2. Create a Web Service
+- Go to [Render.com](https://render.com) and sign in.
+- Click **New +** and select **Web Service**.
+- Connect your GitHub repository.
+
+### 3. Build & Start Settings
+- **Runtime**: `Node`
+- **Build Command**: `npm install`
+- **Start Command**: `npm start`
+
+### 4. Set Environment Variables
+In the **Environment** settings tab, add the following variables:
+- `SESSION_ID`: The base64 gzip-compressed session credentials string (e.g. `NEXUS~...`) generated in your local console when you ran the bot and logged in.
+- `PORT`: Set to `10000` (Render's default web service port).
+- `SUDO`: Your primary WhatsApp manager number (e.g., `254797715445`).
+
+### 5. Keep Alive (Prevent Sleep)
+Render's Free Tier spins down web services if there is no inbound traffic for 15 minutes.
+- Copy your Render Web Service URL (e.g., `https://your-bot.onrender.com`).
+- Add it to a free uptime monitor service (like **UptimeRobot**, **Better Stack**, or **cron-job.org**) to ping the URL every 5 to 10 minutes. This hits the bot's internal heartbeat server (`app.get("/")`) and keeps the process online 24/7!
+</details>
+
 ---
 
 ## 📜 License & Credits
