@@ -10,7 +10,7 @@ module.exports = {
     ],
 
     // Command prefixes the bot will respond to
-    prefixes: ["!", ".", "/"],
+    prefixes: ["."],
 
     // Baileys auth folder
     authFolder: "session",
