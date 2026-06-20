@@ -20,7 +20,7 @@ Nexus-1MD is a lightweight, customizable WhatsApp automation and userbot utility
 
 ### 💬 Official WhatsApp Group
 Stay updated, ask questions, and chat with other users by joining our official group:
-👉 **[Join Nexus-1MD Support Group](https://chat.whatsapp.com/BltEhNI2DVfDOSVYXtBuwX)**
+👉 **[Join Nexus-1MD Support Group](https://chat.whatsapp.com/CSPKnrOIG52LdMO06pZgNe)**
 
 ### ⭐ Support the Project
 If you like Nexus-1MD, please take a moment to support the repository:

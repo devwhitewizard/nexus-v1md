@@ -10,7 +10,7 @@ module.exports = {
         const text = `📂 *NEXUS-1MD SOURCE CODE*\n\n` +
                      `You can get the bot script and deployment guide from the official repository:\n\n` +
                      `🔗 *GitHub:* https://github.com/devwhitewizard/nexus-v1md\n` +
-                     `💬 *Support Group:* https://chat.whatsapp.com/BltEhNI2DVfDOSVYXtBuwX\n\n` +
+                     `💬 *Support Group:* https://chat.whatsapp.com/CSPKnrOIG52LdMO06pZgNe\n\n` +
                      `👤 *Developer:* White Wizard\n` +
                      `🌐 *Portfolio:* https://jonathanmwanza.vercel.app/\n\n` +
                      `_Don't forget to give a ⭐ if you like the project!_`;

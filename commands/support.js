@@ -12,7 +12,7 @@ module.exports = {
         let contactText = `💬 *NEXUS-1MD SUPPORT & COMMUNITY*\n\n` +
                           `👥 *Official Testing & Support Group:*\n` +
                           `Join the group to test bot functionality, chat, and get updates:\n` +
-                          `👉 https://chat.whatsapp.com/BltEhNI2DVfDOSVYXtBuwX\n\n` +
+                          `👉 https://chat.whatsapp.com/CSPKnrOIG52LdMO06pZgNe\n\n` +
                           `🛡️ *Bot Administrators:*\n` +
                           `For private support or queries, contact the admin team:\n\n`;
 

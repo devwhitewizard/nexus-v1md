@@ -182,14 +182,14 @@ module.exports = {
             menuBody += `17. ✨ *TEXTMAKER MENU*\n`;
             menuBody += `18. ⛪ *RELIGION MENU*\n`;
             menuBody += `19. 🖼️ *DP MENU*\n\n`;
-            menuBody += `💬 *Nexus Group:* https://chat.whatsapp.com/BltEhNI2DVfDOSVYXtBuwX\n\n`;
+            menuBody += `💬 *Nexus Group:* https://chat.whatsapp.com/CSPKnrOIG52LdMO06pZgNe\n\n`;
             menuBody += `💎 _Type .m <category> or 1-19 for instant access_`;
 
             if (banner) {
                 return await sock.sendMessage(jid, {
                     image: banner,
                     caption: menuBody,
-                    footer: "Nexus-1MD • Support: chat.whatsapp.com/BltEhNI2DVfDOSVYXtBuwX"
+                    footer: "Nexus-1MD • Support: chat.whatsapp.com/CSPKnrOIG52LdMO06pZgNe"
                 }, { quoted: ctx.msg });
             } else {
                 return await sock.sendMessage(jid, { text: menuBody }, { quoted: ctx.msg });
