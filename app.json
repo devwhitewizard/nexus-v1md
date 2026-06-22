@@ -1,0 +1,49 @@
+{
+  "name": "Nexus-MD",
+  "description": "A powerful, multi-functional WhatsApp automation bot designed to elevate the general chat experience with smart tools and utilities.",
+  "env": {
+    "SESSION_ID": {
+      "description": "Your unique bot session ID (starts with NEXUS~ or BWM~).",
+      "required": false,
+      "type": "string"
+    },
+    "PAIRING_NUMBER": {
+      "description": "WhatsApp phone number with country code (e.g. 254797715445) to link via pairing code.",
+      "required": false,
+      "type": "string"
+    },
+    "SUDO": {
+      "description": "The Super-Admin phone number with country code (e.g. 254797715445). Can run system commands.",
+      "required": true,
+      "type": "string"
+    },
+    "OWNERS": {
+      "description": "Additional admin phone numbers, separated by commas (e.g., 254711111111,254722222222).",
+      "required": false,
+      "type": "string"
+    },
+    "PREFIX": {
+      "description": "The command prefix (default is .)",
+      "required": false,
+      "type": "string",
+      "value": "."
+    },
+    "MODE": {
+      "description": "Bot mode (public or private).",
+      "required": false,
+      "type": "string",
+      "value": "public"
+    },
+    "DATABASE_URL": {
+      "description": "Database URL (e.g. postgres://user:pass@host/db). Optional, falls back to SQLite.",
+      "required": false,
+      "type": "string"
+    },
+    "ADMIN_TOKEN": {
+      "description": "Secret token to protect the admin panel APIs.",
+      "required": false,
+      "type": "string",
+      "value": "nexus_super_secret_token_2026"
+    }
+  }
+}

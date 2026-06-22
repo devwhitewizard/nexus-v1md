@@ -17,7 +17,7 @@ process.on("uncaughtException", (error) => {
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
-const { DisconnectReason, useMultiFileAuthState, makeCacheableSignalKeyStore } = require("@whiskeysockets/baileys");
+const { DisconnectReason, useMultiFileAuthState, makeCacheableSignalKeyStore, Browsers, fetchLatestBaileysVersion } = require("@whiskeysockets/baileys");
 const makeWASocket = require("@whiskeysockets/baileys").default;
 const qrcode = require("qrcode-terminal");
 const zlib = require("zlib");
@@ -142,14 +142,25 @@ async function connectionLogic() {
     const P = require("pino");
     const logger = P({ level: "error" });
 
+    // Fetch latest WhatsApp Web version to bypass version checks on WhatsApp servers
+    let version = [2, 3000, 1017531287]; // Fallback version
+    try {
+        const { version: latestVer } = await fetchLatestBaileysVersion();
+        version = latestVer;
+        console.log(`ℹ️ Using WhatsApp Web version: ${version.join(".")}`);
+    } catch (e) {
+        console.log("⚠️ Failed to fetch latest WhatsApp version, using fallback version.");
+    }
+
     const sock = makeWASocket({
         auth: {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, logger),
         },
         logger,
+        version,
         markOnline: true, // Mark online to ensure real-time message delivery
-        browser: ["Windows", "Chrome", "110.0.5481.178"], // More common modern browser
+        browser: Browsers.macOS("Desktop"),
         msgRetryCounterCache,
         defaultQueryTimeoutMs: 60000, // Prevent queries from hanging indefinitely
         syncFullHistory: false,
