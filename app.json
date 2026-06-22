@@ -4,7 +4,7 @@
   "env": {
     "SESSION_ID": {
       "description": "Your unique bot session ID (starts with NEXUS~ or BWM~).",
-      "required": false,
+      "required": true,
       "type": "string"
     },
     "PAIRING_NUMBER": {
@@ -38,12 +38,6 @@
       "description": "Database URL (e.g. postgres://user:pass@host/db). Optional, falls back to SQLite.",
       "required": false,
       "type": "string"
-    },
-    "ADMIN_TOKEN": {
-      "description": "Secret token to protect the admin panel APIs.",
-      "required": false,
-      "type": "string",
-      "value": "nexus_super_secret_token_2026"
     }
   }
 }
