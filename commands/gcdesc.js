@@ -1,7 +1,8 @@
 module.exports = {
-    name: "setdesc",
+    name: "gcdesc",
+    aliases: ["setdesc"],
     description: "Updates the group description.",
-    category: "admin",
+    category: "group",
     adminOnly: true,
     groupOnly: true,
     async execute({ sock, jid, args }) {

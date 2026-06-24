@@ -1,7 +1,8 @@
 module.exports = {
-    name: "setname",
+    name: "groupname",
+    aliases: ["setname"],
     description: "Updates the group name.",
-    category: "admin",
+    category: "group",
     adminOnly: true,
     groupOnly: true,
     async execute({ sock, jid, args }) {
