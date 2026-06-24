@@ -34,6 +34,11 @@ desktop.ini
 # Temporary / Downloaded Files
 database/*.db
 database/storage.json
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+assets/dp_history/
 temp/
 tmp/
 downloads/
