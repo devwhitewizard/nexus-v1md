@@ -2,7 +2,7 @@ const os = require("os");
 
 module.exports = {
     name: "status",
-    aliases: ["systemstatus", "health", "sysinfo", "!status", "system"],
+    aliases: ["systemstatus", "health", "sysinfo", "!status", "system", "systeminfo"],
     description: "Check bot health, uptime, and memory usage.",
     category: "system",
     execute: async ({ sock, jid, msg }) => {

@@ -98,9 +98,9 @@ const getPanels = (s) => ({
     },
     16: {
         title: "🔧 OTHER COMMANDS",
-        desc: "Quick reference for important Nexus commands.",
+        desc: "Admin and configuration utility commands for Nexus-1MD.",
         status: "",
-        usage: `▸ \`.menu\` — Full command list\n▸ \`.ping\` — Check bot speed\n▸ \`.update\` — Check for updates\n▸ \`.repo\` — GitHub repository\n▸ \`.owner\` — Contact the owner\n▸ \`.systemstatus\` — System health`
+        usage: `▸ \`.syncsettings all\` — Reset ALL settings to env var defaults\n▸ \`.syncsettings <name>\` — Reset one setting (e.g. anticall, antidelete, autoread)\n▸ \`.allvar\` — View all bot variables at once\n▸ \`.getvar <key>\` — Get a specific variable value\n▸ \`.setvar key=value\` — Change a variable directly\n▸ \`.systeminfo\` — View system info (uptime, memory, version)\n▸ \`.botpic\` — Set bot profile picture\n▸ \`.boturl\` — Set bot URL`
     }
 });
 
