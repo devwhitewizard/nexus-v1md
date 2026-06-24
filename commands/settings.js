@@ -1,4 +1,108 @@
 const { getSettings, updateSettings } = require("../lib/settings");
+const jsonStore = require("../lib/jsonStore");
+
+const on  = "✅ ON";
+const off = "❌ OFF";
+
+// ─── Detail panels shown when user replies with a number ──────────────────────
+const getPanels = (s) => ({
+    1: {
+        title: "🤖 BOT CONFIG",
+        desc: "Controls whether the bot responds to everyone (Public) or only the owner (Private).",
+        status: `💠 *Mode:* ${s.publicMode ? "🌍 Public" : "🔒 Private"}`,
+        usage: `▸ \`.mode public\` — Open to everyone\n▸ \`.mode private\` — Owner only`
+    },
+    2: {
+        title: "🔗 ANTI-LINK",
+        desc: "Automatically deletes WhatsApp group invite links sent in groups.",
+        status: `💠 *Status:* ${s.antiLink ? on : off}`,
+        usage: `▸ \`.antilink on\` — Enable\n▸ \`.antilink off\` — Disable`
+    },
+    3: {
+        title: "🏷️ ANTI-TAG",
+        desc: "Prevents members from mass-tagging everyone in groups.",
+        status: `💠 *Status:* ${s.antiTag ? on : off}`,
+        usage: `▸ \`.settings 3\` — Toggle ON/OFF`
+    },
+    4: {
+        title: "🗑️ ANTI-DELETE",
+        desc: "Recovers deleted messages and sends them to your personal DM.",
+        status: `💠 *Status:* ${s.antiDelete ? on : off}`,
+        usage: `▸ \`.antidelete on\` — Enable\n▸ \`.antidelete off\` — Disable`
+    },
+    5: {
+        title: "📊 STATUS ANTI-DELETE",
+        desc: "Recovers deleted status updates and forwards them to your DM.",
+        status: `💠 *Status:* ${s.statusAntiDelete ? on : off}`,
+        usage: `▸ \`.antidelete status on\` — Enable\n▸ \`.antidelete status off\` — Disable`
+    },
+    6: {
+        title: "📞 ANTI-CALL",
+        desc: "Automatically rejects all incoming voice and video calls.",
+        status: `💠 *Status:* ${s.antiCall ? on : off}`,
+        usage: `▸ \`.anticall on\` — Enable\n▸ \`.anticall off\` — Disable`
+    },
+    7: {
+        title: "🎭 GROUP EVENTS",
+        desc: "Sends automated welcome and goodbye messages when members join or leave your groups.",
+        status: `💠 *Welcome:* ${s.welcome ? on : off}\n💠 *Goodbye:* ${s.goodbye ? on : off}`,
+        usage: `▸ \`.welcome on/off\` — Toggle welcome\n▸ \`.goodbye on/off\` — Toggle goodbye\n▸ \`.setwelcome <msg>\` — Custom welcome\n▸ \`.setgoodbye <msg>\` — Custom goodbye`
+    },
+    8: {
+        title: "🔄 PRESENCE",
+        desc: "Shows a 'typing...' indicator whenever someone messages you, making you appear active.",
+        status: `💠 *DM Presence:* ${s.dmPresence ? on : off}\n💠 *Group Presence:* ${s.groupPresence ? on : off}`,
+        usage: `▸ \`.presence dm on\` — Enable in DMs\n▸ \`.presence dm off\` — Disable in DMs\n▸ \`.presence grp on\` — Enable in groups\n▸ \`.presence grp off\` — Disable in groups`
+    },
+    9: {
+        title: "👁️ AUTO VIEW STATUS",
+        desc: "Automatically views all contacts' status updates with a human-like random delay.",
+        status: `💠 *Auto View:* ${s.autoViewStatus ? on : off}\n💠 *Auto React:* ${s.autoLikeStatus ? on : off}`,
+        usage: `▸ \`.autostatus view on/off\` — Toggle auto view\n▸ \`.autostatus react on/off\` — Toggle status react`
+    },
+    10: {
+        title: "💬 AUTO REPLY STATUS",
+        desc: "Automatically sends a reply to contacts after viewing their status updates.",
+        status: `💠 *Status:* ${s.autoReplyStatus ? on : off}\n💠 *Reply Text:* ${s.statusReplyText || "Nice status! ✨"}`,
+        usage: `▸ \`.autostatus reply on/off\` — Toggle\n▸ \`.autostatus setreply <text>\` — Set reply text`
+    },
+    11: {
+        title: "📖 AUTO READ",
+        desc: "Automatically marks all incoming messages as read (sends blue ticks immediately).",
+        status: `💠 *Status:* ${s.autoRead ? on : off}`,
+        usage: `▸ \`.settings 11\` — Toggle ON/OFF`
+    },
+    12: {
+        title: "📝 AUTO BIO",
+        desc: "Automatically rotates your WhatsApp About/bio text on a timer.",
+        status: `💠 *Status:* ${s.autoBio ? on : off}`,
+        usage: `▸ \`.settings 12\` — Toggle ON/OFF\n▸ \`.setbio <text1> | <text2> | ...\` — Set rotation texts`
+    },
+    13: {
+        title: "🤖 CHATBOT (AI)",
+        desc: "Enables AI-powered automatic replies to private messages using Gemini AI.",
+        status: `💠 *Status:* ${s.chatbotAI ? on : off}`,
+        usage: `▸ \`.chatbot on\` — Enable AI chatbot\n▸ \`.chatbot off\` — Disable AI chatbot`
+    },
+    14: {
+        title: "👋 GREET (DM AUTO-REPLY)",
+        desc: "Sends an automatic one-time greeting when someone messages you in private for the first time. Each contact only gets greeted once (until you clear the memory).",
+        status: `💠 *Status:* ${s.greetDM ? on : off}\n💠 *Message:* ${s.greetDMMsg || "Hello! 👋"}\n💠 *Greeted contacts:* ${(jsonStore.get("greeted_users") || []).length}`,
+        usage: `▸ \`.greet on\` — Enable greetings\n▸ \`.greet off\` — Disable greetings\n▸ \`.greet set <message>\` — Custom greeting message\n▸ \`.greet clear\` — Reset memory (greet everyone again)`
+    },
+    15: {
+        title: "😍 AUTO REACT",
+        desc: "Automatically reacts with a random emoji to incoming messages.",
+        status: `💠 *DM React:* ${s.autoReactDM ? on : off}\n💠 *Group React:* ${s.autoReactGrp ? on : off}`,
+        usage: `▸ \`.settings 15 dm\` — Toggle DM auto-react\n▸ \`.settings 15 grp\` — Toggle Group auto-react`
+    },
+    16: {
+        title: "🔧 OTHER COMMANDS",
+        desc: "Quick reference for important Nexus commands.",
+        status: "",
+        usage: `▸ \`.menu\` — Full command list\n▸ \`.ping\` — Check bot speed\n▸ \`.update\` — Check for updates\n▸ \`.repo\` — GitHub repository\n▸ \`.owner\` — Contact the owner\n▸ \`.systemstatus\` — System health`
+    }
+});
 
 module.exports = {
     name: "settings",
@@ -10,60 +114,75 @@ module.exports = {
         const { sock, jid, args } = ctx;
         const settings = getSettings();
 
-        // If no args, show the dashboard
+        // ── Main menu (no args) ────────────────────────────────────────────────
         if (args.length === 0) {
-            const on = "✅ ON";
-            const off = "❌ OFF";
-            
-            let dashboard = `🤖 *NEXUS-1MD CONFIGURATION*\n\n`;
-            dashboard += `1. *Bot Config* — ${settings.publicMode ? "Public" : "Private"}\n`;
-            dashboard += `2. *Anti-Link* — ${settings.antiLink ? on : off}\n`;
-            dashboard += `3. *Anti-Badword* — ${settings.antiBadword ? on : off}\n`;
-            dashboard += `4. *Anti-Spam* — ${settings.antiSpam ? on : off}\n`;
-            dashboard += `5. *Anti-Delete* — ${settings.antiDelete ? on : off}\n`;
-            dashboard += `6. *Anti-Edit* — ${settings.antiEdit ? on : off}\n`;
-            dashboard += `7. *Status Anti-Delete* — ${settings.statusAntiDelete ? on : off}\n`;
-            dashboard += `8. *Anti-Call* — ${settings.antiCall ? on : off}\n`;
-            dashboard += `9. *Auto Welcome* — ${settings.welcome ? on : off}\n`;
-            dashboard += `10. *Auto Goodbye* — ${settings.goodbye ? on : off}\n`;
-            dashboard += `11. *Auto-Delete* — ${settings.autoDelete ? on : off}\n`;
-            dashboard += `12. *Auto View Status* — ${settings.autoViewStatus ? on : off}\n`;
-            dashboard += `13. *Auto Status Like* — ${settings.autoLikeStatus ? on : off}\n`;
-            dashboard += `14. *Chatbot (AI)* — ${settings.chatbotAI ? on : off}\n`;
-            dashboard += `15. *Greet DM* — ${settings.greetDM ? on : off} ("${settings.greetDMMsg || 'Hello World'}")\n`;
+            const s = settings;
+            let menu  = `⚙️ *NEXUS-1MD SETTINGS*\n`;
+            menu += `${"─".repeat(30)}\n\n`;
+            menu += `_Reply with a number (1-16) to see full details:_\n\n`;
+            menu += `1. 🤖 Bot Config — Nexus-1MD | ${s.publicMode ? "Public" : "Private"}\n`;
+            menu += `2. 🔗 Anti-Link — ${s.antiLink ? on : off}\n`;
+            menu += `3. 🏷️ Anti-Tag — ${s.antiTag ? on : off}\n`;
+            menu += `4. 🗑️ Anti-Delete — ${s.antiDelete ? on : off}\n`;
+            menu += `5. 📊 Status Anti-Delete — ${s.statusAntiDelete ? on : off}\n`;
+            menu += `6. 📞 Anti-Call — ${s.antiCall ? on : off}\n`;
+            menu += `7. 🎭 Group Events — Welcome: ${s.welcome ? on : off} | Goodbye: ${s.goodbye ? on : off}\n`;
+            menu += `8. 🔄 Presence — DM: ${s.dmPresence ? on : off} | Grp: ${s.groupPresence ? on : off}\n`;
+            menu += `9. 👁️ Auto View Status — ${s.autoViewStatus ? on : off}\n`;
+            menu += `10. 💬 Auto Reply Status — ${s.autoReplyStatus ? on : off} | Auto React — ${s.autoLikeStatus ? on : off}\n`;
+            menu += `11. 📖 Auto Read — ${s.autoRead ? on : off}\n`;
+            menu += `12. 📝 Auto Bio — ${s.autoBio ? on : off}\n`;
+            menu += `13. 🤖 Chatbot (AI) — ${s.chatbotAI ? on : off}\n`;
+            menu += `14. 👋 Greet (DM Auto-Reply) — ${s.greetDM ? on : off}\n`;
+            menu += `15. 😍 Auto React — DM: ${s.autoReactDM ? on : off} | Grp: ${s.autoReactGrp ? on : off}\n`;
+            menu += `16. 🔧 Other Commands\n`;
 
-            
-            dashboard += `\n💡 *Tip:* Use \`.settings <number>\` to toggle.\nExample: \`.settings 10\` for Auto-Delete.`;
-            
-            return await sock.sendMessage(jid, { text: dashboard });
+            return await sock.sendMessage(jid, { text: menu });
         }
 
-        // Toggle logic based on number
         const choice = parseInt(args[0]);
-        let msg = "";
+        const sub = args[1]?.toLowerCase(); // e.g. "dm", "grp", "toggle"
 
-        switch (choice) {
-            case 1: settings.publicMode = !settings.publicMode; msg = `Public Mode is now ${settings.publicMode ? "ON" : "OFF"}`; break;
-            case 2: settings.antiLink = !settings.antiLink; msg = `Anti-Link is now ${settings.antiLink ? "ON" : "OFF"}`; break;
-            case 3: settings.antiBadword = !settings.antiBadword; msg = `Anti-Badword is now ${settings.antiBadword ? "ON" : "OFF"}`; break;
-            case 4: settings.antiSpam = !settings.antiSpam; msg = `Anti-Spam is now ${settings.antiSpam ? "ON" : "OFF"}`; break;
-            case 5: settings.antiDelete = !settings.antiDelete; msg = `Anti-Delete is now ${settings.antiDelete ? "ON" : "OFF"}`; break;
-            case 6: settings.antiEdit = !settings.antiEdit; msg = `Anti-Edit is now ${settings.antiEdit ? "ON" : "OFF"}`; break;
-            case 7: settings.statusAntiDelete = !settings.statusAntiDelete; msg = `Status Anti-Delete is now ${settings.statusAntiDelete ? "ON" : "OFF"}`; break;
-            case 8: settings.antiCall = !settings.antiCall; msg = `Anti-Call is now ${settings.antiCall ? "ON" : "OFF"}`; break;
-            case 9: settings.welcome = !settings.welcome; msg = `Auto Welcome is now ${settings.welcome ? "ON" : "OFF"}`; break;
-            case 10: settings.goodbye = !settings.goodbye; msg = `Auto Goodbye is now ${settings.goodbye ? "ON" : "OFF"}`; break;
-            case 11: settings.autoDelete = !settings.autoDelete; msg = `Auto-Delete is now ${settings.autoDelete ? "ON" : "OFF"}`; break;
-            case 12: settings.autoViewStatus = !settings.autoViewStatus; msg = `Auto View Status is now ${settings.autoViewStatus ? "ON" : "OFF"}`; break;
-            case 13: settings.autoLikeStatus = !settings.autoLikeStatus; msg = `Auto Status Like is now ${settings.autoLikeStatus ? "ON" : "OFF"}`; break;
-            case 14: settings.chatbotAI = !settings.chatbotAI; msg = `Chatbot AI is now ${settings.chatbotAI ? "ON" : "OFF"}`; break;
-            case 15: settings.greetDM = !settings.greetDM; msg = `Greet DM is now ${settings.greetDM ? "ON" : "OFF"}`; break;
-            default:
-                return await sock.sendMessage(jid, { text: "⚠️ Invalid choice. Use numbers 1-15." });
+        // ── Inline toggles (settings that don't have dedicated commands) ───────
+        const inlineToggles = {
+            3:  () => ({ antiTag: !settings.antiTag }),
+            11: () => ({ autoRead: !settings.autoRead }),
+            12: () => ({ autoBio: !settings.autoBio }),
+            15: () => {
+                if (sub === "grp") return { autoReactGrp: !settings.autoReactGrp };
+                return { autoReactDM: !settings.autoReactDM };
+            }
+        };
 
+        if (inlineToggles[choice]) {
+            const updates = inlineToggles[choice]();
+            Object.assign(settings, updates);
+            await updateSettings(updates);
+            // Re-fetch updated settings for the panel
+            const panels = getPanels(settings);
+            const p = panels[choice];
+            let reply = `*${p.title}*\n${"─".repeat(28)}\n\n`;
+            reply += `${p.status}\n\n`;
+            reply += `✅ *Updated!*\n\n`;
+            reply += `🔧 *How to use:*\n${p.usage}\n\n`;
+            reply += `_Reply 0 or \`.settings\` to go back_`;
+            return await sock.sendMessage(jid, { text: reply });
         }
 
-        await updateSettings(settings);
-        await sock.sendMessage(jid, { text: `✅ *Settings Updated*\n\n${msg}` });
+        // ── Detail panels for all other numbers ───────────────────────────────
+        const panels = getPanels(settings);
+        const p = panels[choice];
+
+        if (!p) {
+            return await sock.sendMessage(jid, { text: "⚠️ Invalid number. Use 1-16." });
+        }
+
+        let reply = `*${p.title}*\n${"─".repeat(28)}\n\n`;
+        reply += `${p.desc}\n\n`;
+        if (p.status) reply += `${p.status}\n\n`;
+        reply += `🔧 *How to use:*\n${p.usage}\n\n`;
+        reply += `_Reply 0 or \`.settings\` to go back to menu_`;
+
+        return await sock.sendMessage(jid, { text: reply });
     }
 };

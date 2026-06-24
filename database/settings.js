@@ -37,6 +37,7 @@ if (sequelize) {
         greetDM: { type: DataTypes.BOOLEAN, defaultValue: false },
         greetDMMsg: { type: DataTypes.STRING, defaultValue: 'Hello World' },
         autoReactDM: { type: DataTypes.BOOLEAN, defaultValue: false },
+        autoReactGrp: { type: DataTypes.BOOLEAN, defaultValue: false },
         
         // 5. Group Events (Welcome/Goodbye)
         welcome: { type: DataTypes.BOOLEAN, defaultValue: false },
@@ -95,6 +96,7 @@ const getBotSettings = async () => {
         greetDM: false,
         greetDMMsg: 'Hello World',
         autoReactDM: false,
+        autoReactGrp: false,
         welcome: false,
         goodbye: false,
         welcomeMsg: 'Hi @user, welcome to *@group*! 👋',
