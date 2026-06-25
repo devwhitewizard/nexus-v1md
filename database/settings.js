@@ -58,7 +58,16 @@ if (sequelize) {
         },
         footer: { type: DataTypes.STRING, defaultValue: '© Nexus-1MD' },
         ownerNumber: { type: DataTypes.STRING, defaultValue: '' },
-        lockedCommands: { type: DataTypes.TEXT, defaultValue: '' }
+        lockedCommands: { type: DataTypes.TEXT, defaultValue: '' },
+        botName: { type: DataTypes.STRING, defaultValue: 'Nexus-MD' },
+        device: { type: DataTypes.STRING, defaultValue: 'Android' },
+        prefix: { type: DataTypes.STRING, defaultValue: '.' },
+        packName: { type: DataTypes.STRING, defaultValue: 'BWM-XMD' },
+        author: { type: DataTypes.STRING, defaultValue: 'Ibrahim Adams' },
+        timezone: { type: DataTypes.STRING, defaultValue: 'Africa/Nairobi' },
+        botImage: { type: DataTypes.STRING, defaultValue: 'Default' },
+        hideViewChannel: { type: DataTypes.BOOLEAN, defaultValue: false },
+        menuStyle: { type: DataTypes.INTEGER, defaultValue: 1 }
     }, {
         timestamps: true
     });
@@ -104,7 +113,16 @@ const getBotSettings = async () => {
         antiDeleteNotification: '🕵️ *Nexus Anti-Delete Update*',
         footer: '© Nexus-1MD',
         ownerNumber: '',
-        lockedCommands: ''
+        lockedCommands: '',
+        botName: 'Nexus-MD',
+        device: 'Android',
+        prefix: '.',
+        packName: 'BWM-XMD',
+        author: 'Ibrahim Adams',
+        timezone: 'Africa/Nairobi',
+        botImage: 'Default',
+        hideViewChannel: false,
+        menuStyle: 1
     };
 
     if (!isOnline() || !SettingsDB) {

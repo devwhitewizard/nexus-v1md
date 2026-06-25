@@ -7,10 +7,29 @@ const off = "❌ OFF";
 // ─── Detail panels shown when user replies with a number ──────────────────────
 const getPanels = (s) => ({
     1: {
-        title: "🤖 BOT CONFIG",
-        desc: "Controls whether the bot responds to everyone (Public) or only the owner (Private).",
-        status: `💠 *Mode:* ${s.publicMode ? "🌍 Public" : "🔒 Private"}`,
-        usage: `▸ \`.mode public\` — Open to everyone\n▸ \`.mode private\` — Owner only`
+        title: "🤖 BOT CONFIGURATION",
+        desc: "Customize your bot identity and behavior.",
+        status: `🔹 *Name:* ${s.botName || "Nexus-MD"}\n` +
+                `🔹 *Mode:* ${s.publicMode ? "public" : "private"}\n` +
+                `   _public = everyone can use, private = owner only_\n` +
+                `🔹 *Device:* ${s.device || "Android"}\n` +
+                `   _iPhone = plain text messages, Android = full features_\n` +
+                `🔹 *Prefix:* ${s.prefix || "."}\n` +
+                `🔹 *Pack:* ${s.packName || "BWM-XMD"}\n` +
+                `🔹 *Author:* ${s.author || "Ibrahim Adams"}\n` +
+                `🔹 *Timezone:* ${s.timezone || "Africa/Nairobi"}\n` +
+                `🔹 *Bot Image:* ${s.botImage || "Default"}\n` +
+                `🔹 *Menu Style:* Style ${s.menuStyle || "1"} — ${s.menuStyle == 2 ? "Buttons" : s.menuStyle == 3 ? "List" : "Lines"}`,
+        usage: `▸ \`.botname <name>\` — Change bot name\n` +
+               `▸ \`.mode public/private\` — Bot access mode\n` +
+               `▸ \`.devicemode iphone/android\` — Message style\n` +
+               `▸ \`.prefix <symbol>\` — Change prefix (e.g. ! or #)\n` +
+               `▸ \`.packname <name>\` — Sticker pack name\n` +
+               `▸ \`.author <name>\` — Sticker author name\n` +
+               `▸ \`.timezone <zone>\` — e.g. Africa/Nairobi\n` +
+               `▸ \`.botpic\` — Reply to image or video to set bot image\n` +
+               `▸ \`.hideviewchannel on/off\` — Hide view channel & forwarded labels\n` +
+               `▸ \`.menustyle 1/2/3\` — Switch menu style`
     },
     2: {
         title: "🔗 ANTI-LINK",
@@ -120,7 +139,7 @@ module.exports = {
             let menu  = `⚙️ *NEXUS-1MD SETTINGS*\n`;
             menu += `${"─".repeat(30)}\n\n`;
             menu += `_Reply with a number (1-16) to see full details:_\n\n`;
-            menu += `1. 🤖 Bot Config — Nexus-1MD | ${s.publicMode ? "Public" : "Private"}\n`;
+            menu += `1. 🤖 Bot Configuration — Name: ${s.botName || "Nexus-MD"} | Mode: ${s.publicMode ? "public" : "private"}\n`;
             menu += `2. 🔗 Anti-Link — ${s.antiLink ? on : off}\n`;
             menu += `3. 🏷️ Anti-Tag — ${s.antiTag ? on : off}\n`;
             menu += `4. 🗑️ Anti-Delete — ${s.antiDelete ? on : off}\n`;
@@ -161,7 +180,8 @@ module.exports = {
             // Re-fetch updated settings for the panel
             const panels = getPanels(settings);
             const p = panels[choice];
-            let reply = `*${p.title}*\n${"─".repeat(28)}\n\n`;
+            const separator = choice === 1 ? "━━━━━━━━━━━━━━━━━━" : "─".repeat(28);
+            let reply = `*${p.title}*\n${separator}\n\n`;
             reply += `${p.status}\n\n`;
             reply += `✅ *Updated!*\n\n`;
             reply += `🔧 *How to use:*\n${p.usage}\n\n`;
@@ -177,7 +197,8 @@ module.exports = {
             return await sock.sendMessage(jid, { text: "⚠️ Invalid number. Use 1-16." });
         }
 
-        let reply = `*${p.title}*\n${"─".repeat(28)}\n\n`;
+        const separator = choice === 1 ? "━━━━━━━━━━━━━━━━━━" : "─".repeat(28);
+        let reply = `*${p.title}*\n${separator}\n\n`;
         reply += `${p.desc}\n\n`;
         if (p.status) reply += `${p.status}\n\n`;
         reply += `🔧 *How to use:*\n${p.usage}\n\n`;
