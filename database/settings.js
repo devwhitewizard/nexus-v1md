@@ -69,7 +69,9 @@ if (sequelize) {
         hideViewChannel: { type: DataTypes.BOOLEAN, defaultValue: false },
         menuStyle: { type: DataTypes.INTEGER, defaultValue: 1 },
         antiLinkGlobal: { type: DataTypes.STRING, defaultValue: 'off' },
-        antiLinkLimit: { type: DataTypes.INTEGER, defaultValue: 3 }
+        antiLinkLimit: { type: DataTypes.INTEGER, defaultValue: 3 },
+        antiStatusMentionGlobal: { type: DataTypes.STRING, defaultValue: 'off' },
+        antiStatusMentionLimit: { type: DataTypes.INTEGER, defaultValue: 3 }
     }, {
         timestamps: true
     });
@@ -126,7 +128,9 @@ const getBotSettings = async () => {
         hideViewChannel: false,
         menuStyle: 1,
         antiLinkGlobal: 'off',
-        antiLinkLimit: 3
+        antiLinkLimit: 3,
+        antiStatusMentionGlobal: 'off',
+        antiStatusMentionLimit: 3
     };
 
     if (!isOnline() || !SettingsDB) {

@@ -48,10 +48,20 @@ const getPanels = (s) => ({
                `▸ \`.antilink resetwarns\` — Clear all warning counts`
     },
     3: {
-        title: "🏷️ ANTI-TAG",
-        desc: "Prevents members from mass-tagging everyone in groups.",
-        status: `💠 *Status:* ${s.antiTag ? on : off}`,
-        usage: `▸ \`.settings 3\` — Toggle ON/OFF`
+        title: "🏷️ ANTI-STATUS-MENTION (ANTITAG)",
+        desc: "Blocks users who send status mention/tag messages in groups. Set per-group or for all groups.",
+        status: `🔹 *All Groups (global):* ${s.antiStatusMentionGlobal === "off" ? "❌ OFF" : `✅ ${s.antiStatusMentionGlobal.toUpperCase()}`}\n` +
+                `🔹 *Warn Limit:* ${s.antiStatusMentionLimit || 3}`,
+        usage: `▸ \`.antistatusmention warn\` — Enable for this group (warn mode)\n` +
+               `▸ \`.antistatusmention delete\` — Enable for this group (delete mode)\n` +
+               `▸ \`.antistatusmention remove\` — Enable for this group (kick mode)\n` +
+               `▸ \`.antistatusmention off\` — Disable in this group\n` +
+               `▸ \`.antistatusmention warn all\` — Enable in ALL groups\n` +
+               `▸ \`.antistatusmention delete all\` — Delete in ALL groups\n` +
+               `▸ \`.antistatusmention remove all\` — Kick in ALL groups\n` +
+               `▸ \`.antistatusmention off all\` — Disable in ALL groups\n` +
+               `▸ \`.antistatusmention limit <1-10>\` — Set how many warns before kick\n` +
+               `▸ \`.antistatusmention resetwarns\` — Clear all warning counts`
     },
     4: {
         title: "🗑️ ANTI-DELETE",
@@ -151,7 +161,7 @@ module.exports = {
             menu += `_Reply with a number (1-16) to see full details:_\n\n`;
             menu += `1. 🤖 Bot Configuration — Name: ${s.botName || "Nexus-MD"} | Mode: ${s.publicMode ? "public" : "private"}\n`;
             menu += `2. 🔗 Anti-Link — Global: ${s.antiLinkGlobal === "off" ? "❌ OFF" : `✅ ${s.antiLinkGlobal.toUpperCase()}`} | Warn Limit: ${s.antiLinkLimit || 3}\n`;
-            menu += `3. 🏷️ Anti-Tag — ${s.antiTag ? on : off}\n`;
+            menu += `3. 🏷️ Anti-Status-Mention — Global: ${s.antiStatusMentionGlobal === "off" ? "❌ OFF" : `✅ ${s.antiStatusMentionGlobal.toUpperCase()}`} | Warn Limit: ${s.antiStatusMentionLimit || 3}\n`;
             menu += `4. 🗑️ Anti-Delete — ${s.antiDelete ? on : off}\n`;
             menu += `5. 📊 Status Anti-Delete — ${s.statusAntiDelete ? on : off}\n`;
             menu += `6. 📞 Anti-Call — ${s.antiCall ? on : off}\n`;
@@ -174,7 +184,6 @@ module.exports = {
 
         // ── Inline toggles (settings that don't have dedicated commands) ───────
         const inlineToggles = {
-            3:  () => ({ antiTag: !settings.antiTag }),
             11: () => ({ autoRead: !settings.autoRead }),
             12: () => ({ autoBio: !settings.autoBio }),
             15: () => {
