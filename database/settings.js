@@ -67,7 +67,9 @@ if (sequelize) {
         timezone: { type: DataTypes.STRING, defaultValue: 'Africa/Nairobi' },
         botImage: { type: DataTypes.STRING, defaultValue: 'Default' },
         hideViewChannel: { type: DataTypes.BOOLEAN, defaultValue: false },
-        menuStyle: { type: DataTypes.INTEGER, defaultValue: 1 }
+        menuStyle: { type: DataTypes.INTEGER, defaultValue: 1 },
+        antiLinkGlobal: { type: DataTypes.STRING, defaultValue: 'off' },
+        antiLinkLimit: { type: DataTypes.INTEGER, defaultValue: 3 }
     }, {
         timestamps: true
     });
@@ -122,7 +124,9 @@ const getBotSettings = async () => {
         timezone: 'Africa/Nairobi',
         botImage: 'Default',
         hideViewChannel: false,
-        menuStyle: 1
+        menuStyle: 1,
+        antiLinkGlobal: 'off',
+        antiLinkLimit: 3
     };
 
     if (!isOnline() || !SettingsDB) {

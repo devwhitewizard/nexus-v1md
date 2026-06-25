@@ -33,9 +33,19 @@ const getPanels = (s) => ({
     },
     2: {
         title: "🔗 ANTI-LINK",
-        desc: "Automatically deletes WhatsApp group invite links sent in groups.",
-        status: `💠 *Status:* ${s.antiLink ? on : off}`,
-        usage: `▸ \`.antilink on\` — Enable\n▸ \`.antilink off\` — Disable`
+        desc: "Automatically detects and handles links posted in groups. You can set it for one specific group or all groups at once.",
+        status: `🔹 *All Groups (global):* ${s.antiLinkGlobal === "off" ? "❌ OFF" : `✅ ${s.antiLinkGlobal.toUpperCase()}`}\n` +
+                `🔹 *Warn Limit:* ${s.antiLinkLimit || 3}`,
+        usage: `▸ \`.antilink warn\` — Enable for this group (warn mode)\n` +
+               `▸ \`.antilink delete\` — Enable for this group (delete mode)\n` +
+               `▸ \`.antilink remove\` — Enable for this group (kick mode)\n` +
+               `▸ \`.antilink off\` — Disable in this group\n` +
+               `▸ \`.antilink warn all\` — Enable in ALL groups\n` +
+               `▸ \`.antilink delete all\` — Delete in ALL groups\n` +
+               `▸ \`.antilink remove all\` — Kick in ALL groups\n` +
+               `▸ \`.antilink off all\` — Disable in ALL groups\n` +
+               `▸ \`.antilink limit <1-10>\` — Set how many warns before kick\n` +
+               `▸ \`.antilink resetwarns\` — Clear all warning counts`
     },
     3: {
         title: "🏷️ ANTI-TAG",
@@ -140,7 +150,7 @@ module.exports = {
             menu += `${"─".repeat(30)}\n\n`;
             menu += `_Reply with a number (1-16) to see full details:_\n\n`;
             menu += `1. 🤖 Bot Configuration — Name: ${s.botName || "Nexus-MD"} | Mode: ${s.publicMode ? "public" : "private"}\n`;
-            menu += `2. 🔗 Anti-Link — ${s.antiLink ? on : off}\n`;
+            menu += `2. 🔗 Anti-Link — Global: ${s.antiLinkGlobal === "off" ? "❌ OFF" : `✅ ${s.antiLinkGlobal.toUpperCase()}`} | Warn Limit: ${s.antiLinkLimit || 3}\n`;
             menu += `3. 🏷️ Anti-Tag — ${s.antiTag ? on : off}\n`;
             menu += `4. 🗑️ Anti-Delete — ${s.antiDelete ? on : off}\n`;
             menu += `5. 📊 Status Anti-Delete — ${s.statusAntiDelete ? on : off}\n`;
@@ -180,7 +190,7 @@ module.exports = {
             // Re-fetch updated settings for the panel
             const panels = getPanels(settings);
             const p = panels[choice];
-            const separator = choice === 1 ? "━━━━━━━━━━━━━━━━━━" : "─".repeat(28);
+            const separator = "━━━━━━━━━━━━━━━━━━";
             let reply = `*${p.title}*\n${separator}\n\n`;
             reply += `${p.status}\n\n`;
             reply += `✅ *Updated!*\n\n`;
@@ -197,7 +207,7 @@ module.exports = {
             return await sock.sendMessage(jid, { text: "⚠️ Invalid number. Use 1-16." });
         }
 
-        const separator = choice === 1 ? "━━━━━━━━━━━━━━━━━━" : "─".repeat(28);
+        const separator = "━━━━━━━━━━━━━━━━━━";
         let reply = `*${p.title}*\n${separator}\n\n`;
         reply += `${p.desc}\n\n`;
         if (p.status) reply += `${p.status}\n\n`;
