@@ -68,7 +68,7 @@ async function connectionLogic() {
             console.log("📦 SESSION_ID found in .env and local credentials missing. Attempting to restore session...");
             try {
                 const rawId = process.env.SESSION_ID.trim();
-                const sessionId = rawId.includes("~") ? rawId.split("~")[1] : (rawId.startsWith("BWM") || rawId.startsWith("XMD") ? rawId.slice(4) : rawId);
+                const sessionId = rawId.includes("~") ? rawId.split("~")[1] : (rawId.startsWith("Nexus") ? rawId.slice(5) : rawId);
                 const buffer = Buffer.from(sessionId, "base64");
 
                 let credsJson = "";

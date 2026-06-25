@@ -65,7 +65,7 @@ module.exports = {
                 if (connection === "open") {
                     const credsPath = path.join(tempSessionDir, "creds.json");
                     const credsData = fs.readFileSync(credsPath, "utf-8");
-                    const sessionId = "BWM~" + Buffer.from(credsData).toString("base64");
+                    const sessionId = "Nexus~" + Buffer.from(credsData).toString("base64");
 
                     await sock.sendMessage(jid, { 
                         text: `✅ *Session Generated!*\nCopy the code below:`

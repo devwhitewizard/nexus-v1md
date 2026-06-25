@@ -15,8 +15,8 @@ const getPanels = (s) => ({
                 `🔹 *Device:* ${s.device || "Android"}\n` +
                 `   _iPhone = plain text messages, Android = full features_\n` +
                 `🔹 *Prefix:* ${s.prefix || "."}\n` +
-                `🔹 *Pack:* ${s.packName || "BWM-XMD"}\n` +
-                `🔹 *Author:* ${s.author || "Ibrahim Adams"}\n` +
+                `🔹 *Pack:* ${s.packName || "Nexus-MD"}\n` +
+                `🔹 *Author:* ${s.author || "White Wizard"}\n` +
                 `🔹 *Timezone:* ${s.timezone || "Africa/Nairobi"}\n` +
                 `🔹 *Bot Image:* ${s.botImage || "Default"}\n` +
                 `🔹 *Menu Style:* Style ${s.menuStyle || "1"} — ${s.menuStyle == 2 ? "Buttons" : s.menuStyle == 3 ? "List" : "Lines"}`,
