@@ -83,9 +83,24 @@ const getPanels = (s) => ({
     },
     7: {
         title: "🎭 GROUP EVENTS",
-        desc: "Sends automated welcome and goodbye messages when members join or leave your groups.",
-        status: `💠 *Welcome:* ${s.welcome ? on : off}\n💠 *Goodbye:* ${s.goodbye ? on : off}`,
-        usage: `▸ \`.welcome on/off\` — Toggle welcome\n▸ \`.goodbye on/off\` — Toggle goodbye\n▸ \`.setwelcome <msg>\` — Custom welcome\n▸ \`.setgoodbye <msg>\` — Custom goodbye`
+        desc: "Sends welcome messages when new members join and goodbye messages when they leave. Also notifies about promotions/demotions. Set per-group or globally.",
+        status: `🔹 *All Groups (global):* ${s.groupEventsGlobal ? "✅ ON" : "❌ OFF"}\n` +
+                `🔹 *Promotion Alerts:* ${s.eventsPromote ? "✅ ON" : "❌ OFF"}`,
+        usage: `▸ \`.events on\` — Enable in this group\n` +
+               `▸ \`.events off\` — Disable in this group\n` +
+               `▸ \`.events on all\` — Enable in ALL groups\n` +
+               `▸ \`.events off all\` — Disable in ALL groups\n` +
+               `▸ \`.events promote on/off\` — Show promotion notices\n` +
+               `▸ \`.events welcome <message>\` — Set welcome message\n` +
+               `▸ \`.events welcome <message> all\` — Set for all groups\n` +
+               `▸ \`.events goodbye <message>\` — Set goodbye message\n` +
+               `▸ \`.events goodbye <message> all\` — Set for all groups\n\n` +
+               `*Placeholders available:*\n` +
+               `▸ \`@user\` — Mentions member\n` +
+               `▸ \`{group}\` — Group name\n` +
+               `▸ \`{count}\` — Member count\n` +
+               `▸ \`{time}\` — Join/leave time\n` +
+               `▸ \`{desc}\` — Group description`
     },
     8: {
         title: "🔄 PRESENCE",
@@ -165,7 +180,7 @@ module.exports = {
             menu += `4. 🗑️ Anti-Delete — ${s.antiDelete ? on : off}\n`;
             menu += `5. 📊 Status Anti-Delete — ${s.statusAntiDelete ? on : off}\n`;
             menu += `6. 📞 Anti-Call — ${s.antiCall ? on : off}\n`;
-            menu += `7. 🎭 Group Events — Welcome: ${s.welcome ? on : off} | Goodbye: ${s.goodbye ? on : off}\n`;
+            menu += `7. 🎭 Group Events — Global: ${s.groupEventsGlobal ? on : off} | Promote: ${s.eventsPromote ? on : off}\n`;
             menu += `8. 🔄 Presence — DM: ${s.dmPresence ? on : off} | Grp: ${s.groupPresence ? on : off}\n`;
             menu += `9. 👁️ Auto View Status — ${s.autoViewStatus ? on : off}\n`;
             menu += `10. 💬 Auto Reply Status — ${s.autoReplyStatus ? on : off} | Auto React — ${s.autoLikeStatus ? on : off}\n`;

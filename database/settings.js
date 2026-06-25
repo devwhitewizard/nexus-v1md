@@ -71,7 +71,9 @@ if (sequelize) {
         antiLinkGlobal: { type: DataTypes.STRING, defaultValue: 'off' },
         antiLinkLimit: { type: DataTypes.INTEGER, defaultValue: 3 },
         antiStatusMentionGlobal: { type: DataTypes.STRING, defaultValue: 'off' },
-        antiStatusMentionLimit: { type: DataTypes.INTEGER, defaultValue: 3 }
+        antiStatusMentionLimit: { type: DataTypes.INTEGER, defaultValue: 3 },
+        groupEventsGlobal: { type: DataTypes.BOOLEAN, defaultValue: false },
+        eventsPromote: { type: DataTypes.BOOLEAN, defaultValue: false }
     }, {
         timestamps: true
     });
@@ -130,7 +132,9 @@ const getBotSettings = async () => {
         antiLinkGlobal: 'off',
         antiLinkLimit: 3,
         antiStatusMentionGlobal: 'off',
-        antiStatusMentionLimit: 3
+        antiStatusMentionLimit: 3,
+        groupEventsGlobal: false,
+        eventsPromote: false
     };
 
     if (!isOnline() || !SettingsDB) {

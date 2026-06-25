@@ -472,17 +472,59 @@ async function connectionLogic() {
     });
 
     sock.ev.on("group-participants.update", async (update) => {
+        try {
+            const { id, participants, action } = update;
+            const settings = getSettings();
 
-        const { id, participants, action } = update;
-        const settings = getSettings();
-        if (action === "add" && settings.welcome) {
-            for (let user of participants) {
-                try {
-                    const metadata = await sock.groupMetadata(id);
-                    let msg = settings.welcomeMsg.replace("@user", `@${user.split("@")[0]}`).replace("@group", metadata.subject);
-                    await sock.sendMessage(id, { text: msg, mentions: [user] });
-                } catch (e) { }
+            const jsonStore = require("./lib/jsonStore");
+            const localMode = jsonStore.get(`events_mode_${id}`, null);
+            const isActive = localMode !== null ? (localMode === "on") : settings.groupEventsGlobal;
+
+            if (!isActive) return;
+
+            const metadata = await sock.groupMetadata(id).catch(() => null);
+            if (!metadata) return;
+
+            const time = new Date().toLocaleTimeString("en-GB", { hour12: false });
+            const groupName = metadata.subject || "";
+            const groupDesc = metadata.desc?.toString() || "";
+            const memberCount = metadata.participants?.length || 0;
+
+            for (const participant of participants) {
+                const userMention = `@${participant.split("@")[0]}`;
+
+                if (action === "add") {
+                    const msgTemplate = jsonStore.get(`welcome_msg_${id}`, null) || settings.welcomeMsg || "Hi @user, welcome to *@group*! 👋";
+                    const msg = msgTemplate
+                        .replace(/@user/g, userMention)
+                        .replace(/{group}/g, groupName)
+                        .replace(/@group/g, groupName)
+                        .replace(/{count}/g, memberCount)
+                        .replace(/{time}/g, time)
+                        .replace(/{desc}/g, groupDesc);
+                    
+                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => {});
+                } else if (action === "remove") {
+                    const msgTemplate = jsonStore.get(`goodbye_msg_${id}`, null) || settings.goodbyeMsg || "Goodbye @user, we hope to see you back soon! 😢";
+                    const msg = msgTemplate
+                        .replace(/@user/g, userMention)
+                        .replace(/{group}/g, groupName)
+                        .replace(/@group/g, groupName)
+                        .replace(/{count}/g, memberCount)
+                        .replace(/{time}/g, time)
+                        .replace(/{desc}/g, groupDesc);
+                    
+                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => {});
+                } else if (action === "promote" && settings.eventsPromote) {
+                    const msg = `🎉 *Promotion Notice:*\n\n${userMention} has been promoted to Admin in this group.\n\n⌚ *Time:* ${time}`;
+                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => {});
+                } else if (action === "demote" && settings.eventsPromote) {
+                    const msg = `⚠️ *Demotion Notice:*\n\n${userMention} is no longer an Admin in this group.\n\n⌚ *Time:* ${time}`;
+                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => {});
+                }
             }
+        } catch (err) {
+            console.error("⚠️ Error handling group-participants.update:", err.message);
         }
     });
 }
