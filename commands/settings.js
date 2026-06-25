@@ -143,8 +143,8 @@ module.exports = {
         const { sock, jid, args } = ctx;
         const settings = getSettings();
 
-        // ── Main menu (no args) ────────────────────────────────────────────────
-        if (args.length === 0) {
+        // ── Main menu (no args or choice 0) ────────────────────────────────────
+        if (args.length === 0 || parseInt(args[0]) === 0) {
             const s = settings;
             let menu  = `⚙️ *NEXUS-1MD SETTINGS*\n`;
             menu += `${"─".repeat(30)}\n\n`;
