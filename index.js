@@ -232,7 +232,7 @@ async function connectionLogic() {
                 const code = await sock.requestPairingCode(pNumber);
                 console.clear();
                 console.log("\n========================================");
-                console.log("🔗 YOUR NEXUS-1MD PAIRING CODE:");
+                console.log("🔗 YOUR NEXUS-MD PAIRING CODE:");
                 console.log(`👉 ${code} 👈`);
                 console.log("========================================\n");
                 console.log("1. Open WhatsApp on your phone.");
@@ -273,8 +273,24 @@ async function connectionLogic() {
             const { initDb } = require("./lib/db");
             await initDb();
 
-            const { loadSettings } = require("./lib/settings");
+            const { loadSettings, getSettings } = require("./lib/settings");
             await loadSettings();
+
+            // Set up alwaysOnline presence updates
+            const settings = getSettings();
+            if (settings.alwaysOnline) {
+                await sock.sendPresenceUpdate("available").catch(() => {});
+            }
+
+            if (global.alwaysOnlineInterval) clearInterval(global.alwaysOnlineInterval);
+            global.alwaysOnlineInterval = setInterval(async () => {
+                try {
+                    const currentSettings = getSettings();
+                    if (currentSettings.alwaysOnline) {
+                        await sock.sendPresenceUpdate("available").catch(() => {});
+                    }
+                } catch (e) {}
+            }, 15000);
 
             const myJid = (sock.user && sock.user.id) || (sock.authState.creds.me && sock.authState.creds.me.id) || (sock.authState.creds.me && sock.authState.creds.me.lid) || "";
             const cleanJid = myJid.split(":")[0];
@@ -311,8 +327,12 @@ async function connectionLogic() {
                 console.log("========================================\n");
 
                 // 💎 PREMIUM USER MESSAGE
+                const { getSettings } = require("./lib/settings");
+                const settings = getSettings();
+                const botName = settings.botName || "Nexus-MD";
+
                 const userWelcome = {
-                    text: `✨ *Nexus-1MD v${version} Connected!* ✨\n\n` +
+                    text: `✨ *${botName} v${version} Connected!* ✨\n\n` +
                         `🤖 *Status:* System fully operational.\n` +
                         `✅ *Secure:* Your connection is stable and encrypted.\n\n` +
                         `🌟 *Welcome!* Your bot is ready to serve. Type *.menu* to see what I can do!\n\n` +
@@ -321,7 +341,7 @@ async function connectionLogic() {
 
                 // 🛠️ TECHNICAL ADMIN MESSAGE
                 const adminAlert = {
-                    text: `🛠️ *Nexus-1MD v${version}: Connection Established*\n\n` +
+                    text: `🛠️ *${botName} v${version}: Connection Established*\n\n` +
                         `📦 *Session:* Restored/Initialized\n` +
                         `💾 *Storage:* Nexus-MD-100%\n\n` +
                         `> Session ID has been printed to your private console.`
@@ -387,6 +407,9 @@ async function connectionLogic() {
             isReconnecting = false;
             if (global.healthCheckInterval) {
                 clearInterval(global.healthCheckInterval);
+            }
+            if (global.alwaysOnlineInterval) {
+                clearInterval(global.alwaysOnlineInterval);
             }
             const statusCode = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode;
 
@@ -532,7 +555,12 @@ async function connectionLogic() {
 connectionLogic();
 
 // 🌐 Health Check Server
-app.get("/", (req, res) => res.send("🤖 Nexus-1MD is Online and Healthy!"));
+app.get("/", (req, res) => {
+    const { getSettings } = require("./lib/settings");
+    const settings = getSettings();
+    const botName = settings.botName || "Nexus-MD";
+    res.send(`🤖 ${botName} is Online and Healthy!`);
+});
 
 // 🛠️ Admin Control Panel APIs
 try {

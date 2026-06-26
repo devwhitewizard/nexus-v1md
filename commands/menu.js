@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const { getUserCount } = require("../lib/userModel");
+const { getSettings } = require("../lib/settings");
 
 module.exports = {
     name: "menu",
@@ -144,11 +145,20 @@ module.exports = {
             }
 
             // 🎨 Level 1: Main Menu (Sleek Dashboard)
-            const bannerPath = path.join(__dirname, "../assets/Nexuspic.jpg");
-            const banner = fs.existsSync(bannerPath) ? fs.readFileSync(bannerPath) : null;
+            const settings = getSettings();
+            const botName = settings.botName || "Nexus-MD";
+            const botImageUrl = settings.botImage;
+
+            let banner;
+            if (botImageUrl && botImageUrl.startsWith("http")) {
+                banner = { url: botImageUrl };
+            } else {
+                const bannerPath = path.join(__dirname, "../assets/Nexuspic.jpg");
+                banner = fs.existsSync(bannerPath) ? fs.readFileSync(bannerPath) : null;
+            }
 
             let menuBody = `╭━━━━━━━◇\n`;
-            menuBody += `┃ *NEXUS-1MD*\n`;
+            menuBody += `┃ *${botName.toUpperCase()}*\n`;
             menuBody += `┃ ◇━━━━━━━◇\n`;
             menuBody += `┃ 🖼️ *${greeting}*\n`;
             menuBody += `╰━━━━━━━◇\n\n`;
@@ -170,14 +180,14 @@ module.exports = {
             menuBody += `5. 🎨 *STICKER MENU*\n`;
             menuBody += `6. 📦 *OWNER MENU*\n`;
             menuBody += `7. 🌍 *GENERAL MENU*\n`;
-            menuBody += `8. 💻 *DEV INFO* (Direct)\n`;
-            menuBody += `9. 🎭 *ANIME MENU*\n`;
-            menuBody += `10. 🕹️ *GAMES MENU*\n`;
-            menuBody += `11. 🤝 *SOCIAL MENU*\n`;
-            menuBody += `12. 🎉 *FUN MENU*\n`;
-            menuBody += `13. 💰 *ECONOMY MENU*\n`;
-            menuBody += `14. 🎬 *MEDIA MENU*\n`;
-            menuBody += `15. 🏀 *SPORTS MENU*\n`;
+            menuBody += `8. ⚽ *SPORTS MENU*\n`;
+            menuBody += `9. 💻 *DEV INFO* (Direct)\n`;
+            menuBody += `10. 🎭 *ANIME MENU*\n`;
+            menuBody += `11. 🕹️ *GAMES MENU*\n`;
+            menuBody += `12. 🤝 *SOCIAL MENU*\n`;
+            menuBody += `13. 🎉 *FUN MENU*\n`;
+            menuBody += `14. 💰 *ECONOMY MENU*\n`;
+            menuBody += `15. 🎬 *MEDIA MENU*\n`;
             menuBody += `16. 🛰️ *SYSTEM MENU*\n`;
             menuBody += `17. ✨ *TEXTMAKER MENU*\n`;
             menuBody += `18. ⛪ *RELIGION MENU*\n`;
@@ -189,7 +199,7 @@ module.exports = {
                 return await sock.sendMessage(jid, {
                     image: banner,
                     caption: menuBody,
-                    footer: "Nexus-1MD • Support: chat.whatsapp.com/CSPKnrOIG52LdMO06pZgNe"
+                    footer: `${botName} • Support: chat.whatsapp.com/CSPKnrOIG52LdMO06pZgNe`
                 }, { quoted: ctx.msg });
             } else {
                 return await sock.sendMessage(jid, { text: menuBody }, { quoted: ctx.msg });

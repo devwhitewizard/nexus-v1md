@@ -146,13 +146,18 @@ const getPanels = (s) => ({
                `▸ \`.autostatus setreply <text>\` — Set reply text`
     },
     11: {
-        title: "📖 AUTO READ",
-        desc: "Automatically marks all incoming messages as read (sends blue ticks immediately).",
-        status: `💠 *Status:* ${s.autoRead ? on : off}`,
-        usage: `▸ Reply "11" or "toggle" — Toggle ON/OFF\n` +
-               `▸ Reply "on" or "off" — Set status\n` +
-               `▸ \`.autoread on\` — Enable\n` +
-               `▸ \`.autoread off\` — Disable`
+        title: "📖 AUTO READ & PRESENCE",
+        desc: "Configure auto-read and presence simulations (typing, recording, always online).",
+        status: `💠 *Auto Read:* ${s.autoRead ? on : off}\n` +
+                `💠 *Auto Type:* ${s.autoType ? on : off}\n` +
+                `💠 *Auto Record:* ${s.autoRecord ? on : off}\n` +
+                `💠 *Always Online:* ${s.alwaysOnline ? on : off}`,
+        usage: `▸ Reply "read" — Toggle Auto Read\n` +
+               `▸ Reply "type" — Toggle Auto Type\n` +
+               `▸ Reply "record" — Toggle Auto Record\n` +
+               `▸ Reply "online" — Toggle Always Online\n` +
+               `▸ Reply "toggle" — Toggle Auto Read ON/OFF\n` +
+               `▸ \`.autoread <read/type/record/online> <on/off>\` — Detailed config`
     },
     12: {
         title: "📝 AUTO BIO",
@@ -193,7 +198,7 @@ const getPanels = (s) => ({
     },
     16: {
         title: "🔧 OTHER COMMANDS",
-        desc: "Admin and configuration utility commands for Nexus-1MD.",
+        desc: `Admin and configuration utility commands for ${(s.botName || "Nexus-MD")}.`,
         status: "",
         usage: `▸ \`.syncsettings all\` — Reset ALL settings to env var defaults\n` +
                `▸ \`.syncsettings <name>\` — Reset one setting (e.g. anticall, antidelete, autoread)\n` +
@@ -219,7 +224,7 @@ module.exports = {
         // ── Main menu (no args or choice 0) ────────────────────────────────────
         if (args.length === 0 || parseInt(args[0]) === 0) {
             const s = settings;
-            let menu  = `⚙️ *NEXUS-1MD SETTINGS*\n`;
+            let menu  = `⚙️ *${(s.botName || "Nexus-MD").toUpperCase()} SETTINGS*\n`;
             menu += `${"─".repeat(30)}\n\n`;
             menu += `_Reply with \`.settings <number>\` (e.g. \`.settings 4\`) to configure:_\n\n`;
             menu += `1. 🤖 Bot Configuration — Name: ${s.botName || "Nexus-MD"} | Mode: ${s.publicMode ? "public" : "private"}\n`;
@@ -232,7 +237,7 @@ module.exports = {
             menu += `8. 🔄 Presence — DM: ${s.dmPresence ? on : off} | Grp: ${s.groupPresence ? on : off}\n`;
             menu += `9. 👁️ Auto View Status — ${s.autoViewStatus ? on : off}\n`;
             menu += `10. 💬 Auto Reply Status — ${s.autoReplyStatus ? on : off} | Auto React — ${s.autoLikeStatus ? on : off}\n`;
-            menu += `11. 📖 Auto Read — ${s.autoRead ? on : off}\n`;
+            menu += `11. 📖 Auto Read & Presence — Read: ${s.autoRead ? on : off} | Type: ${s.autoType ? on : off} | Rec: ${s.autoRecord ? on : off} | Online: ${s.alwaysOnline ? on : off}\n`;
             menu += `12. 📝 Auto Bio — ${s.autoBio ? on : off}\n`;
             menu += `13. 🤖 Chatbot (AI) — ${s.chatbotAI ? on : off}\n`;
             menu += `14. 👋 Greet (DM Auto-Reply) — ${s.greetDM ? on : off}\n`;
@@ -321,6 +326,10 @@ module.exports = {
                 return {};
             },
             11: () => {
+                if (sub === "read") return { autoRead: !settings.autoRead };
+                if (sub === "type") return { autoType: !settings.autoType };
+                if (sub === "record") return { autoRecord: !settings.autoRecord };
+                if (sub === "online") return { alwaysOnline: !settings.alwaysOnline };
                 if (sub === "on") return { autoRead: true };
                 if (sub === "off") return { autoRead: false };
                 if (sub === "toggle" || sub === "11") return { autoRead: !settings.autoRead };
@@ -357,6 +366,9 @@ module.exports = {
             if (Object.keys(updates).length > 0) {
                 Object.assign(settings, updates);
                 await updateSettings(updates);
+                if (updates.alwaysOnline !== undefined) {
+                    await sock.sendPresenceUpdate(updates.alwaysOnline ? "available" : "unavailable").catch(() => {});
+                }
             }
             // Re-fetch updated settings for the panel
             const updatedPanels = getPanels(settings);

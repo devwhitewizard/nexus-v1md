@@ -29,9 +29,19 @@ module.exports = {
 
         contactText += `_Thank you for using Nexus-1MD!_`;
 
+        const { getSettings } = require("../lib/settings");
+        const settings = getSettings();
+        const botImageUrl = settings.botImage;
+
         try {
+            let banner;
+            if (botImageUrl && botImageUrl.startsWith("http")) {
+                banner = { url: botImageUrl };
+            } else {
+                banner = fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.jpg"));
+            }
             await sock.sendMessage(jid, { 
-                image: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.jpg")),
+                image: banner,
                 caption: contactText
             }, { quoted: msg });
         } catch (e) {

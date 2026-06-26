@@ -28,6 +28,9 @@ if (sequelize) {
         statusReplyText: { type: DataTypes.STRING, defaultValue: 'Nice status! ✨' },
         statusLikeEmojis: { type: DataTypes.STRING, defaultValue: '❤️,✨,🔥,🙌,👍,⭐,💥,🎉,💯,😎,🤩,😍,👏' },
         autoRead: { type: DataTypes.BOOLEAN, defaultValue: false },
+        autoType: { type: DataTypes.BOOLEAN, defaultValue: false },
+        autoRecord: { type: DataTypes.BOOLEAN, defaultValue: false },
+        alwaysOnline: { type: DataTypes.BOOLEAN, defaultValue: false },
         autoBio: { type: DataTypes.BOOLEAN, defaultValue: false },
         
         // 4. Presence & AI
@@ -56,7 +59,7 @@ if (sequelize) {
             type: DataTypes.STRING, 
             defaultValue: '🕵️ *Nexus Anti-Delete Update*' 
         },
-        footer: { type: DataTypes.STRING, defaultValue: '© Nexus-1MD' },
+        footer: { type: DataTypes.STRING, defaultValue: '© Nexus-MD' },
         ownerNumber: { type: DataTypes.STRING, defaultValue: '' },
         lockedCommands: { type: DataTypes.TEXT, defaultValue: '' },
         botName: { type: DataTypes.STRING, defaultValue: 'Nexus-MD' },
@@ -104,6 +107,9 @@ const getBotSettings = async () => {
         statusReplyText: 'Nice status! ✨',
         statusLikeEmojis: '❤️,✨,🔥,🙌,👍,⭐,💥,🎉,💯,😎,🤩,😍,👏',
         autoRead: false,
+        autoType: false,
+        autoRecord: false,
+        alwaysOnline: false,
         autoBio: false,
         dmPresence: false,
         groupPresence: false,
@@ -117,7 +123,7 @@ const getBotSettings = async () => {
         welcomeMsg: 'Hi @user, welcome to *@group*! 👋',
         goodbyeMsg: 'Goodbye @user, we hope to see you back soon! 😢',
         antiDeleteNotification: '🕵️ *Nexus Anti-Delete Update*',
-        footer: '© Nexus-1MD',
+        footer: '© Nexus-MD',
         ownerNumber: '',
         lockedCommands: '',
         botName: 'Nexus-MD',

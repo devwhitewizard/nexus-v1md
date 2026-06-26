@@ -41,13 +41,24 @@ module.exports = {
         }
 
         try {
-            await sock.sendMessage(jid, { text: "⏳ Updating bot profile picture..." }, { quoted: msg });
-            const botJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-            await sock.updateProfilePicture(botJid, buffer);
-            await sock.sendMessage(jid, { text: "✅ Bot profile picture updated successfully!" }, { quoted: msg });
+            await sock.sendMessage(jid, { text: "⏳ Updating bot menu/banner image..." }, { quoted: msg });
+            
+            const path = require("path");
+            const fs = require("fs");
+            const targetPath = path.join(__dirname, "../assets/Nexuspic.jpg");
+            
+            // Save the image buffer directly as the bot menu banner
+            fs.writeFileSync(targetPath, buffer);
+            
+            // Update the settings database
+            const { updateSettings } = require("../lib/settings");
+            const botImageUrl = (args[0] && args[0].startsWith("http")) ? args[0] : "Local Custom";
+            await updateSettings({ botImage: botImageUrl });
+            
+            await sock.sendMessage(jid, { text: "✅ Bot menu/banner image updated successfully!" }, { quoted: msg });
         } catch (err) {
-            console.error("Profile picture update error:", err);
-            await sock.sendMessage(jid, { text: `❌ Failed to update profile picture: ${err.message}` }, { quoted: msg });
+            console.error("Bot image update error:", err);
+            await sock.sendMessage(jid, { text: `❌ Failed to update bot image: ${err.message}` }, { quoted: msg });
         }
     }
 };

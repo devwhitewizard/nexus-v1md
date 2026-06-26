@@ -15,8 +15,19 @@ module.exports = {
                      `🌐 *Portfolio:* https://jonathanmwanza.vercel.app/\n\n` +
                      `_Don't forget to give a ⭐ if you like the project!_`;
 
+        const { getSettings } = require("../lib/settings");
+        const settings = getSettings();
+        const botImageUrl = settings.botImage;
+
+        let banner;
+        if (botImageUrl && botImageUrl.startsWith("http")) {
+            banner = { url: botImageUrl };
+        } else {
+            banner = fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.jpg"));
+        }
+
         await sock.sendMessage(jid, { 
-            image: fs.readFileSync(path.join(__dirname, "../assets/Nexuspic.jpg")),
+            image: banner,
             caption: text
         }, { quoted: msg });
     }
