@@ -214,6 +214,33 @@ async function connectionLogic() {
     });
     global.sock = sock; // Expose globally for Admin Panel
 
+    // Custom wrapper for sendMessage to inject clickable "View Channel" label
+    const originalSendMessage = sock.sendMessage.bind(sock);
+    sock.sendMessage = async (jid, content, options = {}) => {
+        const { getSettings } = require("./lib/settings");
+        const settings = getSettings();
+
+        // If hideViewChannel is false (meaning show the clickable View Channel label) and we have resolved the JID
+        if (!settings.hideViewChannel && global.newsletterJid) {
+            if (content && typeof content === "object" && !content.delete && !content.react) {
+                if (!content.contextInfo) {
+                    content.contextInfo = {};
+                }
+                // Only override if not already explicitly set
+                if (!content.contextInfo.forwardedNewsletterMessageInfo) {
+                    content.contextInfo.forwardingScore = 999;
+                    content.contextInfo.isForwarded = true;
+                    content.contextInfo.forwardedNewsletterMessageInfo = {
+                        newsletterJid: global.newsletterJid,
+                        newsletterName: global.newsletterName || "Nexus-MD Updates",
+                        serverMessageId: 1
+                    };
+                }
+            }
+        }
+        return await originalSendMessage(jid, content, options);
+    };
+
     // ⌚ WATCHDOG: If SESSION_ID is present but fails to connect within 30s, enable QR.
     let connectionTimeout = null;
     if (process.env.SESSION_ID) {
@@ -292,22 +319,35 @@ async function connectionLogic() {
                 } catch (e) {}
             }, 15000);
 
-            // Auto-follow WhatsApp Channel on connection/deployment
-            const jsonStore = require("./lib/jsonStore");
-            if (!jsonStore.get("channel_autofollowed")) {
-                setTimeout(async () => {
-                    try {
-                        console.log("📢 Auto-following WhatsApp Channel: https://whatsapp.com/channel/0029VbD62UY7IUYU6cftzu02");
-                        const metadata = await sock.newsletterMetadata("invite", "0029VbD62UY7IUYU6cftzu02");
-                        if (metadata && metadata.id) {
-                            await sock.newsletterFollow(metadata.id);
+            // Resolve newsletter metadata to get JID for "View Channel" feature
+            try {
+                console.log("📢 Resolving WhatsApp Channel JID for invite: 0029VbD62UY7IUYU6cftzu02");
+                const metadata = await sock.newsletterMetadata("invite", "0029VbD62UY7IUYU6cftzu02").catch(() => null);
+                if (metadata && metadata.id) {
+                    global.newsletterJid = metadata.id;
+                    global.newsletterName = metadata.subject || "Nexus-MD Updates";
+                    console.log(`📢 Resolved Channel JID: ${global.newsletterJid} (${global.newsletterName})`);
+                    
+                    // Auto-follow channel on connection/deployment
+                    const jsonStore = require("./lib/jsonStore");
+                    if (!jsonStore.get("channel_autofollowed")) {
+                        try {
+                            await sock.newsletterFollow(global.newsletterJid);
                             jsonStore.set("channel_autofollowed", true);
                             console.log("✅ Successfully autofollowed channel!");
+                        } catch (followErr) {
+                            console.error("⚠️ Failed to autofollow resolved channel:", followErr.message);
                         }
-                    } catch (e) {
-                        console.error("⚠️ Failed to autofollow channel:", e.message);
                     }
-                }, 10000);
+                } else {
+                    global.newsletterJid = "120363428521307680@newsletter"; // Fallback to user's known channel JID
+                    global.newsletterName = "Nexus-MD Updates";
+                    console.log(`⚠️ Metadata lookup returned null, using fallback JID: ${global.newsletterJid}`);
+                }
+            } catch (e) {
+                console.error("⚠️ Failed to resolve newsletter JID:", e.message);
+                global.newsletterJid = "120363428521307680@newsletter"; // Fallback JID
+                global.newsletterName = "Nexus-MD Updates";
             }
 
             const myJid = (sock.user && sock.user.id) || (sock.authState.creds.me && sock.authState.creds.me.id) || (sock.authState.creds.me && sock.authState.creds.me.lid) || "";

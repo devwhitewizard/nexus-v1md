@@ -19,7 +19,7 @@ const getPanels = (s) => ({
                 `🔹 *Author:* ${s.author || "White Wizard"}\n` +
                 `🔹 *Timezone:* ${s.timezone || "Africa/Nairobi"}\n` +
                 `🔹 *Bot Image:* ${s.botImage || "Default"}\n` +
-                `🔹 *Menu Style:* Style ${s.menuStyle || "1"} — ${s.menuStyle == 2 ? "Buttons" : s.menuStyle == 3 ? "List" : "Lines"}`,
+                `🔹 *Menu Style:* Style ${s.menuStyle || "1"} — ${s.menuStyle == 2 ? "Buttons" : "Lines"}`,
         usage: `▸ Reply "mode" or "toggle" — Toggle public/private mode\n` +
                `▸ \`.mode public/private\` — Bot access mode\n` +
                `▸ \`.botname <name>\` — Change bot name\n` +
@@ -30,7 +30,7 @@ const getPanels = (s) => ({
                `▸ \`.timezone <zone>\` — e.g. Africa/Nairobi\n` +
                `▸ \`.botpic\` — Reply to image or video to set bot image\n` +
                `▸ \`.hideviewchannel on/off\` — Hide view channel & forwarded labels\n` +
-               `▸ \`.menustyle 1/2/3\` — Switch menu style`
+               `▸ \`.menustyle 1/2\` — Switch menu style`
     },
     2: {
         title: "🔗 ANTI-LINK",

@@ -132,7 +132,7 @@ module.exports = {
                 if (list) {
                     let subText = `╭━━━━╼ *${target.toUpperCase()} MENU* ╾━━━━╮\n`;
                     subText += `┃ _Type these to use the features_\n┃\n`;
-                    list.forEach((c, i) => {
+                    list.forEach((c) => {
                         subText += `┃ 💎 *.${c.name}*\n`;
                     });
                     subText += `┃\n╰━━━━━━━━━━━━━━━━━━━━╯`;
@@ -144,7 +144,7 @@ module.exports = {
                 }
             }
 
-            // 🎨 Level 1: Main Menu (Sleek Dashboard)
+            // 🎨 Main Menu
             const settings = getSettings();
             const botName = settings.botName || "Nexus-MD";
             const botImageUrl = settings.botImage;
@@ -153,27 +153,24 @@ module.exports = {
             if (botImageUrl && botImageUrl.startsWith("http")) {
                 banner = { url: botImageUrl };
             } else {
-                // Prefer botnexus.png (new bot image), fallback to Nexuspic.jpg
                 const newBotPic = path.join(__dirname, "../assets/botnexus.png");
                 const legacyPic = path.join(__dirname, "../assets/Nexuspic.jpg");
                 const bannerPath = fs.existsSync(newBotPic) ? newBotPic : legacyPic;
                 banner = fs.existsSync(bannerPath) ? fs.readFileSync(bannerPath) : null;
             }
 
+            const userCount = await getUserCount();
+
             let menuBody = `╭━━━━━━━◇\n`;
             menuBody += `┃ *${botName.toUpperCase()}*\n`;
             menuBody += `┃ ◇━━━━━━━◇\n`;
             menuBody += `┃ 🖼️ *${greeting}*\n`;
             menuBody += `╰━━━━━━━◇\n\n`;
-            
-            const userCount = await getUserCount();
-            
             menuBody += `┃ 🤠 *USER:* ${pushName}\n`;
             menuBody += `┃ 📅 *DATE:* ${date}\n`;
             menuBody += `┃ ⌚ *TIME:* ${time}\n`;
             menuBody += `┃ ⭐ *USERS:* ${userCount}\n`;
             menuBody += `╰━━━━━━━━━◇\n\n`;
-            
             menuBody += `*AVAILABLE CATEGORIES:*\n`;
             menuBody += `💡 _Explore by typing .menu <name> or the shortcut number_\n\n`;
             menuBody += `1. 🌐 *ADMIN MENU*\n`;
@@ -195,15 +192,15 @@ module.exports = {
             menuBody += `17. ✨ *TEXTMAKER MENU*\n`;
             menuBody += `18. ⛪ *RELIGION MENU*\n`;
             menuBody += `19. 🖼️ *DP MENU*\n\n`;
-            menuBody += `💬 *Nexus Group:* https://chat.whatsapp.com/CSPKnrOIG52LdMO06pZgNe\n\n`;
             menuBody += `💎 _Type .m <category> or 1-19 for instant access_`;
 
             const { sendButtonMessage } = require("../lib/utils");
             const footerText = `${botName} • Support & Updates`;
+
+            // CTA buttons — Channel + Repo only (no group link)
             const buttons = [
-                { text: "💬 Bot Group", url: "https://chat.whatsapp.com/CSPKnrOIG52LdMO06pZgNe" },
-                { text: "💻 Bot Repo", url: "https://github.com/devwhitewizard/nexus-v1md" },
-                { text: "📢 WhatsApp Channel", url: "https://whatsapp.com/channel/0029VbD62UY7IUYU6cftzu02" }
+                { text: "📢 Follow on WhatsApp", url: "https://whatsapp.com/channel/0029VbD62UY7IUYU6cftzu02" },
+                { text: "💻 GitHub Repo", url: "https://github.com/devwhitewizard/nexus-v1md" }
             ];
 
             const style = settings.menuStyle || 1;
@@ -211,113 +208,9 @@ module.exports = {
             if (style === 2) {
                 // Style 2: Native flow interactive buttons
                 return await sendButtonMessage(sock, jid, menuBody, footerText, buttons, banner, ctx.msg);
-            } else if (style === 3) {
-                // Style 3: Hybrid List Menu (Single-select dropdown + CTA buttons underneath)
-                const { proto, generateWAMessageFromContent, prepareWAMessageMedia } = require("@whiskeysockets/baileys");
-
-                const nativeButtons = [
-                    {
-                        name: "single_select",
-                        buttonParamsJson: JSON.stringify({
-                            title: "Select Category 📂",
-                            sections: [
-                                {
-                                    title: "Nexus Menu Categories",
-                                    rows: [
-                                        { title: "🌐 Admin Menu", rowId: ".menu admin", description: "Admin tools and controls" },
-                                        { title: "🤖 AI Menu", rowId: ".menu ai", description: "AI tools (ChatGPT, Imagine etc.)" },
-                                        { title: "📥 Download Menu", rowId: ".menu download", description: "Video & audio downloaders" },
-                                        { title: "👥 Group Menu", rowId: ".menu group", description: "Group management tools" },
-                                        { title: "🎨 Sticker Menu", rowId: ".menu sticker", description: "Create and edit stickers" },
-                                        { title: "📦 Owner Menu", rowId: ".menu owner", description: "Owner-only settings & tools" },
-                                        { title: "🌍 General Menu", rowId: ".menu general", description: "General utility commands" },
-                                        { title: "⚽ Sports Menu", rowId: ".menu sports", description: "Football, livescores & matches" },
-                                        { title: "🎭 Anime Menu", rowId: ".menu anime", description: "Anime images, search & quotes" },
-                                        { title: "🕹️ Games Menu", rowId: ".menu games", description: "Fun text games and challenges" },
-                                        { title: "🤝 Social Menu", rowId: ".menu social", description: "Social & fun interaction commands" },
-                                        { title: "🎉 Fun Menu", rowId: ".menu fun", description: "Jokes, memes, raters & RPG games" },
-                                        { title: "💰 Economy Menu", rowId: ".menu economy", description: "Coins, balance, job & daily reward" },
-                                        { title: "🎬 Media Menu", rowId: ".menu media", description: "Image converters, OCR & audio tools" },
-                                        { title: "🛰️ System Menu", rowId: ".menu system", description: "Bot runtime stats & developer info" },
-                                        { title: "⛪ Religion Menu", rowId: ".menu religion", description: "Quran & Bible scriptures" },
-                                        { title: "🖼️ DP Menu", rowId: ".menu dp", description: "DP makers and graphics" }
-                                    ]
-                                }
-                            ]
-                        })
-                    },
-                    {
-                        name: "cta_url",
-                        buttonParamsJson: JSON.stringify({
-                            display_text: "💬 Bot Group",
-                            url: "https://chat.whatsapp.com/CSPKnrOIG52LdMO06pZgNe",
-                            merchant_url: "https://chat.whatsapp.com/CSPKnrOIG52LdMO06pZgNe"
-                        })
-                    },
-                    {
-                        name: "cta_url",
-                        buttonParamsJson: JSON.stringify({
-                            display_text: "💻 Bot Repo",
-                            url: "https://github.com/devwhitewizard/nexus-v1md",
-                            merchant_url: "https://github.com/devwhitewizard/nexus-v1md"
-                        })
-                    },
-                    {
-                        name: "cta_url",
-                        buttonParamsJson: JSON.stringify({
-                            display_text: "📢 WhatsApp Channel",
-                            url: "https://whatsapp.com/channel/0029VbD62UY7IUYU6cftzu02",
-                            merchant_url: "https://whatsapp.com/channel/0029VbD62UY7IUYU6cftzu02"
-                        })
-                    }
-                ];
-
-                let header = {};
-                if (banner) {
-                    const isObj = banner && typeof banner === "object" && !Buffer.isBuffer(banner);
-                    const hasUrl = isObj && banner.url;
-                    if (Buffer.isBuffer(banner) || typeof banner === "string" || hasUrl) {
-                        try {
-                            const prepared = await prepareWAMessageMedia(
-                                { image: Buffer.isBuffer(banner) ? banner : (hasUrl ? { url: banner.url } : { url: banner }) },
-                                { upload: sock.waUploadToServer }
-                            );
-                            header = {
-                                title: "",
-                                hasMediaAttachment: true,
-                                imageMessage: prepared.imageMessage
-                            };
-                        } catch (err) {
-                            console.error("❌ Failed to prepare media banner for Style 3:", err.message);
-                        }
-                    }
-                }
-
-                const hasQuotedContent = ctx.msg && ctx.msg.key && ctx.msg.message && Object.keys(ctx.msg.message).length > 0;
-
-                const msg = generateWAMessageFromContent(jid, {
-                    interactiveMessage: proto.Message.InteractiveMessage.create({
-                        header: Object.keys(header).length > 0 ? proto.Message.InteractiveMessage.Header.create(header) : undefined,
-                        body: proto.Message.InteractiveMessage.Body.create({ text: menuBody }),
-                        footer: proto.Message.InteractiveMessage.Footer.create({ text: footerText }),
-                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                            buttons: nativeButtons
-                        })
-                    })
-                }, { 
-                    quoted: hasQuotedContent ? ctx.msg : undefined,
-                    userJid: sock.user?.id || sock.authState?.creds?.me?.id || global.myJid
-                });
-
-                try {
-                    await sock.relayMessage(jid, msg.message, { messageId: msg.key.id });
-                    return msg;
-                } catch (err) {
-                    console.error("❌ Hybrid Style 3 failed, falling back to Style 1:", err.message);
-                }
             }
 
-            // Default Style 1: Plain text layout with media caption (highly compatible)
+            // Style 1 (default): plain text + image — most compatible, always works
             let plainText = menuBody + `\n\n`;
             buttons.forEach(btn => {
                 plainText += `🔗 *${btn.text}:* ${btn.url}\n`;
