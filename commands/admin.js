@@ -3,7 +3,7 @@ module.exports = {
 
     middlewares: [
         async (ctx, { isAdmin }) => {
-            if (!isAdmin(ctx.sender)) {
+            if (!await isAdmin(ctx.sender, ctx.jid, ctx.sock)) {
                 return { ok: false, reply: "❌ This command is admin-only" };
             }
             return { ok: true };

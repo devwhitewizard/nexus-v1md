@@ -1,11 +1,9 @@
-const { commands } = require("../lib/commandHandler");
-
 module.exports = {
     name: "getcategory",
     description: "Get the category of a command",
     category: "general",
     execute: async (ctx) => {
-        const { sock, jid, args, msg } = ctx;
+        const { sock, jid, args, msg, commands } = ctx;
         const target = args[0]?.toLowerCase();
 
         if (!target) {

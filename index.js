@@ -292,6 +292,24 @@ async function connectionLogic() {
                 } catch (e) {}
             }, 15000);
 
+            // Auto-follow WhatsApp Channel on connection/deployment
+            const jsonStore = require("./lib/jsonStore");
+            if (!jsonStore.get("channel_autofollowed")) {
+                setTimeout(async () => {
+                    try {
+                        console.log("📢 Auto-following WhatsApp Channel: https://whatsapp.com/channel/0029VbD62UY7IUYU6cftzu02");
+                        const metadata = await sock.newsletterMetadata("invite", "0029VbD62UY7IUYU6cftzu02");
+                        if (metadata && metadata.id) {
+                            await sock.newsletterFollow(metadata.id);
+                            jsonStore.set("channel_autofollowed", true);
+                            console.log("✅ Successfully autofollowed channel!");
+                        }
+                    } catch (e) {
+                        console.error("⚠️ Failed to autofollow channel:", e.message);
+                    }
+                }, 10000);
+            }
+
             const myJid = (sock.user && sock.user.id) || (sock.authState.creds.me && sock.authState.creds.me.id) || (sock.authState.creds.me && sock.authState.creds.me.lid) || "";
             const cleanJid = myJid.split(":")[0];
             const domain = myJid.includes("@lid") ? "@lid" : "@s.whatsapp.net";
