@@ -10,7 +10,7 @@ module.exports = {
     category: "general",
     execute: async (ctx) => {
         const { sock, jid, args, commands } = ctx;
-        const pushName = ctx.msg.pushName || "User";
+        const pushName = ctx.msg?.pushName || ctx.msg?.key?.participant?.split("@")[0] || "User";
         
         // 🕰️ Date & Time Logic
         const date = new Date().toLocaleDateString("en-GB");
@@ -153,7 +153,10 @@ module.exports = {
             if (botImageUrl && botImageUrl.startsWith("http")) {
                 banner = { url: botImageUrl };
             } else {
-                const bannerPath = path.join(__dirname, "../assets/Nexuspic.jpg");
+                // Prefer botnexus.png (new bot image), fallback to Nexuspic.jpg
+                const newBotPic = path.join(__dirname, "../assets/botnexus.png");
+                const legacyPic = path.join(__dirname, "../assets/Nexuspic.jpg");
+                const bannerPath = fs.existsSync(newBotPic) ? newBotPic : legacyPic;
                 banner = fs.existsSync(bannerPath) ? fs.readFileSync(bannerPath) : null;
             }
 
