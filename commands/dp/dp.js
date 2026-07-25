@@ -2,7 +2,7 @@ const { Jimp } = require("jimp");
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
-const { trackDp, getDpHistory } = require("../../lib/dpModel");
+const { trackDp, getDpHistory } = require("../../nexus/dpModel");
 
 const DEFAULT_AVATAR = "https://i.imgur.com/8Q4sLzJ.png";
 

@@ -1,7 +1,7 @@
 /**
- * fix_db_backup.js
+ * db_cleanup.js
  * Drops orphan SQLite *_backup tables left behind by failed Sequelize alter syncs.
- * Run once: node fix_db_backup.js
+ * Run once: node db_cleanup.js
  */
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');

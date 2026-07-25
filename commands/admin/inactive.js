@@ -1,4 +1,4 @@
-const { MessageLog } = require("../../lib/messageModel");
+const { MessageLog } = require("../../nexus/messageModel");
 const { Sequelize, Op } = require("sequelize");
 
 module.exports = {

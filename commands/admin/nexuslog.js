@@ -1,4 +1,4 @@
-const { MessageLog } = require("../../lib/messageModel");
+const { MessageLog } = require("../../nexus/messageModel");
 
 module.exports = {
     name: "log",

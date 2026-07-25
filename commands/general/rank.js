@@ -1,4 +1,4 @@
-const { User } = require("../../lib/userModel");
+const { User } = require("../../nexus/userModel");
 
 module.exports = {
     name: "rank",

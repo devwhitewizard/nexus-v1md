@@ -1,5 +1,5 @@
 const { getSettings, updateSettings } = require("../../lib/settings");
-const jsonStore = require("../../lib/jsonStore");
+const jsonStore = require("../../nexus/jsonStore");
 
 module.exports = {
     name: "events",

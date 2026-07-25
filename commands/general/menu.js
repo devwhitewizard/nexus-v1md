@@ -1,6 +1,6 @@
 const path = require("path");
 const fs = require("fs");
-const { getUserCount } = require("../../lib/userModel");
+const { getUserCount } = require("../../nexus/userModel");
 const { getSettings } = require("../../lib/settings");
 
 module.exports = {

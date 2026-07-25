@@ -1,5 +1,5 @@
 const { getSettings, updateSettings } = require("../../lib/settings");
-const jsonStore = require("../../lib/jsonStore");
+const jsonStore = require("../../nexus/jsonStore");
 
 const on  = "✅ ON";
 const off = "❌ OFF";

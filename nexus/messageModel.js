@@ -4,8 +4,8 @@ const { downloadContentFromMessage } = require("@whiskeysockets/baileys");
 const fs = require("fs");
 const path = require("path");
 const jsonStore = require("./jsonStore");
-const { getSettings } = require("./settings");
-const messageCache = require("./messageCache"); // Isolated fast cache for anti-delete
+const { getSettings } = require("../lib/settings");
+const messageCache = require("../lib/messageCache"); // Isolated fast cache for anti-delete
 
 const TEMP_MEDIA_DIR = path.join(__dirname, "../temp_media");
 if (!fs.existsSync(TEMP_MEDIA_DIR)) fs.mkdirSync(TEMP_MEDIA_DIR, { recursive: true });

@@ -1,4 +1,4 @@
-const { getGroupHistory } = require("../../lib/messageModel");
+const { getGroupHistory } = require("../../nexus/messageModel");
 const { askAI, checkAILimit } = require("../../lib/aiHelper");
 
 module.exports = {

@@ -1,4 +1,4 @@
-const { getUser } = require("../../lib/userModel");
+const { getUser } = require("../../nexus/userModel");
 
 module.exports = {
     name: "inventory",

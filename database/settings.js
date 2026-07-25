@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../lib/db');
+const { sequelize } = require('../nexus/db');
 
 let SettingsDB = null;
 
@@ -86,8 +86,8 @@ if (sequelize) {
  * Initializes the settings record if it doesn't exist
  */
 const getBotSettings = async () => {
-    const { isOnline } = require('../lib/db');
-    const jsonStore = require('../lib/jsonStore');
+    const { isOnline } = require('../nexus/db');
+    const jsonStore = require('../nexus/jsonStore');
 
     const defaults = { 
         publicMode: true,

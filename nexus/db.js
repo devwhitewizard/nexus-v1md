@@ -28,7 +28,7 @@ if (dbUrl) {
     // 💾 Local / Panel fallback — use SQLite (much faster than JSON file store!)
     // sqlite3 is already installed. SQLite uses indexed B-tree lookups and WAL
     // mode so reads/writes are non-blocking and don't load the entire file.
-    const dbPath = path.join(__dirname, "../database/nexus.db");
+    const dbPath = path.join(__dirname, "../database/nexus.db"); // nexus/ → database/
     sequelize = new Sequelize({
         dialect: "sqlite",
         storage: dbPath,

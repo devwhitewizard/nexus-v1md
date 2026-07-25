@@ -25,7 +25,7 @@ const zlib = require("zlib");
 
 const { authFolder } = require("./config");
 const { handleMessages } = require("./lib/commandHandler");
-const { getMessage } = require("./lib/messageModel");
+const { getMessage } = require("./nexus/messageModel");
 const { getSettings } = require("./lib/settings");
 
 let isFirstConnect = true;
@@ -297,7 +297,7 @@ async function connectionLogic() {
             console.log("✅ Bot connected and stable!");
 
             // Initialize Database (Centralized)
-            const { initDb } = require("./lib/db");
+            const { initDb } = require("./nexus/db");
             await initDb();
 
             const { loadSettings, getSettings } = require("./lib/settings");
@@ -329,7 +329,7 @@ async function connectionLogic() {
                     console.log(`📢 Resolved Channel JID: ${global.newsletterJid} (${global.newsletterName})`);
                     
                     // Auto-follow channel on connection/deployment
-                    const jsonStore = require("./lib/jsonStore");
+                    const jsonStore = require("./nexus/jsonStore");
                     if (!jsonStore.get("channel_autofollowed")) {
                         try {
                             await sock.newsletterFollow(global.newsletterJid);
@@ -452,7 +452,7 @@ async function connectionLogic() {
             }, 3 * 60 * 1000); // check every 3 minutes
 
             setInterval(async () => {
-                const { MessageLog } = require("./lib/messageModel");
+                const { MessageLog } = require("./nexus/messageModel");
                 const { Op } = require("sequelize");
                 const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
                 try {
@@ -566,7 +566,7 @@ async function connectionLogic() {
             const { id, participants, action } = update;
             const settings = getSettings();
 
-            const jsonStore = require("./lib/jsonStore");
+            const jsonStore = require("./nexus/jsonStore");
             const localMode = jsonStore.get(`events_mode_${id}`, null);
             const isActive = localMode !== null ? (localMode === "on") : settings.groupEventsGlobal;
 

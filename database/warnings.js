@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
-const { sequelize, isOnline } = require('../lib/db');
-const jsonStore = require('../lib/jsonStore');
+const { sequelize, isOnline } = require('../nexus/db');
+const jsonStore = require('../nexus/jsonStore');
 
 let WarningDB = null;
 
