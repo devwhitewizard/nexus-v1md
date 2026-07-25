@@ -33,6 +33,10 @@ let isReconnecting = false;
 let consecutiveFailures = 0;
 let hasWipedSessionOnStartup = false;
 
+// Global Newsletter Defaults for "View Channel" label
+global.newsletterJid = "120363428521307680@newsletter";
+global.newsletterName = "Nexus-MD Updates";
+
 async function connectionLogic() {
     if (isReconnecting) return;
     isReconnecting = true;

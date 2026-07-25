@@ -10,7 +10,7 @@ module.exports = {
     ownerOnly: true,
     async execute({ sock, jid, msg }) {
         try {
-            const credsPath = path.join(__dirname, `../${authFolder}/creds.json`);
+            const credsPath = path.join(process.cwd(), authFolder, "creds.json");
 
             if (!fs.existsSync(credsPath)) {
                 return await sock.sendMessage(jid, { text: "❌ *Error:* No credentials found. Are you logged in?" });

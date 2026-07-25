@@ -133,13 +133,33 @@ module.exports = {
                     let subText = `╭━━━━╼ *${target.toUpperCase()} MENU* ╾━━━━╮\n`;
                     subText += `┃ _Type these to use the features_\n┃\n`;
                     list.forEach((c) => {
-                        subText += `┃ 💎 *.${c.name}*\n`;
+                        const desc = c.description ? ` — _${c.description}_` : "";
+                        subText += `┃ 💎 *.${c.name}*${desc}\n`;
                     });
                     subText += `┃\n╰━━━━━━━━━━━━━━━━━━━━╯`;
                     return await sock.sendMessage(jid, { text: subText }, { quoted: ctx.msg });
                 } else {
+                    // Check if user passed a specific command name/alias (e.g. .help ping or .m weather)
+                    const cleanCmdName = target.startsWith(".") ? target.slice(1) : target;
+                    const foundCmd = commands.get(cleanCmdName);
+                    if (foundCmd) {
+                        let card = `╭━━━━╼ *COMMAND HELP* ╾━━━━╮\n`;
+                        card += `┃\n`;
+                        card += `┃ 🔹 *Command:* .${foundCmd.name}\n`;
+                        if (foundCmd.description) card += `┃ 📝 *Description:* ${foundCmd.description}\n`;
+                        if (foundCmd.category) card += `┃ 🏷️ *Category:* ${foundCmd.category.toUpperCase()}\n`;
+                        if (foundCmd.aliases && foundCmd.aliases.length > 0) {
+                            card += `┃ 🔤 *Aliases:* ${foundCmd.aliases.map(a => `.${a}`).join(", ")}\n`;
+                        }
+                        if (foundCmd.isOwnerOnly) card += `┃ 🔒 *Permission:* Owner Only\n`;
+                        else if (foundCmd.isAdminOnly) card += `┃ 🛡️ *Permission:* Admin Only\n`;
+                        else if (foundCmd.isGroupOnly) card += `┃ 👥 *Permission:* Group Only\n`;
+                        card += `┃\n╰━━━━━━━━━━━━━━━━━━━━╯`;
+                        return await sock.sendMessage(jid, { text: card }, { quoted: ctx.msg });
+                    }
+
                     return await sock.sendMessage(jid, { 
-                        text: `⚠️ *Category "${target}" not found!*\n\nAvailable categories: \`admin, ai, download, group, sticker, anime, games, social, fun, economy, media, sports, religion, dp, system, owner, general\`` 
+                        text: `⚠️ *Category or Command "${target}" not found!*\n\nAvailable categories: \`admin, ai, download, group, sticker, anime, games, social, fun, economy, media, sports, religion, dp, system, owner, general\`\n\n💡 _Try typing .help <command> (e.g. .help ping)_` 
                     }, { quoted: ctx.msg });
                 }
             }
@@ -149,24 +169,36 @@ module.exports = {
             const botName = settings.botName || "Nexus-MD";
             const botImageUrl = settings.botImage;
 
-            let banner;
-            if (botImageUrl && botImageUrl.startsWith("http")) {
-                banner = { url: botImageUrl };
-            } else {
-                const newBotPic = path.join(__dirname, "../../assets/botnexus.png");
-                const legacyPic = path.join(__dirname, "../../assets/Nexuspic.jpg");
-                const bannerPath = fs.existsSync(newBotPic) ? newBotPic : legacyPic;
-                banner = fs.existsSync(bannerPath) ? fs.readFileSync(bannerPath) : null;
+            let banner = null;
+            try {
+                if (botImageUrl && botImageUrl.startsWith("http")) {
+                    banner = { url: botImageUrl };
+                } else {
+                    const newBotPic = path.join(__dirname, "../../assets/botnexus.png");
+                    const legacyPic = path.join(__dirname, "../../assets/Nexuspic.jpg");
+                    const bannerPath = fs.existsSync(newBotPic) ? newBotPic : legacyPic;
+                    banner = fs.existsSync(bannerPath) ? fs.readFileSync(bannerPath) : null;
+                }
+            } catch (e) {
+                banner = null;
             }
 
-            const userCount = await getUserCount();
+            let userCount = 1;
+            try {
+                userCount = await Promise.race([
+                    getUserCount(),
+                    new Promise(res => setTimeout(() => res(1), 1000))
+                ]);
+            } catch (e) {
+                userCount = 1;
+            }
 
             let menuBody = `╭━━━━━━━◇\n`;
             menuBody += `┃ *${botName.toUpperCase()}*\n`;
             menuBody += `┃ ◇━━━━━━━◇\n`;
             menuBody += `┃ 🖼️ *${greeting}*\n`;
             menuBody += `╰━━━━━━━◇\n\n`;
-            menuBody += `┃ 🤠 *USER:* ${pushName}\n`;
+            menuBody += `┃ 👤 *USER:* ${pushName}\n`;
             menuBody += `┃ 📅 *DATE:* ${date}\n`;
             menuBody += `┃ ⌚ *TIME:* ${time}\n`;
             menuBody += `┃ ⭐ *USERS:* ${userCount}\n`;
@@ -194,23 +226,15 @@ module.exports = {
             menuBody += `19. 🖼️ *DP MENU*\n\n`;
             menuBody += `💎 _Type .m <category> to explore features_`;
 
-            const { sendButtonMessage } = require("../../lib/utils");
             const footerText = `${botName} • Support & Updates`;
 
-            // CTA buttons — Channel + Repo only (no group link)
+            // CTA buttons — Channel + Repo only
             const buttons = [
                 { text: "📢 Follow on WhatsApp", url: "https://whatsapp.com/channel/0029VbD62UY7IUYU6cftzu02" },
                 { text: "💻 GitHub Repo", url: "https://github.com/devwhitewizard/nexus-v1md" }
             ];
 
-            const style = settings.menuStyle || 1;
-
-            if (style === 2) {
-                // Style 2: Native flow interactive buttons
-                return await sendButtonMessage(sock, jid, menuBody, footerText, buttons, banner, ctx.msg);
-            }
-
-            // Style 1 (default): plain text + image — most compatible, always works
+            // Plain text + image — most compatible, fast, and 100% reliable
             let plainText = menuBody + `\n\n`;
             buttons.forEach(btn => {
                 plainText += `🔗 *${btn.text}:* ${btn.url}\n`;
@@ -218,7 +242,11 @@ module.exports = {
             if (footerText) plainText += `\n_${footerText}_`;
 
             if (banner) {
-                return await sock.sendMessage(jid, { image: banner, caption: plainText }, { quoted: ctx.msg });
+                try {
+                    return await sock.sendMessage(jid, { image: banner, caption: plainText }, { quoted: ctx.msg });
+                } catch (imgErr) {
+                    console.warn("⚠️ Failed to send banner image, sending text menu fallback:", imgErr.message);
+                }
             }
             return await sock.sendMessage(jid, { text: plainText }, { quoted: ctx.msg });
 
