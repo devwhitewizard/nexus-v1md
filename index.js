@@ -497,6 +497,15 @@ async function connectionLogic() {
                 }
                 consecutiveFailures = 0; // Reset counter
                 hasWipedSessionOnStartup = false; // Reset wipe flag to allow startup cleanup on next run
+
+                // 🔒 Mark SESSION_ID as invalid so the restore logic doesn't re-apply
+                // the same expired/revoked session causing an infinite 401 loop.
+                if (process.env.SESSION_ID) {
+                    console.log("⚠️ [Self-Healing] SESSION_ID is marked invalid for this session. Bot will use QR code on next start.");
+                    process.env.SESSION_ID_INVALID = "true";
+                    delete process.env.SESSION_ID;
+                }
+
                 const fs = require("fs");
                 const path = require("path");
                 const { authFolder } = require("./config");
