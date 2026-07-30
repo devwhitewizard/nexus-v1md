@@ -6,12 +6,61 @@ if (envResult.error) {
     console.log("✅ .env file loaded successfully.");
 }
 
+// ── Log Noise Filter ─────────────────────────────────────────────────────────
+// Maps known noisy libsignal/Baileys internals to clean human-readable messages.
+// Each unique message is rate-limited to once per 30s to prevent spam.
+const _origError = console.error.bind(console);
+const _origLog   = console.log.bind(console);
+
+const CLEAN_SIGNAL_ERRORS = [
+    // Pattern → clean message (shown max once per 30s)
+    { match: "Bad MAC",                                           msg: "⚠️  [Signal] Corrupt session key (Bad MAC) — key will auto-refresh on next message." },
+    { match: "No matching sessions found",                        msg: "⚠️  [Signal] No session found for this contact — awaiting fresh key exchange." },
+    { match: "No session found to decrypt",                       msg: "⚠️  [Signal] Missing sender key — message skipped, will resolve automatically." },
+    { match: "Failed to decrypt message with any known session",  msg: "⚠️  [Signal] All session keys failed — contact needs to send a new message to re-establish." },
+    { match: "Closing open session in favor of incoming prekey",  msg: "ℹ️  [Signal] Re-keying session (prekey bundle received)." },
+    { match: "Closing session:",                                   msg: "ℹ️  [Signal] Closing stale session." },
+    { match: "Decrypted message with closed session",             msg: "ℹ️  [Signal] Decrypted via closed session (harmless)." },
+    { match: "transaction failed, rolling back",                  msg: "⚠️  [Signal] Transaction rollback — likely due to session mismatch (non-fatal)." },
+    // Raw session object dumps — just suppress, no output needed
+    { match: "_chains",         msg: null },
+    { match: "registrationId",  msg: null },
+    { match: "currentRatchet",  msg: null },
+    { match: "pendingPreKey",   msg: null },
+    { match: "indexInfo",       msg: null },
+    { match: "baseKeyType",     msg: null },
+    { match: "ephemeralKeyPair",msg: null },
+];
+
+const _logCooldowns = new Map(); // key → last printed timestamp
+const COOLDOWN_MS = 30_000;      // show each unique clean message max once per 30s
+
+function interceptLog(originalFn, args) {
+    const raw = String(args[0] ?? "");
+    for (const { match, msg } of CLEAN_SIGNAL_ERRORS) {
+        if (raw.includes(match)) {
+            if (msg === null) return; // silently drop raw dumps
+            const now = Date.now();
+            const last = _logCooldowns.get(match) || 0;
+            if (now - last >= COOLDOWN_MS) {
+                _logCooldowns.set(match, now);
+                _origLog(msg);
+            }
+            return;
+        }
+    }
+    originalFn(...args);
+}
+
+console.error = (...args) => interceptLog(_origError, args);
+console.log   = (...args) => interceptLog(_origLog,   args);
+
 // Global Exception Handlers to prevent process crashes on Baileys/libsignal socket errors
 process.on("unhandledRejection", (reason, promise) => {
-    console.error("⚠️ Unhandled Promise Rejection:", reason);
+    _origError("⚠️ Unhandled Promise Rejection:", reason);
 });
 process.on("uncaughtException", (error) => {
-    console.error("⚠️ Uncaught Exception:", error);
+    _origError("⚠️ Uncaught Exception:", error);
 });
 
 const express = require("express");
@@ -298,6 +347,7 @@ async function connectionLogic() {
             global.latestQr = null;
             isReconnecting = false;
             consecutiveFailures = 0; // Reset failure counter on successful connection
+            global.botStartTime = Math.floor(Date.now() / 1000); // Unix seconds — ignore any message older than this
             console.log("✅ Bot connected and stable!");
 
             // Initialize Database (Centralized)
@@ -537,8 +587,16 @@ async function connectionLogic() {
 
     const { handleAutomation } = require("./lib/automation");
     sock.ev.on("messages.upsert", async (upsert) => {
+        // Only process live incoming messages — skip historical replays and pre-startup messages
+        if (upsert.type !== "notify") return;
+
         const m = upsert.messages[0];
-        if (!m.message) {
+        if (!m.message) return;
+
+        // Discard messages that were sent before the bot connected this session
+        const msgTime = m.messageTimestamp ? Number(m.messageTimestamp) : 0;
+        if (global.botStartTime && msgTime < global.botStartTime) {
+            console.log(`⏩ Skipping pre-startup message (${new Date(msgTime * 1000).toLocaleTimeString()})`);
             return;
         }
 
