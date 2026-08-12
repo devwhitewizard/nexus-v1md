@@ -452,9 +452,9 @@ async function connectionLogic() {
                 ];
 
                 const userWelcomeText = `✨ *${botName} v${version} Connected!* ✨\n\n` +
-                    `🤖 *Status:* System fully operational.\n` +
+                    `🤖 *Status:* Connected.\n` +
                     `✅ *Secure:* Your connection is stable and encrypted.\n\n` +
-                    `🌟 *Welcome!* Your bot is ready to serve. Type *.menu* to see what I can do!`;
+                    `🌟 *Welcome!* Type *.menu* to see what I can do!`;
 
                 const adminAlertText = `🛠️ *${botName} v${version}: Connection Established*\n\n` +
                     `📦 *Session:* Restored/Initialized\n` +
@@ -465,12 +465,12 @@ async function connectionLogic() {
                 setTimeout(async () => {
                     try {
                         console.log("📨 Sending startup welcome message to bot with CTA buttons...");
-                        await sendButtonMessage(sock, global.myJid, userWelcomeText, "📢 View Channel", connectButtons, null, null);
+                        await sendButtonMessage(sock, global.myJid, userWelcomeText, botName, connectButtons, null, null);
                         console.log("✅ Startup message sent successfully.");
 
                         if (primarySudo && primarySudo !== global.myJid && isSudo(primarySudo)) {
                             console.log(`🛰️ Sending tech alert to Sudo: ${primarySudo}`);
-                            await sendButtonMessage(sock, primarySudo, adminAlertText, "📢 View Channel", connectButtons, null, null);
+                            await sendButtonMessage(sock, primarySudo, adminAlertText, botName, connectButtons, null, null);
                         }
                     } catch (e) {
                         console.error("⚠️ Failed to send startup message:", e.message);
