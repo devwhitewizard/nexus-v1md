@@ -204,8 +204,7 @@ module.exports = {
             ])];
 
             const channelButtons = [
-                { text: "📢 View Channel", url: CHANNEL_URL },
-                { text: "💻 GitHub Repo", url: REPO_URL }
+                { text: "📢 Follow Channel", url: CHANNEL_URL }
             ];
 
             // ── Handle .menu <category> or .menu <command> ─────────────────────
@@ -219,7 +218,7 @@ module.exports = {
                     let txt = `┌───[ ${meta.icon} ${meta.label} ] [${cmds.length}]\n`;
                     txt += formatCategoryCommands(cmds) + "\n";
                     txt += `└─────────────────────────────`;
-                    return await sendButtonMessage(sock, jid, txt, "📢 View Channel", channelButtons, null, ctx.msg);
+                    return await sendButtonMessage(sock, jid, txt, botName, channelButtons, null, ctx.msg);
                 }
 
                 // ② Match a specific command or alias
@@ -238,7 +237,7 @@ module.exports = {
                     if (foundCmd.aliases && foundCmd.aliases.length)
                         card += `│ > Aliases: ${foundCmd.aliases.map(a => `.${a}`).join(", ")}\n`;
                     card += `└─────────────────────────────`;
-                    return await sendButtonMessage(sock, jid, card, "📢 View Channel", channelButtons, null, ctx.msg);
+                    return await sendButtonMessage(sock, jid, card, botName, channelButtons, null, ctx.msg);
                 }
 
                 // ③ Not found
@@ -297,8 +296,7 @@ module.exports = {
                 }
             } catch (_) { banner = null; }
 
-            const footerMsg = "📢 View Channel";
-            return await sendButtonMessage(sock, jid, body.trim(), footerMsg, channelButtons, banner, ctx.msg);
+            return await sendButtonMessage(sock, jid, body.trim(), botName, channelButtons, banner, ctx.msg);
 
         } catch (e) {
             console.error("❌ Menu error:", e);
