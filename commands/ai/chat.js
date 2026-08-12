@@ -1,4 +1,4 @@
-const { askAI } = require("../../lib/aiHelper");
+const { askChat } = require("../../lib/aiHelper");
 
 module.exports = {
     name: "chat",
@@ -16,12 +16,7 @@ module.exports = {
         try {
             await sock.sendMessage(jid, { react: { text: "💬", key: msg.key } });
 
-            const system =
-                "You are Nexus, a witty and friendly WhatsApp chatbot. " +
-                "Keep responses conversational, warm, and brief (under 150 words). " +
-                "Use emojis occasionally to match the WhatsApp vibe.";
-
-            const reply = await askAI(text, system);
+            const reply = await askChat(text);
 
             await sock.sendMessage(jid, {
                 text: `💬 *NEXUS CHAT*\n\n${reply}`

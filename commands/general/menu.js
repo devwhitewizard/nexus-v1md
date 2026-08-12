@@ -2,17 +2,169 @@ const path = require("path");
 const fs = require("fs");
 const { getUserCount } = require("../../nexus/userModel");
 const { getSettings } = require("../../lib/settings");
+const { sendButtonMessage } = require("../../lib/utils");
+
+// Category display config: emoji + label
+const CATEGORY_META = {
+    general: { icon: "🛠️", label: "GENERAL" },
+    download: { icon: "📥", label: "DOWNLOAD" },
+    ai: { icon: "🤖", label: "AI" },
+    media: { icon: "🎬", label: "MEDIA" },
+    sticker: { icon: "🎨", label: "STICKER" },
+    fun: { icon: "🎉", label: "FUN" },
+    games: { icon: "🕹️", label: "GAMES" },
+    social: { icon: "🤝", label: "SOCIAL" },
+    anime: { icon: "🎭", label: "ANIME" },
+    economy: { icon: "💰", label: "ECONOMY" },
+    sports: { icon: "⚽", label: "SPORTS" },
+    religion: { icon: "⛪", label: "RELIGION" },
+    dp: { icon: "🖼️", label: "DP" },
+    group: { icon: "👥", label: "GROUP" },
+    admin: { icon: "⚙️", label: "ADMIN" },
+    system: { icon: "🛰️", label: "SYSTEM" },
+    textmaker: { icon: "✨", label: "TEXTMAKER" },
+    owner: { icon: "📦", label: "OWNER" },
+};
+
+// Strict, clean display order
+const CATEGORY_ORDER = [
+    "general", "download", "ai", "media", "sticker", "fun", "games",
+    "social", "anime", "economy", "sports", "religion", "dp",
+    "group", "admin", "system", "textmaker", "owner"
+];
+
+// Usage parameter hints for commands
+const USAGE_HINTS = {
+    // Textmaker Logo Generators
+    "1917": "<text>",
+    advancedglow: "<text>",
+    arena: "<text>",
+    arting: "<text>",
+    blackpink: "<text>",
+    blackpinkstyle: "<text>",
+    cartoonstyle: "<text>",
+    comic: "<text>",
+    corntext: "<text>",
+    deadpool: "<text>",
+    devil: "<text>",
+    devilwings: "<text>",
+    dragonball: "<text>",
+    effectclouds: "<text>",
+    fire: "<text>",
+    flagtext: "<text>",
+    flux: "<text>",
+    galaxystyle: "<text>",
+    galaxywallpaper: "<text>",
+    glitch: "<text>",
+    glowingtext: "<text>",
+    glossysilver: "<text>",
+    hacker: "<text>",
+    ice: "<text>",
+    impressive: "<text>",
+    leaves: "<text>",
+    light: "<text>",
+    luxurygold: "<text>",
+    makingneon: "<text>",
+    matrix: "<text>",
+    metallic: "<text>",
+    multicoloredneon: "<text>",
+    naruto: "<text>",
+    neon: "<text>",
+    painttext: "<text>",
+    pixelglitch: "<text>",
+    pubglogo: "<text>",
+    purple: "<text>",
+    royaltext: "<text>",
+    sand: "<text>",
+    snow: "<text>",
+    summerbeach: "<text>",
+    textonwetglass: "<text>",
+    thunder: "<text>",
+    typography: "<text>",
+    underwater: "<text>",
+    vintagetext: "<text>",
+    vintagetext: "<text>",
+    wingslogo: "<text>",
+    wolfgalaxy: "<text>",
+
+    // AI
+    ai: "<question>",
+    ask: "<question>",
+    deepseek: "<query>",
+    ds: "<query>",
+    guru: "<query>",
+    chat: "<message>",
+    code: "<prompt>",
+    explain: "<topic>",
+    imagine: "<prompt>",
+    draw: "<prompt>",
+
+    // Download
+    tiktok: "<link>",
+    tt: "<link>",
+    instagram: "<link>",
+    ig: "<link>",
+    reels: "<link>",
+    facebook: "<link>",
+    fb: "<link>",
+    twitter: "<link>",
+    tw: "<link>",
+    linkedin: "<link>",
+    li: "<link>",
+    play: "<song>",
+    yt: "<link>",
+
+    // Admin & Group
+    kick: "<user>",
+    ban: "<user>",
+    mute: "[time]",
+    unmute: "",
+    promote: "<user>",
+    demote: "<user>",
+    tagall: "[reason]",
+    hidetag: "<message>",
+
+    // General & Tools
+    calc: "<math>",
+    translate: "<text>",
+    weather: "<city>",
+    wiki: "<query>",
+    qr: "<text>",
+    readqr: "",
+    tts: "<text>",
+    shorten: "<link>",
+    ocr: "<image>",
+    menu: "[cat]"
+};
+
+/**
+ * Format commands in strict vertical tree list matching screenshot:
+ * │ > .command <args>
+ */
+function formatCategoryCommands(cmds) {
+    return cmds.map(c => {
+        let hint = c.usage || USAGE_HINTS[c.name] || "";
+        if (typeof hint === "string" && hint.startsWith(".")) {
+            const parts = hint.trim().split(/\s+/);
+            hint = parts.length > 1 ? parts.slice(1).join(" ") : "";
+        }
+        const paramStr = hint ? ` ${hint}` : "";
+        return `│ > .${c.name}${paramStr}`;
+    }).join("\n");
+}
 
 module.exports = {
     name: "menu",
     aliases: ["help", "list", "m"],
-    description: "Display beautiful command menu",
+    description: "List all commands in stylized tree layout",
     category: "general",
+    noAutoDelete: true,
+
     execute: async (ctx) => {
         const { sock, jid, args, commands } = ctx;
         const pushName = ctx.msg?.pushName || ctx.msg?.key?.participant?.split("@")[0] || "User";
-        
-        // 🕰️ Date & Time Logic
+
+        // 🕰️ Date & Time
         const date = new Date().toLocaleDateString("en-GB");
         const time = new Date().toLocaleTimeString("en-GB", { hour12: false });
         const hours = new Date().getHours();
@@ -21,238 +173,136 @@ module.exports = {
         else if (hours < 18) greeting = "Good Day 🤠";
         else greeting = "Good Evening 🌃";
 
+        const settings = getSettings();
+        const botName = settings.botName || "Nexus-MD";
+        const CHANNEL_URL = "https://whatsapp.com/channel/0029VbD62UY7IUYU6cftzu02";
+        const REPO_URL = "https://github.com/devwhitewizard/nexus-v1md";
+
         try {
+            // ── De-duplicate commands ──────────────────────────────────────────
             const allCommands = [...commands.values()];
-            const uniqueCommands = allCommands.filter((cmd, index, self) => 
-                index === self.findIndex((t) => t.name === cmd.name)
+            const uniqueCommands = allCommands.filter((cmd, idx, self) =>
+                idx === self.findIndex(t => t.name === cmd.name)
             );
 
-            // 👑 Filter categories
-            const categories = {
-                admin: uniqueCommands.filter(c => (c.category === "admin" || c.adminOnly) && !c.ownerOnly),
-                owner: uniqueCommands.filter(c => c.category === "owner" || c.ownerOnly),
-                ai: uniqueCommands.filter(c => c.category === "ai"),
-                download: uniqueCommands.filter(c => c.category === "download"),
-                group: uniqueCommands.filter(c => c.category === "group"),
-                sticker: uniqueCommands.filter(c => c.category === "sticker"),
-                social: uniqueCommands.filter(c => c.category === "social"),
-                games: uniqueCommands.filter(c => c.category === "games"),
-                anime: uniqueCommands.filter(c => c.category === "anime"),
-                fun: uniqueCommands.filter(c => c.category === "fun"),
-                textmaker: uniqueCommands.filter(c => c.category === "textmaker"),
-                economy: uniqueCommands.filter(c => c.category === "economy"),
-                media: uniqueCommands.filter(c => c.category === "media"),
-                system: uniqueCommands.filter(c => c.category === "system"),
-                sports: uniqueCommands.filter(c => c.category === "sports"),
-                religion: uniqueCommands.filter(c => c.category === "religion"),
-                dp: uniqueCommands.filter(c => c.category === "dp"),
-                general: uniqueCommands.filter(c => c.category === "general" && !c.ownerOnly && !c.adminOnly)
-            };
+            // ── Build grouped map ──────────────────────────────────────────────
+            const grouped = {};
+            for (const cmd of uniqueCommands) {
+                const cat = (cmd.category || "general").toLowerCase();
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(cmd);
+            }
+            // Sort commands alphabetically within each category
+            for (const cat of Object.keys(grouped)) {
+                grouped[cat].sort((a, b) => a.name.localeCompare(b.name));
+            }
 
+            // ── Determine ordered category list ────────────────────────────────
+            const allCats = [...new Set([
+                ...CATEGORY_ORDER.filter(c => grouped[c]),
+                ...Object.keys(grouped).filter(c => !CATEGORY_ORDER.includes(c))
+            ])];
+
+            const channelButtons = [
+                { text: "📢 View Channel", url: CHANNEL_URL },
+                { text: "💻 GitHub Repo", url: REPO_URL }
+            ];
+
+            // ── Handle .menu <category> or .menu <command> ─────────────────────
             if (args.length > 0) {
-                const target = args[0].toLowerCase();
-                const list = categories[target];
-                
-                if (target === "economy") {
-                    let econText = `╭━━━━╼ *NEXUS ECONOMY* ╾━━━━╮\n`;
-                    econText += `┃ _Manage your wealth & assets_\n┃\n`;
-                    econText += `┃ 💳 *FINANCE*\n`;
-                    econText += `┃ ┃ 💎 *.balance* - Check wallet\n`;
-                    econText += `┃ ┃ 🏦 *.bank* - View savings\n`;
-                    econText += `┃ ┃ 📅 *.daily* / *.weekly*\n`;
-                    econText += `┃\n`;
-                    econText += `┃ 💼 *CAREER & CRIME*\n`;
-                    econText += `┃ ┃ 🏢 *.work* - Earn legally\n`;
-                    econText += `┃ ┃ 🕵️ *.crime* - High risk\n`;
-                    econText += `┃ ┃ 🔫 *.rob* - Take from others\n`;
-                    econText += `┃\n`;
-                    econText += `┃ 🏪 *MARKET & STORAGE*\n`;
-                    econText += `┃ ┃ 🛍️ *.shop* - Buy items\n`;
-                    econText += `┃ ┃ 📦 *.inventory* - My gear\n`;
-                    econText += `┃ ┃ 💰 *.sell* - Liquidate assets\n`;
-                    econText += `┃\n`;
-                    econText += `┃ ✨ *PRIVILEGES (SOON)*\n`;
-                    econText += `┃ ┃ 💎 VIP-only Commands\n`;
-                    econText += `┃ ┃ 🏘️ Property Ownership\n`;
-                    econText += `┃\n╰━━━━━━━━━━━━━━━━━━━━╯`;
-                    return await sock.sendMessage(jid, { text: econText }, { quoted: ctx.msg });
+                const target = args[0].toLowerCase().replace(/^\./, "");
+
+                // ① Match a category
+                if (grouped[target]) {
+                    const meta = CATEGORY_META[target] || { icon: "📁", label: target.toUpperCase() };
+                    const cmds = grouped[target];
+                    let txt = `┌───[ ${meta.icon} ${meta.label} ] [${cmds.length}]\n`;
+                    txt += formatCategoryCommands(cmds) + "\n";
+                    txt += `└─────────────────────────────`;
+                    return await sendButtonMessage(sock, jid, txt, "📢 View Channel", channelButtons, null, ctx.msg);
                 }
 
-                if (target === "fun") {
-                    let funText = `╭━━━━╼ *NEXUS FUN & GAMES* ╾━━━━╮\n`;
-                    funText += `┃ _Bring excitement to the chats!_\n┃\n`;
-                    funText += `┃ 🎭 *LAUGHTER & HUMOUR*\n`;
-                    funText += `┃ ┃ 😂 *.joke* / 🖤 *.darkjoke* / 🖼️ *.meme*\n`;
-                    funText += `┃ ┃ 🗣️ *.roast* / 🤬 *.insult* / 🗣️ *.sarcasm*\n`;
-                    funText += `┃ ┃ 🤡 *.dadjoke* / 🤡 *.pun* / 💀 *.cringe*\n`;
-                    funText += `┃ ┃ 🧠 *.brainrot* / 🧠 *.nonsense* / 🧠 *.cursed*\n`;
-                    funText += `┃\n`;
-                    funText += `┃ 💘 *ROMANCE & SOCIAL*\n`;
-                    funText += `┃ ┃ 💌 *.pickup* / ❤️ *.lovetest* / 🤝 *.bestfriend*\n`;
-                    funText += `┃ ┃ 💬 *.compliment* / 💑 *.ship* / 💖 *.simp*\n`;
-                    funText += `┃\n`;
-                    funText += `┃ 🕹️ *GAMES & CHANCE*\n`;
-                    funText += `┃ ┃ 🎱 *.8ball* / 🤔 *.wyr* / 🎲 *.luck* / 💡 *.riddle*\n`;
-                    funText += `┃ ┃ 🪙 *.coinflip* / 🎲 *.dice* / 🎮 *.rps*\n`;
-                    funText += `┃ ┃ ❓ *.truthordare* (or *.tod*) / 🙅‍♂️ *.neverhaveiever*\n`;
-                    funText += `┃ ┃ 🔥 *.hotseat* / 🧩 *.emojiquiz* / 🧩 *.scramble*\n`;
-                    funText += `┃ ┃ ⚡ *.fasttype* / 📢 *.spamword* / ⚡ *.reactiongame*\n`;
-                    funText += `┃ ┃ 🎯 *.clickfast* / 🎲 *.guess*\n`;
-                    funText += `┃\n`;
-                    funText += `┃ ⚔️ *RPG, COMBAT & PRANKS*\n`;
-                    funText += `┃ ┃ 🤺 *.battle* / 🔫 *.duel* / 🧟 *.survive*\n`;
-                    funText += `┃ ┃ 🏃‍♂️ *.escape* / 🏦 *.heist* / 🗡️ *.adventure*\n`;
-                    funText += `┃ ┃ 📜 *.quest* / 👹 *.bossfight* / 🔍 *.scan*\n`;
-                    funText += `┃ ┃ 💻 *.hack* / 🔮 *.future* / 📜 *.pastlife*\n`;
-                    funText += `┃\n`;
-                    funText += `┃ 📊 *RATERS & METERS*\n`;
-                    funText += `┃ ┃ 😎 *.coolness* / 📊 *.sus* / 🤖 *.npc*\n`;
-                    funText += `┃ ┃ ⚡ *.power* / 🕶️ *.drip* (or *.fitcheck*) / 🏆 *.tier*\n`;
-                    funText += `┃ ┃ 🦸 *.hero* / 🦹 *.villain* / 🌈 *.vibe*\n`;
-                    funText += `┃ ┃ 🎭 *.mood* / ⚡ *.energy* / 🍀 *.luckytoday*\n`;
-                    funText += `┃ ┃ 🦸 *.superpower* / ❌ *.weakness* / 🛍️ *.pet*\n`;
-                    funText += `┃ ┃ 🍔 *.food* / 💼 *.job* / 🌀 *.multiverse*\n`;
-                    funText += `┃ ┃ 💭 *.randomthought* / 💡 *.uselessfact* / 💡 *.fact*\n`;
-                    funText += `┃ ┃ 💡 *.showerthought* / 📜 *.fakequote* / 📜 *.weirdfact*\n`;
-                    funText += `┃ ┃ 📜 *.fortune* / 📝 *.confession* / 🎭 *.drama*\n`;
-                    funText += `┃ ┃ 🍵 *.tea* / 🎲 *.chaos* / 🤦 *.realitycheck*\n`;
-                    funText += `┃\n`;
-                    funText += `┃ 👋 *INTERACTION TAG COMMANDS*\n`;
-                    funText += `┃ ┃ 🤗 *.hug* / 🫳 *.pat* / 💥 *.slap* / 👉 *.poke*\n`;
-                    funText += `┃ ┃ 🪶 *.tickle* / 🦷 *.bite* / 🔨 *.bonk* / ☄️ *.yeet*\n`;
-                    funText += `┃ ┃ 🎳 *.throw* / 🧤 *.catch* / 🙌 *.highfive* / 👋 *.wave*\n`;
-                    funText += `┃ ┃ 👀 *.stare* / 😂 *.laugh* / 😭 *.cry* / 😡 *.angry*\n`;
-                    funText += `┃ ┃ 🕺 *.dance* / 😴 *.sleep* / 🤦 *.facepalm* / 😕 *.confuse*\n`;
-                    funText += `┃ ┃ 🔮 *.summon* / 🚶‍♂️ *.follow* / 😑 *.ignore*\n`;
-                    funText += `┃ ┃ ⚔️ *.challenge* / 🎉 *.cheer*\n`;
-                    funText += `┃\n╰━━━━━━━━━━━━━━━━━━━━╯`;
-                    return await sock.sendMessage(jid, { text: funText }, { quoted: ctx.msg });
-                }
-
-                if (list) {
-                    let subText = `╭━━━━╼ *${target.toUpperCase()} MENU* ╾━━━━╮\n`;
-                    subText += `┃ _Type these to use the features_\n┃\n`;
-                    list.forEach((c) => {
-                        const desc = c.description ? ` — _${c.description}_` : "";
-                        subText += `┃ 💎 *.${c.name}*${desc}\n`;
-                    });
-                    subText += `┃\n╰━━━━━━━━━━━━━━━━━━━━╯`;
-                    return await sock.sendMessage(jid, { text: subText }, { quoted: ctx.msg });
-                } else {
-                    // Check if user passed a specific command name/alias (e.g. .help ping or .m weather)
-                    const cleanCmdName = target.startsWith(".") ? target.slice(1) : target;
-                    const foundCmd = commands.get(cleanCmdName);
-                    if (foundCmd) {
-                        let card = `╭━━━━╼ *COMMAND HELP* ╾━━━━╮\n`;
-                        card += `┃\n`;
-                        card += `┃ 🔹 *Command:* .${foundCmd.name}\n`;
-                        if (foundCmd.description) card += `┃ 📝 *Description:* ${foundCmd.description}\n`;
-                        if (foundCmd.category) card += `┃ 🏷️ *Category:* ${foundCmd.category.toUpperCase()}\n`;
-                        if (foundCmd.aliases && foundCmd.aliases.length > 0) {
-                            card += `┃ 🔤 *Aliases:* ${foundCmd.aliases.map(a => `.${a}`).join(", ")}\n`;
-                        }
-                        if (foundCmd.isOwnerOnly) card += `┃ 🔒 *Permission:* Owner Only\n`;
-                        else if (foundCmd.isAdminOnly) card += `┃ 🛡️ *Permission:* Admin Only\n`;
-                        else if (foundCmd.isGroupOnly) card += `┃ 👥 *Permission:* Group Only\n`;
-                        card += `┃\n╰━━━━━━━━━━━━━━━━━━━━╯`;
-                        return await sock.sendMessage(jid, { text: card }, { quoted: ctx.msg });
+                // ② Match a specific command or alias
+                const foundCmd = commands.get(target);
+                if (foundCmd) {
+                    const meta = CATEGORY_META[foundCmd.category] || { icon: "📁", label: (foundCmd.category || "general").toUpperCase() };
+                    let hint = foundCmd.usage || USAGE_HINTS[foundCmd.name] || "";
+                    if (typeof hint === "string" && hint.startsWith(".")) {
+                        const parts = hint.trim().split(/\s+/);
+                        hint = parts.length > 1 ? parts.slice(1).join(" ") : "";
                     }
-
-                    return await sock.sendMessage(jid, { 
-                        text: `⚠️ *Category or Command "${target}" not found!*\n\nAvailable categories: \`admin, ai, download, group, sticker, anime, games, social, fun, economy, media, sports, religion, dp, system, owner, general\`\n\n💡 _Try typing .help <command> (e.g. .help ping)_` 
-                    }, { quoted: ctx.msg });
+                    let card = `┌───[ 🔍 COMMAND HELP ]\n`;
+                    card += `│ > Command: .${foundCmd.name}${hint ? " " + hint : ""}\n`;
+                    if (foundCmd.description) card += `│ > What it does: ${foundCmd.description}\n`;
+                    if (foundCmd.category) card += `│ > Category: ${meta.icon} ${meta.label}\n`;
+                    if (foundCmd.aliases && foundCmd.aliases.length)
+                        card += `│ > Aliases: ${foundCmd.aliases.map(a => `.${a}`).join(", ")}\n`;
+                    card += `└─────────────────────────────`;
+                    return await sendButtonMessage(sock, jid, card, "📢 View Channel", channelButtons, null, ctx.msg);
                 }
+
+                // ③ Not found
+                const catList = allCats.map(c => {
+                    const m = CATEGORY_META[c] || { icon: "📁" };
+                    return `${m.icon} \`${c}\` [${grouped[c]?.length || 0}]`;
+                }).join("  •  ");
+                return await sock.sendMessage(jid, {
+                    text: `⚠️ *"${target}" not found.*\n\n📂 *Available Categories:*\n${catList}\n\n💡 _Try_ *.menu download* _or_ *.menu ping_`
+                }, { quoted: ctx.msg });
             }
 
-            // 🎨 Main Menu
-            const settings = getSettings();
-            const botName = settings.botName || "Nexus-MD";
-            const botImageUrl = settings.botImage;
-
-            let banner = null;
-            try {
-                if (botImageUrl && botImageUrl.startsWith("http")) {
-                    banner = { url: botImageUrl };
-                } else {
-                    const newBotPic = path.join(__dirname, "../../assets/botnexus.png");
-                    const legacyPic = path.join(__dirname, "../../assets/Nexuspic.jpg");
-                    const bannerPath = fs.existsSync(newBotPic) ? newBotPic : legacyPic;
-                    banner = fs.existsSync(bannerPath) ? fs.readFileSync(bannerPath) : null;
-                }
-            } catch (e) {
-                banner = null;
-            }
-
+            // ── Main "all commands" menu ───────────────────────────────────────
             let userCount = 1;
             try {
                 userCount = await Promise.race([
                     getUserCount(),
                     new Promise(res => setTimeout(() => res(1), 1000))
                 ]);
-            } catch (e) {
-                userCount = 1;
+            } catch (_) { userCount = 1; }
+
+            const totalCmdCount = uniqueCommands.length;
+
+            // Header card
+            let body = "";
+            body += `┌───[ 💎 ${botName.toUpperCase()} ]\n`;
+            body += `│ > User: ${pushName}\n`;
+            body += `│ > Greeting: ${greeting}\n`;
+            body += `│ > Date: ${date}\n`;
+            body += `│ > Time: ${time}\n`;
+            body += `│ > Total Commands: [${totalCmdCount}]\n`;
+            body += `│ > Active Users: ${userCount}\n`;
+            body += `└─────────────────────────────\n\n`;
+
+            // Category cards styled exactly like screenshot
+            for (const cat of allCats) {
+                const cmds = grouped[cat];
+                if (!cmds || cmds.length === 0) continue;
+                const meta = CATEGORY_META[cat] || { icon: "📁", label: cat.toUpperCase() };
+
+                body += `┌───[ ${meta.icon} ${meta.label} ] [${cmds.length}]\n`;
+                body += formatCategoryCommands(cmds) + "\n";
+                body += `└─────────────────────────────\n\n`;
             }
 
-            let menuBody = `╭━━━━━━━◇\n`;
-            menuBody += `┃ *${botName.toUpperCase()}*\n`;
-            menuBody += `┃ ◇━━━━━━━◇\n`;
-            menuBody += `┃ 🖼️ *${greeting}*\n`;
-            menuBody += `╰━━━━━━━◇\n\n`;
-            menuBody += `┃ 👤 *USER:* ${pushName}\n`;
-            menuBody += `┃ 📅 *DATE:* ${date}\n`;
-            menuBody += `┃ ⌚ *TIME:* ${time}\n`;
-            menuBody += `┃ ⭐ *USERS:* ${userCount}\n`;
-            menuBody += `╰━━━━━━━━━◇\n\n`;
-            menuBody += `*AVAILABLE CATEGORIES:*\n`;
-            menuBody += `💡 _Explore by typing .m <category>_\n\n`;
-            menuBody += `1. 🌐 *ADMIN MENU*\n`;
-            menuBody += `2. 🤖 *AI MENU*\n`;
-            menuBody += `3. 📥 *DOWNLOAD MENU*\n`;
-            menuBody += `4. 👥 *GROUP MENU*\n`;
-            menuBody += `5. 🎨 *STICKER MENU*\n`;
-            menuBody += `6. 📦 *OWNER MENU*\n`;
-            menuBody += `7. 🌍 *GENERAL MENU*\n`;
-            menuBody += `8. ⚽ *SPORTS MENU*\n`;
-            menuBody += `9. 💻 *DEV INFO* (Direct)\n`;
-            menuBody += `10. 🎭 *ANIME MENU*\n`;
-            menuBody += `11. 🕹️ *GAMES MENU*\n`;
-            menuBody += `12. 🤝 *SOCIAL MENU*\n`;
-            menuBody += `13. 🎉 *FUN MENU*\n`;
-            menuBody += `14. 💰 *ECONOMY MENU*\n`;
-            menuBody += `15. 🎬 *MEDIA MENU*\n`;
-            menuBody += `16. 🛰️ *SYSTEM MENU*\n`;
-            menuBody += `17. ✨ *TEXTMAKER MENU*\n`;
-            menuBody += `18. ⛪ *RELIGION MENU*\n`;
-            menuBody += `19. 🖼️ *DP MENU*\n\n`;
-            menuBody += `💎 _Type .m <category> to explore features_`;
-
-            const footerText = `${botName} • Support & Updates`;
-
-            // CTA buttons — Channel + Repo only
-            const buttons = [
-                { text: "📢 Follow on WhatsApp", url: "https://whatsapp.com/channel/0029VbD62UY7IUYU6cftzu02" },
-                { text: "💻 GitHub Repo", url: "https://github.com/devwhitewizard/nexus-v1md" }
-            ];
-
-            // Plain text + image — most compatible, fast, and 100% reliable
-            let plainText = menuBody + `\n\n`;
-            buttons.forEach(btn => {
-                plainText += `🔗 *${btn.text}:* ${btn.url}\n`;
-            });
-            if (footerText) plainText += `\n_${footerText}_`;
-
-            if (banner) {
-                try {
-                    return await sock.sendMessage(jid, { image: banner, caption: plainText }, { quoted: ctx.msg });
-                } catch (imgErr) {
-                    console.warn("⚠️ Failed to send banner image, sending text menu fallback:", imgErr.message);
+            // Bot banner image
+            let banner = null;
+            try {
+                if (settings.botImage && settings.botImage.startsWith("http")) {
+                    banner = { url: settings.botImage };
+                } else {
+                    const newPic = path.join(__dirname, "../../assets/botnexus.png");
+                    const oldPic = path.join(__dirname, "../../assets/Nexuspic.jpg");
+                    const picPath = fs.existsSync(newPic) ? newPic : oldPic;
+                    if (fs.existsSync(picPath)) banner = fs.readFileSync(picPath);
                 }
-            }
-            return await sock.sendMessage(jid, { text: plainText }, { quoted: ctx.msg });
+            } catch (_) { banner = null; }
+
+            const footerMsg = "📢 View Channel";
+            return await sendButtonMessage(sock, jid, body.trim(), footerMsg, channelButtons, banner, ctx.msg);
 
         } catch (e) {
-            console.error("❌ Menu Dashboard Error:", e);
-            await sock.sendMessage(jid, { text: "⚠️ Error loading menu." });
+            console.error("❌ Menu error:", e);
+            await sock.sendMessage(jid, { text: "⚠️ Error loading menu. Try again." });
         }
     }
 };

@@ -24,7 +24,7 @@ module.exports = {
                 await sock.sendPresenceUpdate('composing', jid);
                 await sock.sendMessage(jid, { 
                     video: video.buffer,
-                    caption: `🎬 *TikTok Downloader*\n\n✨ *Author:* ${video.author || "Unknown"}\n📦 *Format:* No Watermark\n\n_Nexus-1MD • Media Delivery_`
+                    caption: `🎬 *TikTok Downloader*\n\n✨ *Author:* ${video.author || video.uploader || "Unknown"}\n📦 *Format:* No Watermark\n\n_Nexus-1MD • Media Delivery_`
                 }, { quoted: msg });
             } else if (video.url) {
                 await sock.sendMessage(jid, { 

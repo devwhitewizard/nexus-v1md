@@ -1,4 +1,4 @@
-const { askAI } = require("../../lib/aiHelper");
+const { askCode } = require("../../lib/aiHelper");
 
 module.exports = {
     name: "code",
@@ -22,13 +22,7 @@ module.exports = {
             await sock.sendMessage(jid, { react: { text: "💻", key: msg.key } });
             await sock.sendMessage(jid, { text: "💻 Writing code... ⏳" });
 
-            const system =
-                "You are an expert software engineer. " +
-                "When given a task, respond ONLY with the code and a very short explanation. " +
-                "Format the code inside triple backticks with the language name. " +
-                "Be concise and practical. Do not add unnecessary filler text.";
-
-            const result = await askAI(prompt, system);
+            const result = await askCode(prompt);
 
             await sock.sendMessage(jid, {
                 text:

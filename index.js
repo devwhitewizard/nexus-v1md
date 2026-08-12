@@ -10,26 +10,26 @@ if (envResult.error) {
 // Maps known noisy libsignal/Baileys internals to clean human-readable messages.
 // Each unique message is rate-limited to once per 30s to prevent spam.
 const _origError = console.error.bind(console);
-const _origLog   = console.log.bind(console);
+const _origLog = console.log.bind(console);
 
 const CLEAN_SIGNAL_ERRORS = [
     // Pattern → clean message (shown max once per 30s)
-    { match: "Bad MAC",                                           msg: "⚠️  [Signal] Corrupt session key (Bad MAC) — key will auto-refresh on next message." },
-    { match: "No matching sessions found",                        msg: "⚠️  [Signal] No session found for this contact — awaiting fresh key exchange." },
-    { match: "No session found to decrypt",                       msg: "⚠️  [Signal] Missing sender key — message skipped, will resolve automatically." },
-    { match: "Failed to decrypt message with any known session",  msg: "⚠️  [Signal] All session keys failed — contact needs to send a new message to re-establish." },
-    { match: "Closing open session in favor of incoming prekey",  msg: "ℹ️  [Signal] Re-keying session (prekey bundle received)." },
-    { match: "Closing session:",                                   msg: "ℹ️  [Signal] Closing stale session." },
-    { match: "Decrypted message with closed session",             msg: "ℹ️  [Signal] Decrypted via closed session (harmless)." },
-    { match: "transaction failed, rolling back",                  msg: "⚠️  [Signal] Transaction rollback — likely due to session mismatch (non-fatal)." },
+    { match: "Bad MAC", msg: "⚠️  [Signal] Corrupt session key (Bad MAC) — key will auto-refresh on next message." },
+    { match: "No matching sessions found", msg: "⚠️  [Signal] No session found for this contact — awaiting fresh key exchange." },
+    { match: "No session found to decrypt", msg: "⚠️  [Signal] Missing sender key — message skipped, will resolve automatically." },
+    { match: "Failed to decrypt message with any known session", msg: "⚠️  [Signal] All session keys failed — contact needs to send a new message to re-establish." },
+    { match: "Closing open session in favor of incoming prekey", msg: "ℹ️  [Signal] Re-keying session (prekey bundle received)." },
+    { match: "Closing session:", msg: "ℹ️  [Signal] Closing stale session." },
+    { match: "Decrypted message with closed session", msg: "ℹ️  [Signal] Decrypted via closed session (harmless)." },
+    { match: "transaction failed, rolling back", msg: "⚠️  [Signal] Transaction rollback — likely due to session mismatch (non-fatal)." },
     // Raw session object dumps — just suppress, no output needed
-    { match: "_chains",         msg: null },
-    { match: "registrationId",  msg: null },
-    { match: "currentRatchet",  msg: null },
-    { match: "pendingPreKey",   msg: null },
-    { match: "indexInfo",       msg: null },
-    { match: "baseKeyType",     msg: null },
-    { match: "ephemeralKeyPair",msg: null },
+    { match: "_chains", msg: null },
+    { match: "registrationId", msg: null },
+    { match: "currentRatchet", msg: null },
+    { match: "pendingPreKey", msg: null },
+    { match: "indexInfo", msg: null },
+    { match: "baseKeyType", msg: null },
+    { match: "ephemeralKeyPair", msg: null },
 ];
 
 const _logCooldowns = new Map(); // key → last printed timestamp
@@ -53,7 +53,7 @@ function interceptLog(originalFn, args) {
 }
 
 console.error = (...args) => interceptLog(_origError, args);
-console.log   = (...args) => interceptLog(_origLog,   args);
+console.log = (...args) => interceptLog(_origLog, args);
 
 // Global Exception Handlers to prevent process crashes on Baileys/libsignal socket errors
 process.on("unhandledRejection", (reason, promise) => {
@@ -105,7 +105,7 @@ async function connectionLogic() {
         cleanSessionFolder();
         try {
             cleanTempMedia(6);
-        } catch (e) {}
+        } catch (e) { }
     }, 2 * 60 * 60 * 1000);
 
     const fs = require("fs");
@@ -205,7 +205,7 @@ async function connectionLogic() {
                 fs.readdirSync(sessionDir).forEach(file => {
                     try {
                         fs.unlinkSync(path.join(sessionDir, file));
-                    } catch (e) {}
+                    } catch (e) { }
                 });
             }
             // Re-load auth state after cleaning
@@ -360,7 +360,7 @@ async function connectionLogic() {
             // Set up alwaysOnline presence updates
             const settings = getSettings();
             if (settings.alwaysOnline) {
-                await sock.sendPresenceUpdate("available").catch(() => {});
+                await sock.sendPresenceUpdate("available").catch(() => { });
             }
 
             if (global.alwaysOnlineInterval) clearInterval(global.alwaysOnlineInterval);
@@ -368,9 +368,9 @@ async function connectionLogic() {
                 try {
                     const currentSettings = getSettings();
                     if (currentSettings.alwaysOnline) {
-                        await sock.sendPresenceUpdate("available").catch(() => {});
+                        await sock.sendPresenceUpdate("available").catch(() => { });
                     }
-                } catch (e) {}
+                } catch (e) { }
             }, 15000);
 
             // Resolve newsletter metadata to get JID for "View Channel" feature
@@ -381,7 +381,7 @@ async function connectionLogic() {
                     global.newsletterJid = metadata.id;
                     global.newsletterName = metadata.subject || "Nexus-MD Updates";
                     console.log(`📢 Resolved Channel JID: ${global.newsletterJid} (${global.newsletterName})`);
-                    
+
                     // Auto-follow channel on connection/deployment
                     const jsonStore = require("./nexus/jsonStore");
                     if (!jsonStore.get("channel_autofollowed")) {
@@ -440,35 +440,37 @@ async function connectionLogic() {
 
                 // 💎 PREMIUM USER MESSAGE
                 const { getSettings } = require("./lib/settings");
+                const { sendButtonMessage } = require("./lib/utils");
                 const settings = getSettings();
                 const botName = settings.botName || "Nexus-MD";
+                const CHANNEL_URL = "https://whatsapp.com/channel/0029VbD62UY7UYU6cftzu02";
+                const REPO_URL = "https://github.com/devwhitewizard/nexus-v1md";
 
-                const userWelcome = {
-                    text: `✨ *${botName} v${version} Connected!* ✨\n\n` +
-                        `🤖 *Status:* System fully operational.\n` +
-                        `✅ *Secure:* Your connection is stable and encrypted.\n\n` +
-                        `🌟 *Welcome!* Your bot is ready to serve. Type *.menu* to see what I can do!\n\n` +
-                        `> Powered by Nexus Intelligence`
-                };
+                const connectButtons = [
+                    { text: "📢 Follow Channel", url: CHANNEL_URL },
+                    { text: "💻 GitHub Repo", url: REPO_URL }
+                ];
 
-                // 🛠️ TECHNICAL ADMIN MESSAGE
-                const adminAlert = {
-                    text: `🛠️ *${botName} v${version}: Connection Established*\n\n` +
-                        `📦 *Session:* Restored/Initialized\n` +
-                        `💾 *Storage:* Nexus-MD-100%\n\n` +
-                        `> Session ID has been printed to your private console.`
-                };
+                const userWelcomeText = `✨ *${botName} v${version} Connected!* ✨\n\n` +
+                    `🤖 *Status:* System fully operational.\n` +
+                    `✅ *Secure:* Your connection is stable and encrypted.\n\n` +
+                    `🌟 *Welcome!* Your bot is ready to serve. Type *.menu* to see what I can do!`;
+
+                const adminAlertText = `🛠️ *${botName} v${version}: Connection Established*\n\n` +
+                    `📦 *Session:* Restored/Initialized\n` +
+                    `💾 *Storage:* Nexus-MD-100%\n\n` +
+                    `> Session ID has been printed to your private console.`;
 
                 // 📡 Reliable Message Delivery
                 setTimeout(async () => {
                     try {
-                        console.log("📨 Sending startup welcome message to bot...");
-                        await sock.sendMessage(global.myJid, userWelcome);
+                        console.log("📨 Sending startup welcome message to bot with CTA buttons...");
+                        await sendButtonMessage(sock, global.myJid, userWelcomeText, "📢 View Channel", connectButtons, null, null);
                         console.log("✅ Startup message sent successfully.");
 
                         if (primarySudo && primarySudo !== global.myJid && isSudo(primarySudo)) {
                             console.log(`🛰️ Sending tech alert to Sudo: ${primarySudo}`);
-                            await sock.sendMessage(primarySudo, adminAlert);
+                            await sendButtonMessage(sock, primarySudo, adminAlertText, "📢 View Channel", connectButtons, null, null);
                         }
                     } catch (e) {
                         console.error("⚠️ Failed to send startup message:", e.message);
@@ -525,37 +527,51 @@ async function connectionLogic() {
             }
             const statusCode = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode;
 
-            console.log(`🔌 Connection closed. Status Code: ${statusCode}`);
+            // Translate Baileys status codes into human-readable explanations
+            const REASON_EXPLANATIONS = {
+                [DisconnectReason.badSession]: "Bad Session File — Credentials corrupted, wiping and restarting connection...",
+                [DisconnectReason.connectionClosed]: "Connection Closed — WhatsApp server closed the socket, reconnecting...",
+                [DisconnectReason.connectionLost]: "Connection Lost — Internet connection or socket drop, reconnecting...",
+                [DisconnectReason.connectionReplaced]: "Connection Replaced — Another session logged in with this phone number.",
+                [DisconnectReason.loggedOut]: "Logged Out — Bot unlinked or logged out from phone. Scan QR code or pairing code to re-link.",
+                [DisconnectReason.restartRequired]: "Restart Required — WhatsApp server requested restart, reconnecting...",
+                [DisconnectReason.timedOut]: "Timed Out — Connection timed out (poor server connection), reconnecting...",
+                [DisconnectReason.multideviceMismatch]: "Multi-Device Mismatch — Please re-pair your WhatsApp device."
+            };
 
-            // Detect if the failure is non-network related to avoid false-positive session wipes during internet outages
-            const isNetworkError = 
-                lastDisconnect?.error?.code === "ENOTFOUND" || 
-                lastDisconnect?.error?.code === "EAI_AGAIN" || 
-                lastDisconnect?.error?.code === "ECONNREFUSED" || 
-                lastDisconnect?.error?.code === "ETIMEDOUT" || 
+            // Detect network-related errors vs session errors
+            const isNetworkError =
+                lastDisconnect?.error?.code === "ENOTFOUND" ||
+                lastDisconnect?.error?.code === "EAI_AGAIN" ||
+                lastDisconnect?.error?.code === "ECONNREFUSED" ||
+                lastDisconnect?.error?.code === "ETIMEDOUT" ||
                 lastDisconnect?.error?.code === "ECONNRESET" ||
-                statusCode === DisconnectReason.connectionLost || 
-                statusCode === DisconnectReason.connectionClosed || 
+                statusCode === DisconnectReason.connectionLost ||
+                statusCode === DisconnectReason.connectionClosed ||
                 statusCode === DisconnectReason.timedOut;
+
+            const reasonMessage = REASON_EXPLANATIONS[statusCode] || 
+                (isNetworkError ? "Network Connection Lost — Host internet unstable/reconnecting..." : `Unexpected Disconnect (Status Code: ${statusCode || 'Unknown'})`);
+
+            console.log(`🔌 [DISCONNECT] ${reasonMessage}`);
 
             if (!isNetworkError) {
                 consecutiveFailures++;
-                console.log(`⚠️ Non-network connection failure count: ${consecutiveFailures}/5`);
+                console.log(`⚠️ [HEALTH] Non-network failure counter: ${consecutiveFailures}/5`);
             }
 
             if (statusCode === DisconnectReason.loggedOut || consecutiveFailures >= 5) {
                 if (consecutiveFailures >= 5) {
-                    console.log("⚠️ [Self-Healing] Detected 5 consecutive session-related connection failures. Session may be corrupt. Wiping credentials and restarting...");
+                    console.log("⚠️ [SELF-HEALING] 5 consecutive session-related failures detected. Wiping credentials & requesting fresh login...");
                 } else {
-                    console.log("⚠️ [Self-Healing] Bot was logged out or unlinked. Wiping credentials and restarting connection to show fresh login...");
+                    console.log("⚠️ [SELF-HEALING] Bot logged out or unlinked from phone. Wiping local session to present fresh login...");
                 }
                 consecutiveFailures = 0; // Reset counter
-                hasWipedSessionOnStartup = false; // Reset wipe flag to allow startup cleanup on next run
+                hasWipedSessionOnStartup = false; // Reset wipe flag
 
-                // 🔒 Mark SESSION_ID as invalid so the restore logic doesn't re-apply
-                // the same expired/revoked session causing an infinite 401 loop.
+                // Mark SESSION_ID as invalid to avoid endless retry loops
                 if (process.env.SESSION_ID) {
-                    console.log("⚠️ [Self-Healing] SESSION_ID is marked invalid for this session. Bot will use QR code on next start.");
+                    console.log("⚠️ [SELF-HEALING] SESSION_ID marked invalid for this run. Bot will wait for fresh login.");
                     process.env.SESSION_ID_INVALID = "true";
                     delete process.env.SESSION_ID;
                 }
@@ -573,13 +589,13 @@ async function connectionLogic() {
                         });
                     }
                 } catch (e) {
-                    console.error("Failed to clean session directory:", e.message);
+                    console.error("❌ [SESSION CLEAN] Failed to clear session dir:", e.message);
                 }
 
                 setTimeout(() => connectionLogic(), 5000);
             } else {
                 const delay = 10000;
-                console.log(`🔌 Disconnected. Reconnecting in ${delay / 1000}s...`);
+                console.log(`🔄 [RECONNECT] Attempting reconnect in ${delay / 1000} seconds...`);
                 setTimeout(() => connectionLogic(), delay);
             }
         }
@@ -654,8 +670,8 @@ async function connectionLogic() {
                         .replace(/{count}/g, memberCount)
                         .replace(/{time}/g, time)
                         .replace(/{desc}/g, groupDesc);
-                    
-                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => {});
+
+                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => { });
                 } else if (action === "remove") {
                     const msgTemplate = jsonStore.get(`goodbye_msg_${id}`, null) || settings.goodbyeMsg || "Goodbye @user, we hope to see you back soon! 😢";
                     const msg = msgTemplate
@@ -665,14 +681,14 @@ async function connectionLogic() {
                         .replace(/{count}/g, memberCount)
                         .replace(/{time}/g, time)
                         .replace(/{desc}/g, groupDesc);
-                    
-                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => {});
+
+                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => { });
                 } else if (action === "promote" && settings.eventsPromote) {
                     const msg = `🎉 *Promotion Notice:*\n\n${userMention} has been promoted to Admin in this group.\n\n⌚ *Time:* ${time}`;
-                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => {});
+                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => { });
                 } else if (action === "demote" && settings.eventsPromote) {
                     const msg = `⚠️ *Demotion Notice:*\n\n${userMention} is no longer an Admin in this group.\n\n⌚ *Time:* ${time}`;
-                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => {});
+                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => { });
                 }
             }
         } catch (err) {

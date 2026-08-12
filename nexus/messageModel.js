@@ -70,7 +70,7 @@ const saveMessage = async (m, sock) => {
                 const size = mediaMsg?.fileLength ? parseInt(mediaMsg.fileLength, 10) : 0;
                 const maxDownloadSize = 15 * 1024 * 1024; // Capped at 15MB to prevent CPU/memory spikes on panels
 
-                if (size < maxDownloadSize) {
+                if (!size || size < maxDownloadSize) {
                     const ext = mediaType === "image" ? "jpg" : mediaType === "video" ? "mp4" : mediaType === "audio" ? "mp3" : "webp";
                     const stream = await downloadContentFromMessage(mediaMsg, mediaType);
                     const chunks = [];

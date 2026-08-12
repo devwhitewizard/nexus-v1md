@@ -24,4 +24,5 @@ module.exports = {
     // AI Configuration (Read from .env for security)
     openaiKey: process.env.OPENAI_API_KEY || "", 
     groqKey: process.env.GROQ_API_KEY || "", 
+    gurutechKey: process.env.GURUTECH_API_KEY || "guru_887hpyq48sx5vhf1e7htfgunpiynmaaf",
 };

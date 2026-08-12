@@ -1,4 +1,4 @@
-const { askAI } = require("../../lib/aiHelper");
+const { askExplain } = require("../../lib/aiHelper");
 
 module.exports = {
     name: "explain",
@@ -22,12 +22,7 @@ module.exports = {
             await sock.sendMessage(jid, { react: { text: "📖", key: msg.key } });
             await sock.sendMessage(jid, { text: `📖 Looking up: _"${topic}"_... ⏳` });
 
-            const system =
-                "You are a brilliant teacher who explains complex topics simply. " +
-                "Give a clear, structured explanation in plain language anyone can understand. " +
-                "Use an analogy when helpful. Keep it under 200 words. Use bullet points if listing key facts.";
-
-            const result = await askAI(`Explain: ${topic}`, system);
+            const result = await askExplain(topic);
 
             await sock.sendMessage(jid, {
                 text:
