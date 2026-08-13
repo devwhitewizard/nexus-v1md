@@ -225,9 +225,12 @@ async function connectionLogic() {
     const NodeCache = require("node-cache");
     const msgRetryCounterCache = new NodeCache();
 
-    // Standard Pino logger configured for error logs only to keep terminal clean
+    // Standard Pino logger set to 'silent' — suppresses all Baileys/libsignal internal noise.
+    // Meaningful session warnings are already caught and reformatted by the CLEAN_SIGNAL_ERRORS
+    // interceptor at the top of this file. Raw dumps (signedKeyId, baseKey, preKeyId, etc.) are
+    // completely hidden to keep live logs clean.
     const P = require("pino");
-    const logger = P({ level: "error" });
+    const logger = P({ level: "silent" });
 
     // Fetch latest WhatsApp Web version to bypass version checks on WhatsApp servers
     let version = [2, 3000, 1017531287]; // Fallback version

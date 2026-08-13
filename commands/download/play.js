@@ -42,15 +42,15 @@ module.exports = {
                 await sock.sendMessage(jid, { 
                     audio: audio.buffer,
                     mimetype: "audio/mpeg",
+                    fileName: `${audio.title || video.title}.mp3`,
                     ptt: false
                 }, { quoted: msg });
+                await sock.sendMessage(jid, { text: `✅ *Done:* ${audio.title || video.title}` }, { quoted: msg });
             } else if (audio.url) {
                 await sock.sendMessage(jid, { 
                     text: `⚠️ *Buffer download failed.*\n\n🔗 *Download Link:* ${audio.url}\n\n_You can download it manually using the link above._`
                 }, { quoted: msg });
             }
-            
-            await sock.sendMessage(jid, { text: `✅ *Finished:* ${audio.title || video.title}` });
 
         } catch (err) {
             console.error("Play error:", err);

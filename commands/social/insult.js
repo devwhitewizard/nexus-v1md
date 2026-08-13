@@ -23,7 +23,7 @@ const INSULTS = [
 
 module.exports = {
     name: "insult",
-    aliases: ["mockme", "joke"],
+    aliases: ["mockme"],
     description: "Send a light-hearted joke insult to a mentioned user.",
     category: "social",
     execute: async ({ sock, jid, msg }) => {
