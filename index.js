@@ -428,18 +428,13 @@ async function connectionLogic() {
                 const fs = require("fs");
                 const { authFolder, version } = require("./config");
 
-                // Generate Session ID
+                // Generate Session ID (sent to owner DM only — not printed to logs)
                 const credsPath = path.join(__dirname, authFolder, "creds.json");
                 let sessionId = "NO_CREDS_FOUND";
                 if (fs.existsSync(credsPath)) {
                     const creds = fs.readFileSync(credsPath, "utf-8");
                     sessionId = "NEXUS~" + Buffer.from(creds).toString("base64");
                 }
-
-                console.log("\n========================================");
-                console.log("💾 YOUR PERSISTENT SESSION ID (Keep Secret!):");
-                console.log(`${sessionId}`);
-                console.log("========================================\n");
 
                 // 💎 PREMIUM USER MESSAGE
                 const { getSettings } = require("./lib/settings");

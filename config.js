@@ -1,6 +1,6 @@
 module.exports = {
     // Bot version
-    version: "1.0.1",
+    version: "1.0.2",
 
     // Bot owners (Full JIDs or raw numbers)
     ownerNumbers: [
