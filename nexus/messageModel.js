@@ -118,20 +118,21 @@ const saveMessage = async (m, sock) => {
             });
         }
         
-        // 💾 ALWAYS maintain a rolling buffer for AI Summarization (even if DB is offline)
-        // Store only the text content to keep storage light
+        // 💾 In-Memory rolling buffer for AI Summarization (Zero Disk I/O overhead)
         const textContent = (message.conversation || message.extendedTextMessage?.text || message.imageMessage?.caption || "").trim();
         if (textContent) {
-            const history = jsonStore.get(`history_${m.key.remoteJid}`) || [];
+            const jid = m.key.remoteJid;
+            if (!global.historyCache) global.historyCache = new Map();
+            const history = global.historyCache.get(jid) || [];
             history.push({
                 name: m.pushName || "User",
                 text: textContent,
                 time: m.messageTimestamp
             });
             
-            // Keep only the last 50 messages
+            // Keep only the last 50 messages in RAM
             if (history.length > 50) history.shift();
-            jsonStore.set(`history_${m.key.remoteJid}`, history);
+            global.historyCache.set(jid, history);
         }
         
         return null;
@@ -170,7 +171,12 @@ const getGroupHistory = async (jid, limit = 50) => {
             })).reverse();
         }
         
-        // Preference 2: JSON Store Fallback
+        // Preference 2: In-Memory History Cache
+        if (global.historyCache && global.historyCache.has(jid)) {
+            return global.historyCache.get(jid).slice(-limit);
+        }
+        
+        // Preference 3: JSON Store Fallback
         const history = jsonStore.get(`history_${jid}`) || [];
         return history.slice(-limit);
     } catch (e) {

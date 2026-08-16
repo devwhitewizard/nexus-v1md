@@ -273,7 +273,6 @@ async function connectionLogic() {
     // Custom wrapper for sendMessage to inject clickable "View Channel" label
     const originalSendMessage = sock.sendMessage.bind(sock);
     sock.sendMessage = async (jid, content, options = {}) => {
-        const { getSettings } = require("./lib/settings");
         const settings = getSettings();
 
         // If hideViewChannel is false (meaning show the clickable View Channel label) and we have resolved the JID
