@@ -50,7 +50,8 @@ module.exports = {
             autoreactdm: "autoReactDM", reactdm: "autoReactDM",
             autoreactgrp: "autoReactGrp", reactgrp: "autoReactGrp", reactgroup: "autoReactGrp",
             welcome: "welcome",
-            goodbye: "goodbye"
+            goodbye: "goodbye",
+            hideviewchannel: "hideViewChannel", viewchannel: "hideViewChannel"
         };
 
         const targetKey = nameMap[input];

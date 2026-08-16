@@ -88,60 +88,9 @@ if (sequelize) {
 const getBotSettings = async () => {
     const { isOnline } = require('../nexus/db');
     const jsonStore = require('../nexus/jsonStore');
+    const { defaultSettings } = require('../lib/settings');
 
-    const defaults = { 
-        publicMode: true,
-        antiLink: false,
-        antiTag: false,
-        antiBadword: false,
-        antiSpam: true,
-        antiDelete: true,
-        antiEdit: true,
-        antiCall: false,
-        statusAntiDelete: false,
-        autoDelete: false,
-        autoDeleteTime: 30000,
-        autoViewStatus: true,
-        autoLikeStatus: true,
-        autoReplyStatus: false,
-        statusReplyText: 'Nice status! ✨',
-        statusLikeEmojis: '❤️,✨,🔥,🙌,👍,⭐,💥,🎉,💯,😎,🤩,😍,👏',
-        autoRead: false,
-        autoType: false,
-        autoRecord: false,
-        alwaysOnline: false,
-        autoBio: false,
-        dmPresence: false,
-        groupPresence: false,
-        chatbotAI: false,
-        greetDM: false,
-        greetDMMsg: 'Hello World',
-        autoReactDM: false,
-        autoReactGrp: false,
-        welcome: false,
-        goodbye: false,
-        welcomeMsg: 'Hi @user, welcome to *@group*! 👋',
-        goodbyeMsg: 'Goodbye @user, we hope to see you back soon! 😢',
-        antiDeleteNotification: '🕵️ *Nexus Anti-Delete Update*',
-        footer: '© Nexus-MD • Channel: https://whatsapp.com/channel/0029VbD62UY7IUYU6cftzu02',
-        ownerNumber: '',
-        lockedCommands: '',
-        botName: 'Nexus-MD',
-        device: 'Android',
-        prefix: '.',
-        packName: 'Nexus-MD',
-        author: 'White Wizard',
-        timezone: 'Africa/Nairobi',
-        botImage: 'Default',
-        hideViewChannel: false,
-        menuStyle: 2,
-        antiLinkGlobal: 'off',
-        antiLinkLimit: 3,
-        antiStatusMentionGlobal: 'off',
-        antiStatusMentionLimit: 3,
-        groupEventsGlobal: false,
-        eventsPromote: false
-    };
+    const defaults = defaultSettings;
 
     if (!isOnline() || !SettingsDB) {
         const [settings] = await jsonStore.findOrCreate({

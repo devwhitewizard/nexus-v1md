@@ -2,27 +2,36 @@ const { getSettings, updateSettings } = require("../../lib/settings");
 
 module.exports = {
     name: "hideviewchannel",
-    aliases: ["sethideviewchannel"],
-    description: "Toggle hide view channel and forwarded labels on/off",
+    aliases: ["sethideviewchannel", "viewchannel", "channeltag", "channellink"],
+    description: "Control clickable Channel tag / View Channel label on outgoing messages",
     category: "owner",
     isOwnerOnly: true,
     execute: async (ctx) => {
         const { sock, jid, args, msg } = ctx;
         const input = args[0]?.toLowerCase().trim();
 
-        if (input !== "on" && input !== "off" && input !== "toggle" && input !== undefined) {
-            return await sock.sendMessage(jid, { text: "⚠️ Usage: `.hideviewchannel on/off`" }, { quoted: msg });
-        }
-
         const settings = getSettings();
-        let newValue = !settings.hideViewChannel; // Default to toggle if undefined or 'toggle'
+        let newValue;
 
-        if (input === "on") newValue = true;
-        if (input === "off") newValue = false;
+        if (input === "on" || input === "hide" || input === "true" || input === "enable") {
+            newValue = true;  // Hide the channel tag
+        } else if (input === "off" || input === "show" || input === "false" || input === "disable") {
+            newValue = false; // Show the channel tag
+        } else if (input === "toggle" || !input) {
+            newValue = !settings.hideViewChannel;
+        } else {
+            return await sock.sendMessage(jid, { 
+                text: "⚠️ *Usage:*\n▸ `.hideviewchannel show` (or `off`) — Show the View Channel link on messages\n▸ `.hideviewchannel hide` (or `on`) — Hide the View Channel link on messages" 
+            }, { quoted: msg });
+        }
 
         try {
             await updateSettings({ hideViewChannel: newValue });
-            await sock.sendMessage(jid, { text: `✅ *Hide View Channel Status:* Now *${newValue ? "ON" : "OFF"}*.` }, { quoted: msg });
+            const statusText = newValue 
+                ? "🙈 *View Channel Banner:* **HIDDEN**\n\n_Channel link will NOT appear on outgoing bot messages._" 
+                : "📢 *View Channel Banner:* **VISIBLE**\n\n_Clickable View Channel link will be displayed on outgoing bot messages._";
+            
+            await sock.sendMessage(jid, { text: `✅ ${statusText}` }, { quoted: msg });
         } catch (err) {
             console.error("HideViewChannel update error:", err);
             await sock.sendMessage(jid, { text: `❌ Failed to update hide view channel: ${err.message}` }, { quoted: msg });
