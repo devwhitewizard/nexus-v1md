@@ -444,7 +444,6 @@ async function connectionLogic() {
                 const REPO_URL = "https://github.com/devwhitewizard/nexus-v1md";
 
                 const connectButtons = [
-                    { text: "📢 Follow Channel", url: CHANNEL_URL },
                     { text: "💻 GitHub Repo", url: REPO_URL }
                 ];
 

@@ -23,32 +23,64 @@ const ROASTS = [
     "I've seen better heads on a pimple.",
     "Even your dog emails in more complete sentences than you speak.",
     "If you were any less clever, we'd have to water you.",
-    "You're a special kind of stupid — the kind that takes talent."
+    "You're a special kind of stupid — the kind that takes talent.",
+    "You bring everyone so much joy when you leave the room.",
+    "I'd agree with you, but then we'd both be wrong.",
+    "You're not even worth the effort it takes to be rude to.",
+    "I'd insult you, but nature already did the job.",
+    "You're the human version of a Monday morning."
 ];
 
 module.exports = {
     name: "roast",
-    aliases: ["roastme", "burn"],
-    description: "Roast a mentioned user with a funny insult.",
+    aliases: ["roastme", "burn", "burnout"],
+    description: "Roast a user — tag them, reply to their message, or use alone to roast yourself.",
     category: "social",
-    execute: async ({ sock, jid, msg }) => {
-        const mentioned =
-            msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0];
+    execute: async ({ sock, jid, msg, args, sender }) => {
 
-        if (!mentioned) {
-            return await sock.sendMessage(jid, { text: "❓ *Usage:* `.roast @user`" });
+        // Resolve target: 1. Mention, 2. Quoted message participant, 3. Sender themselves
+        const contextInfo = msg.message?.extendedTextMessage?.contextInfo ||
+                            msg.message?.imageMessage?.contextInfo ||
+                            msg.message?.videoMessage?.contextInfo;
+
+        let targetJid = contextInfo?.mentionedJid?.[0] || contextInfo?.participant || null;
+
+        // If no mention/reply, try args (e.g. .roast 254712345678)
+        if (!targetJid && args && args[0] && !args[0].startsWith(".")) {
+            const argStr = args[0].replace("@", "").replace(/\D/g, "");
+            if (argStr.length > 5) {
+                let digits = argStr;
+                if (digits.startsWith("0")) digits = "254" + digits.slice(1);
+                targetJid = `${digits}@s.whatsapp.net`;
+            }
         }
 
+        // Default: roast the sender themselves
+        if (!targetJid) {
+            targetJid = sender;
+        }
+
+        // Clean device suffix
+        const cleanNum = targetJid.split("@")[0].split(":")[0].replace(/\D/g, "");
+        const phoneJid = `${cleanNum}@s.whatsapp.net`;
+        const isSelf = cleanNum === (sender.split("@")[0].split(":")[0].replace(/\D/g, ""));
+
         const roast = ROASTS[Math.floor(Math.random() * ROASTS.length)];
+        const burnLevel = ["Warm 🟡", "Hot 🟠", "FIRE 🔴", "NUCLEAR ☢️"][Math.floor(Math.random() * 4)];
+
+        const targetLabel = isSelf ? "yourself" : `@${cleanNum}`;
+        const mentionText = isSelf 
+            ? `💀 You dared ask for it — *roasting yourself*...\n\n`
+            : `Targeting @${cleanNum}...\n\n`;
 
         await sock.sendMessage(jid, {
             text:
-                `🔥 *ROAST SESSION*\n\n` +
-                `Targeting @${mentioned.split("@")[0]}...\n\n` +
+                `🔥 *ROAST SESSION* 🔥\n\n` +
+                mentionText +
                 `💬 _"${roast}"_\n\n` +
-                `🌡️ *Burn level:* ${["Warm 🟡", "Hot 🟠", "FIRE 🔴", "NUCLEAR ☢️"][Math.floor(Math.random() * 4)]}\n` +
+                `🌡️ *Burn level:* ${burnLevel}\n` +
                 `_Nexus-1MD Roast Engine™_`,
-            mentions: [mentioned]
+            mentions: [phoneJid]
         }, { quoted: msg });
     }
 };
