@@ -41,7 +41,8 @@ module.exports = {
         // Resolve target: 1. Mention, 2. Quoted message participant, 3. Sender themselves
         const contextInfo = msg.message?.extendedTextMessage?.contextInfo ||
                             msg.message?.imageMessage?.contextInfo ||
-                            msg.message?.videoMessage?.contextInfo;
+                            msg.message?.videoMessage?.contextInfo ||
+                            msg.message?.documentMessage?.contextInfo;
 
         let targetJid = contextInfo?.mentionedJid?.[0] || contextInfo?.participant || null;
 
@@ -60,15 +61,46 @@ module.exports = {
             targetJid = sender;
         }
 
-        // Clean device suffix
-        const cleanNum = targetJid.split("@")[0].split(":")[0].replace(/\D/g, "");
-        const phoneJid = `${cleanNum}@s.whatsapp.net`;
-        const isSelf = cleanNum === (sender.split("@")[0].split(":")[0].replace(/\D/g, ""));
+        // In group chats, resolve LID JID to valid Phone JID via groupMetadata
+        let phoneJid = targetJid;
+        if (jid.endsWith("@g.us")) {
+            try {
+                const metadata = await sock.groupMetadata(jid).catch(() => null);
+                if (metadata && metadata.participants) {
+                    const rawTargetClean = targetJid.split(":")[0].toLowerCase();
+                    const targetDigits = rawTargetClean.replace(/\D/g, "");
+
+                    const matched = metadata.participants.find(p => {
+                        const pIdClean = p.id.split(":")[0].toLowerCase();
+                        const pLidClean = (p.lid || "").split(":")[0].toLowerCase();
+                        const pIdDigits = p.id.split("@")[0].split(":")[0].replace(/\D/g, "");
+                        const pLidDigits = (p.lid || "").split("@")[0].split(":")[0].replace(/\D/g, "");
+
+                        return pIdClean === rawTargetClean ||
+                               (pLidClean && pLidClean === rawTargetClean) ||
+                               (targetDigits && pIdDigits && (pIdDigits === targetDigits || pIdDigits.endsWith(targetDigits) || targetDigits.endsWith(pIdDigits))) ||
+                               (targetDigits && pLidDigits && (pLidDigits === targetDigits || pLidDigits.endsWith(targetDigits) || targetDigits.endsWith(pLidDigits)));
+                    });
+
+                    if (matched) {
+                        phoneJid = matched.id;
+                        if (phoneJid.endsWith("@lid") && matched.phoneNumber) {
+                            phoneJid = `${matched.phoneNumber.replace(/\D/g, "")}@s.whatsapp.net`;
+                        }
+                    }
+                }
+            } catch (_) {}
+        }
+
+        // Clean device suffix and ensure phone JID
+        const cleanNum = phoneJid.split("@")[0].split(":")[0].replace(/\D/g, "");
+        const validPhoneJid = `${cleanNum}@s.whatsapp.net`;
+        const senderClean = sender.split("@")[0].split(":")[0].replace(/\D/g, "");
+        const isSelf = cleanNum === senderClean;
 
         const roast = ROASTS[Math.floor(Math.random() * ROASTS.length)];
         const burnLevel = ["Warm 🟡", "Hot 🟠", "FIRE 🔴", "NUCLEAR ☢️"][Math.floor(Math.random() * 4)];
 
-        const targetLabel = isSelf ? "yourself" : `@${cleanNum}`;
         const mentionText = isSelf 
             ? `💀 You dared ask for it — *roasting yourself*...\n\n`
             : `Targeting @${cleanNum}...\n\n`;
@@ -80,7 +112,7 @@ module.exports = {
                 `💬 _"${roast}"_\n\n` +
                 `🌡️ *Burn level:* ${burnLevel}\n` +
                 `_Nexus-1MD Roast Engine™_`,
-            mentions: [phoneJid]
+            mentions: [validPhoneJid]
         }, { quoted: msg });
     }
 };
