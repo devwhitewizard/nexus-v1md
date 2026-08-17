@@ -17,7 +17,7 @@ module.exports = {
         if (!action) {
             let help = `🎭 *Group Events Control Panel*\n`;
             help += `━━━━━━━━━━━━━━━━━━\n\n`;
-            
+
             const localMode = jsonStore.get(`events_mode_${jid}`, null);
             const activeMode = localMode !== null ? (localMode === "on") : settings.groupEventsGlobal;
 
@@ -54,7 +54,7 @@ module.exports = {
                 await updateSettings({ eventsPromote: false });
                 return await sock.sendMessage(jid, { text: "✅ *Promotion Alerts:* Disabled globally." }, { quoted: msg });
             } else {
-                return await sock.sendMessage(jid, { text: "⚠️ Use `.events promote on` or `.events promote off`" }, { quoted: msg });
+                return await sock.sendMessage(jid, { text: "⚠️ Use `.events  on` or `.events promote off`" }, { quoted: msg });
             }
         }
 
@@ -65,13 +65,13 @@ module.exports = {
 
             if (target === "all" || target === "global") {
                 await updateSettings({ groupEventsGlobal: stateVal });
-                return await sock.sendMessage(jid, { 
-                    text: `✅ *Global Group Events:* Default status set to *${stateVal ? "ON" : "OFF"}* for all groups.` 
+                return await sock.sendMessage(jid, {
+                    text: `✅ *Global Group Events:* Default status set to *${stateVal ? "ON" : "OFF"}* for all groups.`
                 }, { quoted: msg });
             } else {
                 jsonStore.set(`events_mode_${jid}`, action);
-                return await sock.sendMessage(jid, { 
-                    text: `✅ *Group Events:* Status for this group is now set to *${action.toUpperCase()}*.` 
+                return await sock.sendMessage(jid, {
+                    text: `✅ *Group Events:* Status for this group is now set to *${action.toUpperCase()}*.`
                 }, { quoted: msg });
             }
         }
@@ -80,8 +80,8 @@ module.exports = {
         if (action === "welcome" || action === "goodbye") {
             let msgText = args.slice(1).join(" ").trim();
             if (!msgText) {
-                return await sock.sendMessage(jid, { 
-                    text: `⚠️ Please specify a message template. Example:\n\`.events ${action} Welcome @user to {group}!\`` 
+                return await sock.sendMessage(jid, {
+                    text: `⚠️ Please specify a message template. Example:\n\`.events ${action} Welcome @user to {group}!\``
                 }, { quoted: msg });
             }
 
@@ -96,13 +96,13 @@ module.exports = {
                 } else {
                     await updateSettings({ goodbyeMsg: msgText });
                 }
-                return await sock.sendMessage(jid, { 
-                    text: `✅ *Global Message Saved:* The default ${action} template is now set to:\n\n_${msgText}_` 
+                return await sock.sendMessage(jid, {
+                    text: `✅ *Global Message Saved:* The default ${action} template is now set to:\n\n_${msgText}_`
                 }, { quoted: msg });
             } else {
                 jsonStore.set(`${action}_msg_${jid}`, msgText);
-                return await sock.sendMessage(jid, { 
-                    text: `✅ *Group Message Saved:* The ${action} template for this group is now set to:\n\n_${msgText}_` 
+                return await sock.sendMessage(jid, {
+                    text: `✅ *Group Message Saved:* The ${action} template for this group is now set to:\n\n_${msgText}_`
                 }, { quoted: msg });
             }
         }
