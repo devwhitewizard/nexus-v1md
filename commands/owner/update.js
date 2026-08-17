@@ -13,11 +13,8 @@ module.exports = {
     aliases: ["up", "upgrade"],
     description: "Update the bot to the latest version from GitHub.",
     category: "owner",
-    sudoOnly: true,
+    isOwnerOnly: true,
     execute: async ({ sock, jid, msg, args }) => {
-        const { isSudo } = require("../../lib/middleware");
-        const sender = msg.key.participant || msg.key.remoteJid;
-        if (!isSudo(sender)) return;
 
         const isHeroku = !!process.env.DYNO || !!process.env.HEROKU_APP_NAME || !!process.env.HEROKU_API_KEY;
         const subCommand = args[0] ? args[0].toLowerCase() : "";

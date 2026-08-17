@@ -639,15 +639,16 @@ async function connectionLogic() {
     sock.ev.on("group-participants.update", async (update) => {
         try {
             const { id, participants, action } = update;
-            const settings = getSettings();
 
+            // Force refresh group metadata in Baileys cache when participants or admin roles change
+            const metadata = await sock.groupMetadata(id).catch(() => null);
+
+            const settings = getSettings();
             const jsonStore = require("./nexus/jsonStore");
             const localMode = jsonStore.get(`events_mode_${id}`, null);
             const isActive = localMode !== null ? (localMode === "on") : settings.groupEventsGlobal;
 
             if (!isActive) return;
-
-            const metadata = await sock.groupMetadata(id).catch(() => null);
             if (!metadata) return;
 
             const time = new Date().toLocaleTimeString("en-GB", { hour12: false });
