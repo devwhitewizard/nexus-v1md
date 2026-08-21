@@ -113,15 +113,20 @@ async function connectionLogic() {
 
     // 📦 SESSION ID AUTO-RESTORE
     if (process.env.SESSION_ID) {
-        console.log("📦 SESSION_ID detected. Verifying session file...");
+        console.log("📦 SESSION_ID detected in environment variables. Verifying...");
         const credsPath = path.join(__dirname, authFolder, "creds.json");
         const sessionExists = fs.existsSync(credsPath) && fs.statSync(credsPath).size > 10;
 
         if (!sessionExists) {
-            console.log("📦 SESSION_ID found in .env and local credentials missing. Attempting to restore session...");
+            console.log("📦 Restoring credentials from SESSION_ID...");
             try {
-                const rawId = process.env.SESSION_ID.trim();
-                const sessionId = rawId.includes("~") ? rawId.split("~")[1] : (rawId.startsWith("Nexus") ? rawId.slice(5) : rawId);
+                // Strip surrounding quotes, whitespace, and newlines
+                const rawId = process.env.SESSION_ID.trim().replace(/^["']|["']$/g, "").trim();
+                const sessionId = (rawId.includes("~") 
+                    ? rawId.split("~").slice(1).join("~") 
+                    : (rawId.startsWith("Nexus") ? rawId.slice(5) : rawId)
+                ).replace(/\s+/g, "");
+
                 const buffer = Buffer.from(sessionId, "base64");
 
                 let credsJson = "";
@@ -140,13 +145,12 @@ async function connectionLogic() {
                     credsJson = decodeBuffer(nestedBuffer);
                 }
 
-                // 2. Smart Binary Search & Validation
+                // Smart Binary Search & Validation
                 const extractValidJsonFromBuffer = (buf) => {
                     const text = buf.toString("utf-8");
                     const firstBrace = text.indexOf("{");
                     if (firstBrace === -1) return null;
 
-                    // Scan for valid JSON blocks
                     for (let i = 0; i < text.length; i++) {
                         if (text[i] === "{") {
                             try {
@@ -174,20 +178,20 @@ async function connectionLogic() {
                             const finalPath = path.join(__dirname, authFolder, "creds.json");
                             if (!fs.existsSync(path.dirname(finalPath))) fs.mkdirSync(path.dirname(finalPath), { recursive: true });
                             fs.writeFileSync(finalPath, JSON.stringify(creds));
-                            console.log(`✅ Credentials written to: ${finalPath}`);
+                            console.log(`✅ Credentials written successfully to: ${finalPath}`);
                         }
                     } catch (e) {
                         console.error("❌ Session JSON parse failed:", e.message);
                     }
                 } else {
-                    console.error("❌ Error: Could not find valid JSON in Session ID.");
+                    console.error("❌ Error: Could not extract valid credentials JSON from SESSION_ID. The SESSION_ID may be corrupted or truncated.");
                 }
                 console.log("✅ Session restoration flow complete.");
             } catch (e) {
-                console.error("❌ Failed to restore session from ID:", e.message);
+                console.error("❌ Failed to restore session from SESSION_ID:", e.message);
             }
         } else {
-            console.log("📦 Local creds.json already exists and is valid. Skipping SESSION_ID restoration to preserve updated keys.");
+            console.log("📦 Local creds.json already exists and is valid. Skipping SESSION_ID restoration.");
         }
     }
 

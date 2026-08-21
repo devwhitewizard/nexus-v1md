@@ -1,4 +1,4 @@
-const mumaker = require('mumaker');
+const { generateTextEffect } = require('../../lib/textmaker');
 
 module.exports = {
   name: 'sand',
@@ -19,14 +19,10 @@ module.exports = {
 
       await sock.sendMessage(jid, { text: "⏳ *Generating your sand effect...* Please wait." }, { quoted: msg });
       
-      const result = await mumaker.ephoto('https://en.ephoto360.com/write-names-and-messages-on-the-sand-online-582.html', text);
-      
-      if (!result || !result.image) {
-        throw new Error('No image URL received from the API');
-      }
+      const imageUrl = await generateTextEffect('sand', text);
       
       await sock.sendMessage(jid, {
-        image: { url: result.image },
+        image: { url: imageUrl },
         caption: `🏖️ *SAND EFFECT*\n\n💎 *Text:* ${text}\n🛡️ *Powered by Nexus-1MD*`
       }, { quoted: msg });
       

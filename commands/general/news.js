@@ -33,7 +33,7 @@ module.exports = {
     name: "news",
     aliases: ["headlines", "technews", "bbcnews", "citizennews", "cnn"],
     description: "Get latest news headlines from BBC, NTV, Citizen, KBC, Tech, or search Kenya news (with fallback API).",
-    category: "general",
+    category: "news",
     async execute({ sock, jid, msg, args }) {
         const input = args.join(" ").trim();
         const source = args[0]?.toLowerCase();

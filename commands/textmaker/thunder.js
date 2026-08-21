@@ -1,4 +1,4 @@
-const mumaker = require('mumaker');
+const { generateTextEffect } = require('../../lib/textmaker');
 
 module.exports = {
   name: 'thunder',
@@ -19,14 +19,14 @@ module.exports = {
 
       await sock.sendMessage(jid, { text: "⏳ *Generating your thunder effect...* Please wait." }, { quoted: msg });
       
-      const result = await mumaker.ephoto('https://en.ephoto360.com/thunder-text-effect-online-97.html', text);
+      const imageUrl = await generateTextEffect('thunder', text);
       
       if (!result || !result.image) {
         throw new Error('No image URL received from the API');
       }
       
       await sock.sendMessage(jid, {
-        image: { url: result.image },
+        image: { url: imageUrl },
         caption: `✨ *THUNDER EFFECT*\n\n💎 *Text:* ${text}\n🛡️ *Powered by Nexus-1MD*`
       }, { quoted: msg });
       

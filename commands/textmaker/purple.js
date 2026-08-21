@@ -1,4 +1,4 @@
-const mumaker = require('mumaker');
+const { generateTextEffect } = require('../../lib/textmaker');
 
 module.exports = {
   name: 'purple',
@@ -19,14 +19,14 @@ module.exports = {
 
       await sock.sendMessage(jid, { text: "⏳ *Generating your purple effect...* Please wait." }, { quoted: msg });
       
-      const result = await mumaker.ephoto('https://en.ephoto360.com/purple-text-effect-online-100.html', text);
+      const imageUrl = await generateTextEffect('purple', text);
       
       if (!result || !result.image) {
         throw new Error('No image URL received from the API');
       }
       
       await sock.sendMessage(jid, {
-        image: { url: result.image },
+        image: { url: imageUrl },
         caption: `🔮 *PURPLE GLOW EFFECT*\n\n💎 *Text:* ${text}\n🛡️ *Powered by Nexus-1MD*`
       }, { quoted: msg });
       

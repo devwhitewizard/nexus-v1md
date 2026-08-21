@@ -17,6 +17,7 @@ const CATEGORY_META = {
     anime: { icon: "🎭", label: "ANIME" },
     economy: { icon: "💰", label: "ECONOMY" },
     sports: { icon: "⚽", label: "SPORTS" },
+    news: { icon: "📰", label: "NEWS" },
     religion: { icon: "⛪", label: "RELIGION" },
     dp: { icon: "🖼️", label: "DP" },
     group: { icon: "👥", label: "GROUP" },
@@ -29,7 +30,7 @@ const CATEGORY_META = {
 // Strict, clean display order
 const CATEGORY_ORDER = [
     "general", "download", "ai", "media", "sticker", "fun", "games",
-    "social", "anime", "economy", "sports", "religion", "dp",
+    "social", "anime", "economy", "sports", "news", "religion", "dp",
     "group", "admin", "system", "textmaker", "owner"
 ];
 
@@ -83,7 +84,6 @@ const USAGE_HINTS = {
     typography: "<text>",
     underwater: "<text>",
     vintagetext: "<text>",
-    vintagetext: "<text>",
     wingslogo: "<text>",
     wolfgalaxy: "<text>",
 
@@ -124,11 +124,41 @@ const USAGE_HINTS = {
     tagall: "[reason]",
     hidetag: "<message>",
 
+    // News
+    news: "<bbc|ntv|citizen|kbc|tech|cnn|query>",
+    headlines: "<source>",
+    technews: "[query]",
+    bbcnews: "[query]",
+    citizennews: "[query]",
+    cnn: "[query]",
+
+    // Sports
+    player: "<name>",
+    team: "<name>",
+    stadium: "<name>",
+    standings: "[league]",
+    fixtures: "[league]",
+    topscorers: "[league]",
+    gamehistory: "<match>",
+    livesports: "[query]",
+    flive: "",
+    flive2: "",
+    predictions: "",
+    fstream: "",
+    fnews: "",
+    blive: "",
+    livescore: "",
+    sportnews: "",
+    sportscats: "",
+    cricket: "[query]",
+    football: "[query]",
+    nba: "[query]",
+
     // General & Tools
     savestatus: "<reply>",
     save: "<reply>",
     sv: "<reply>",
-    sharestatus: "[all]",
+    sharestatus: "[message]",
     gcstatus: "[message]",
     hideviewchannel: "<on/off>",
     statusemoji: "<emojis>",
