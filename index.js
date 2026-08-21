@@ -273,27 +273,35 @@ async function connectionLogic() {
     // Custom wrapper for sendMessage to inject clickable "View Channel" label
     const originalSendMessage = sock.sendMessage.bind(sock);
     sock.sendMessage = async (jid, content, options = {}) => {
+        let msgPayload = typeof content === "string" ? { text: content } : content;
         const settings = getSettings();
 
-        // If hideViewChannel is false (meaning show the clickable View Channel label) and we have resolved the JID
-        if (!settings.hideViewChannel && global.newsletterJid) {
-            if (content && typeof content === "object" && !content.delete && !content.react) {
-                if (!content.contextInfo) {
-                    content.contextInfo = {};
+        const isChannelHidden = settings.hideViewChannel === true || settings.hideViewChannel === "true" || settings.hideViewChannel === 1 || settings.hideViewChannel === "1";
+
+        if (!isChannelHidden && global.newsletterJid) {
+            const channelData = {
+                newsletterJid: global.newsletterJid,
+                newsletterName: global.newsletterName || "Nexus-MD Updates",
+                serverMessageId: 100
+            };
+
+            if (msgPayload && typeof msgPayload === "object" && !msgPayload.delete && !msgPayload.react) {
+                if (!msgPayload.contextInfo) {
+                    msgPayload.contextInfo = {};
                 }
-                // Only override if not already explicitly set
-                if (!content.contextInfo.forwardedNewsletterMessageInfo) {
-                    content.contextInfo.forwardingScore = 999;
-                    content.contextInfo.isForwarded = true;
-                    content.contextInfo.forwardedNewsletterMessageInfo = {
-                        newsletterJid: global.newsletterJid,
-                        newsletterName: global.newsletterName || "Nexus-MD Updates",
-                        serverMessageId: 1
-                    };
+                msgPayload.contextInfo.forwardingScore = 999;
+                msgPayload.contextInfo.isForwarded = true;
+                msgPayload.contextInfo.forwardedNewsletterMessageInfo = channelData;
+
+                if (options) {
+                    if (!options.contextInfo) options.contextInfo = {};
+                    options.contextInfo.forwardingScore = 999;
+                    options.contextInfo.isForwarded = true;
+                    options.contextInfo.forwardedNewsletterMessageInfo = channelData;
                 }
             }
         }
-        return await originalSendMessage(jid, content, options);
+        return await originalSendMessage(jid, msgPayload, options);
     };
 
     // ⌚ WATCHDOG: If SESSION_ID is present but fails to connect within 30s, enable QR.

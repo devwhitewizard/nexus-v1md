@@ -3,6 +3,13 @@ const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+let ffmpegPath = "ffmpeg";
+try {
+    ffmpegPath = require("ffmpeg-static") || "ffmpeg";
+} catch (e) {
+    ffmpegPath = "ffmpeg";
+}
+
 module.exports = {
     name: "toaudio",
     aliases: ["tovn"],
@@ -26,12 +33,18 @@ module.exports = {
                 { logger: console }
             );
 
-            const inputPath = path.join(__dirname, `../tmp/input_${Date.now()}.mp4`);
-            const outputPath = path.join(__dirname, `../tmp/output_${Date.now()}.mp3`);
+            const tempDir = path.join(__dirname, "../../temp_media");
+            if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+
+            const timestamp = Date.now();
+            const inputPath = path.join(tempDir, `input_${timestamp}.mp4`);
+            const outputPath = path.join(tempDir, `output_${timestamp}.mp3`);
             
             fs.writeFileSync(inputPath, buffer);
 
-            exec(`ffmpeg -i ${inputPath} -vn -acodec libmp3lame -q:a 2 ${outputPath}`, { timeout: 15000 }, async (err) => {
+            const ffmpegCmd = `"${ffmpegPath}" -i "${inputPath}" -vn -acodec libmp3lame -q:a 2 -y "${outputPath}"`;
+
+            exec(ffmpegCmd, { timeout: 15000 }, async (err) => {
                 if (err) {
                     console.error("FFmpeg audio error:", err);
                     await sock.sendMessage(jid, { text: "❌ Audio extraction failed." });

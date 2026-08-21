@@ -3,6 +3,7 @@
 # Dependency directories
 node_modules/
 jspm_packages/
+package-lock.json
 
 # Authentication & Session Data (CRITICAL: Do NOT push these!)
 auth_info_baileys/
@@ -33,6 +34,7 @@ desktop.ini
 
 # Temporary / Downloaded Files
 database/*.db
+database/*.json
 database/storage.json
 *.db
 *.db-journal

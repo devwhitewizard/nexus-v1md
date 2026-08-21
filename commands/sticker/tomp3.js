@@ -3,6 +3,13 @@ const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+let ffmpegPath = "ffmpeg";
+try {
+    ffmpegPath = require("ffmpeg-static") || "ffmpeg";
+} catch (e) {
+    ffmpegPath = "ffmpeg";
+}
+
 module.exports = {
     name: "tomp3",
     description: "Convert audio to high-quality MP3.",
@@ -25,13 +32,18 @@ module.exports = {
                 { logger: console }
             );
 
-            const inputPath = path.join(__dirname, `../tmp/input_${Date.now()}.opus`);
-            const outputPath = path.join(__dirname, `../tmp/output_${Date.now()}.mp3`);
+            const tempDir = path.join(__dirname, "../../temp_media");
+            if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+
+            const timestamp = Date.now();
+            const inputPath = path.join(tempDir, `input_${timestamp}.opus`);
+            const outputPath = path.join(tempDir, `output_${timestamp}.mp3`);
             
             fs.writeFileSync(inputPath, buffer);
 
-            // High-quality 192kbps MP3 CBR
-            exec(`ffmpeg -i ${inputPath} -vn -ar 44100 -ac 2 -b:a 192k ${outputPath}`, { timeout: 15000 }, async (err) => {
+            const ffmpegCmd = `"${ffmpegPath}" -i "${inputPath}" -vn -ar 44100 -ac 2 -b:a 192k -y "${outputPath}"`;
+
+            exec(ffmpegCmd, { timeout: 15000 }, async (err) => {
                 if (err) {
                     console.error("FFmpeg mp3 error:", err);
                     await sock.sendMessage(jid, { text: "❌ MP3 transcoding failed." });

@@ -125,6 +125,14 @@ const USAGE_HINTS = {
     hidetag: "<message>",
 
     // General & Tools
+    savestatus: "<reply>",
+    save: "<reply>",
+    sv: "<reply>",
+    sharestatus: "[all]",
+    gcstatus: "[message]",
+    hideviewchannel: "<on/off>",
+    statusemoji: "<emojis>",
+    mode: "[public/private]",
     calc: "<math>",
     translate: "<text>",
     weather: "<city>",

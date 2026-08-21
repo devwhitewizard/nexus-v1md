@@ -1,161 +1,63 @@
 const axios = require("axios");
-const teamsData = {
-    "real madrid": {
-        name: "Real Madrid CF",
-        nickname: "Los Blancos",
-        stadium: "Santiago Bernabéu (Madrid, Spain)",
-        manager: "Carlo Ancelotti",
-        trophies: "15x UEFA Champions League, 36x La Liga, 20x Copa del Rey",
-        squad: "Mbappé, Vinícius Jr., Bellingham, Valverde, Courtois",
-        desc: "Widely regarded as the most successful football club in the world, famous for their Champions League pedigree."
-    },
-    "barcelona": {
-        name: "FC Barcelona",
-        nickname: "La Blaugrana",
-        stadium: "Camp Nou (Barcelona, Spain)",
-        manager: "Hansi Flick",
-        trophies: "5x UEFA Champions League, 27x La Liga, 31x Copa del Rey",
-        squad: "Lewandowski, Lamine Yamal, Pedri, Gavi, Ter Stegen",
-        desc: "Famous for their Tiki-Taka style, youth academy (La Masia), and historic rivalry with Real Madrid (El Clásico)."
-    },
-    "arsenal": {
-        name: "Arsenal FC",
-        nickname: "The Gunners",
-        stadium: "Emirates Stadium (London, UK)",
-        manager: "Mikel Arteta",
-        trophies: "13x First Division/Premier League, 14x FA Cup",
-        squad: "Saka, Ødegaard, Rice, Saliba, Gabriel, Raya",
-        desc: "Famous for their 'Invincibles' season (2003-04) where they went undefeated in the Premier League."
-    },
-    "chelsea": {
-        name: "Chelsea FC",
-        nickname: "The Blues",
-        stadium: "Stamford Bridge (London, UK)",
-        manager: "Enzo Maresca",
-        trophies: "2x UEFA Champions League, 6x Premier League, 8x FA Cup",
-        squad: "Cole Palmer, Jackson, Caicedo, Enzo, James",
-        desc: "One of the most successful English clubs of the 21st century, rising to prominence under Roman Abramovich."
-    },
-    "man united": {
-        name: "Manchester United FC",
-        nickname: "The Red Devils",
-        stadium: "Old Trafford (Manchester, UK)",
-        manager: "Rúben Amorim",
-        trophies: "3x UEFA Champions League, 20x English League, 13x FA Cup",
-        squad: "Bruno Fernandes, Rashford, Mainoo, Garnacho, De Ligt",
-        desc: "The most successful club in English domestic league history, famously coached by Sir Alex Ferguson."
-    },
-    "man city": {
-        name: "Manchester City FC",
-        nickname: "The Citizens",
-        stadium: "Etihad Stadium (Manchester, UK)",
-        manager: "Pep Guardiola",
-        trophies: "1x UEFA Champions League, 10x Premier League, 7x FA Cup",
-        squad: "Erling Haaland, De Bruyne, Foden, Rodri, Ederson",
-        desc: "Dominant force of modern English football, achieving the historic continental treble in 2023."
-    },
-    "liverpool": {
-        name: "Liverpool FC",
-        nickname: "The Reds",
-        stadium: "Anfield (Liverpool, UK)",
-        manager: "Arne Slot",
-        trophies: "6x UEFA Champions League, 19x English League, 8x FA Cup",
-        squad: "Mohamed Salah, Van Dijk, Luis Díaz, Mac Allister, Alisson",
-        desc: "Famous for their passionate fan base, 'You'll Never Walk Alone' anthem, and rich European history."
-    }
-};
+const { getSettings } = require("../../lib/settings");
 
-const playersData = {
-    "messi": {
-        name: "Lionel Messi",
-        team: "Inter Miami / Argentina",
-        position: "Forward / Playmaker",
-        trophies: "1x World Cup, 8x Ballon d'Or, 4x Champions League, 10x La Liga",
-        stats: "800+ Career Goals, 350+ Assists",
-        desc: "Universally considered one of the greatest players of all time, known for his dribbling, vision, and magic left foot."
-    },
-    "ronaldo": {
-        name: "Cristiano Ronaldo",
-        team: "Al Nassr / Portugal",
-        position: "Forward / Striker",
-        trophies: "5x Champions League, 5x Ballon d'Or, 1x Euros, 3x Premier League, 2x La Liga, 2x Serie A",
-        stats: "890+ Career Goals, 250+ Assists",
-        desc: "The highest goalscorer in football history, legendary for his work ethic, physical fitness, and clutch UCL goals."
-    },
-    "haaland": {
-        name: "Erling Haaland",
-        team: "Manchester City / Norway",
-        position: "Striker",
-        trophies: "1x Champions League, 2x Premier League, 1x FA Cup",
-        stats: "250+ Career Goals in under 300 matches",
-        desc: "A goalscoring machine known for his extreme speed, power, off-the-ball movement, and clinical finishing."
-    },
-    "mbappe": {
-        name: "Kylian Mbappé",
-        team: "Real Madrid / France",
-        position: "Forward / Winger",
-        trophies: "1x World Cup, 7x Ligue 1",
-        stats: "300+ Career Goals, World Cup Final Hat-trick",
-        desc: "One of the fastest players in the world, combining explosive speed with elite dribbling and world-class scoring."
-    },
-    "bellingham": {
-        name: "Jude Bellingham",
-        team: "Real Madrid / England",
-        position: "Midfielder",
-        trophies: "1x Champions League, 1x La Liga",
-        stats: "La Liga Player of the Year 2023-24",
-        desc: "A complete box-to-box midfielder, carrying maturity beyond his years and an exceptional knack for scoring late winners."
-    },
-    "palmer": {
-        name: "Cole Palmer",
-        team: "Chelsea / England",
-        position: "Attacking Midfielder / Winger",
-        trophies: "U21 Euros Champion, EPL Young Player of the Season",
-        stats: "Cold-blooded penalty taker, 25+ goals in breakout Chelsea season",
-        desc: "Dubbed 'Cold Palmer' for his cool composure and effortless playmaking in final third spaces."
-    }
-};
+const KEITH_API_BASE = "https://apiskeith2-production-3020.up.railway.app";
 
-// Main export containing livesports command
+// Main export: livesports command
 const livesportsCommand = {
     name: "livesports",
     aliases: ["livesport"],
-    description: "Get active live sports broadcasts and streaming server info.",
+    description: "Get active live sports broadcasts and live match scores from API.",
     category: "sports",
     execute: async ({ sock, jid, msg }) => {
-        let text = `⚽ *NEXUS LIVE SPORTS HUB* ⚽\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `📺 *Live Streaming Servers:*\n`;
-        text += `▸ *Server 1 (Full HD):* sportstreambox.net\n`;
-        text += `▸ *Server 2 (Mobile Friendly):* livesport24.org\n`;
-        text += `▸ *Server 3 (No Ads):* fstream.io\n\n`;
-        text += `🏟️ *Active Broadcasts Today:*\n`;
-        text += `• ⚽ *Football:* EPL, La Liga, Champions League\n`;
-        text += `• 🏀 *Basketball:* NBA Playoff Finals\n`;
-        text += `• 🎾 *Tennis:* Wimbledon Grand Slam\n\n`;
-        text += `_Type \`.fstream\` to get direct channels, or \`.livescore\` to view current scores!_`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/livescore`, { timeout: 10000 });
+            let text = `⚽ *NEXUS LIVE SPORTS HUB* ⚽\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            if (res.data?.status && res.data?.result?.games) {
+                const games = Object.values(res.data.result.games).slice(0, 8);
+                text += `🏟️ *Active Broadcasts & Matches:* \n\n`;
+                games.forEach((g, index) => {
+                    const status = g.R?.st || "Scheduled";
+                    const score1 = g.R?.r1 ?? "-";
+                    const score2 = g.R?.r2 ?? "-";
+                    text += `${index + 1}. *${g.p1}* ${score1} - ${score2} *${g.p2}* [${status}]\n`;
+                });
+            } else {
+                text += `No active live broadcasts reported right now.\n\n`;
+            }
+
+            text += `\n💡 _Type \`.livescore\` to view current scores or \`.fixtures\` for upcoming matches!_`;
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("livesports error:", err.message);
+            await sock.sendMessage(jid, { text: "❌ Failed to fetch live sports data from API." }, { quoted: msg });
+        }
     }
 };
 
-// Attach other commands as properties of the main export
 livesportsCommand.sportscats = {
     name: "sportscats",
     aliases: ["sportcategories"],
-    description: "List sports categories supported by the bot.",
+    description: "List sports categories and commands supported by the bot.",
     category: "sports",
     execute: async ({ sock, jid, msg }) => {
-        let text = `⚽ *NEXUS SPORTS CATEGORIES* ⚽\n`;
+        let text = `⚽ *NEXUS SPORTS COMMANDS & CATEGORIES* ⚽\n`;
         text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `Explore events across these disciplines:\n\n`;
-        text += `1. ⚽ *Football (Soccer)* — EPL, UCL, La Liga, World Cup\n`;
-        text += `2. 🏀 *Basketball (NBA)* — Playoffs, EuroLeague\n`;
-        text += `3. 🏏 *Cricket* — T20 World Cup, IPL, Ashes\n`;
-        text += `4. 🎾 *Tennis* — Wimbledon, US Open, Roland Garros\n`;
-        text += `5. 🏈 *Rugby* — Six Nations, Super Rugby\n\n`;
-        text += `💡 _Use commands like \`.fixtures\` or \`.standings\` to get details!_`;
-        
+        text += `Explore real-time data powered by Sports API:\n\n`;
+        text += `• 🏃‍♂️ *.player <name>* — Search player bio, team, nationality & status\n`;
+        text += `• 🛡️ *.team <name>* — Search team details, stadium & league\n`;
+        text += `• 🏟️ *.stadium <name>* — Search stadium / venue details\n`;
+        text += `• 📊 *.standings <league>* — League tables (epl, ucl, laliga, bundesliga, seriea, ligue1, euros, fifa)\n`;
+        text += `• 📅 *.fixtures <league>* — Upcoming match fixtures\n`;
+        text += `• ⚽ *.livescore* — Live football match scores\n`;
+        text += `• 🥇 *.topscorers <league>* — Top goal scorers\n`;
+        text += `• 🔮 *.predictions* — Sure betting tips & free odds\n`;
+        text += `• 📰 *.fnews* — Latest football news\n`;
+        text += `• 📜 *.gamehistory <match>* — Match events & history\n`;
+        text += `• ⚽ *.football* / 🏀 *.nba* / 🏏 *.cricket*\n\n`;
+        text += `💡 _Example: \`.standings ucl\` or \`.player Bukayo Saka\`_`;
         await sock.sendMessage(jid, { text }, { quoted: msg });
     }
 };
@@ -166,78 +68,130 @@ livesportsCommand.flive = {
     description: "View active live football match scores.",
     category: "sports",
     execute: async ({ sock, jid, msg }) => {
-        let text = `⚽ *LIVE FOOTBALL MATCHES* ⚽\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `🏆 *Premier League (Live - 74')*\n`;
-        text += `• Arsenal 2 - 1 Chelsea\n`;
-        text += `  ⚽ _Saka 14', Ødegaard 55' | Palmer 42'_\n\n`;
-        text += `🏆 *La Liga (Live - 38')*\n`;
-        text += `• Real Madrid 1 - 0 Barcelona\n`;
-        text += `  ⚽ _Vinicius Jr. 22'_\n\n`;
-        text += `🏆 *UEFA Champions League (Live - 89')*\n`;
-        text += `• Bayern Munich 3 - 3 Man City\n`;
-        text += `  ⚽ _Kane 8', Musiala 47', Sane 71' | Haaland 19', De Bruyne 60', Foden 85'_\n\n`;
-        text += `🎙️ _Type \`.flive2\` to read live event commentary!_`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/livescore`, { timeout: 10000 });
+            let text = `⚽ *LIVE FOOTBALL MATCHES* ⚽\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            if (res.data?.status && res.data?.result?.games) {
+                const games = Object.values(res.data.result.games).slice(0, 10);
+                games.forEach((g, i) => {
+                    const st = g.R?.st || "Live";
+                    const r1 = g.R?.r1 ?? "0";
+                    const r2 = g.R?.r2 ?? "0";
+                    text += `${i + 1}. *${g.p1}* ${r1} - ${r2} *${g.p2}* (${st})\n`;
+                });
+            } else {
+                text += `No live football matches currently active.\n`;
+            }
+
+            text += `\n🎙️ _Type \`.flive2\` for detailed match events!_`;
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("flive error:", err.message);
+            await sock.sendMessage(jid, { text: "❌ Failed to fetch live scores." }, { quoted: msg });
+        }
     }
 };
 
 livesportsCommand.flive2 = {
     name: "flive2",
     aliases: ["footballcommentary"],
-    description: "View detailed live commentary for active matches.",
+    description: "View detailed live commentary and events for active matches.",
     category: "sports",
     execute: async ({ sock, jid, msg }) => {
-        let text = `🎙️ *LIVE FOOTBALL COMMENTARY* 🎙️\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `🏆 *Arsenal vs Chelsea (76')*\n`;
-        text += `> "🔥 CHANCE! Saka runs down the right wing, cuts past Cucurella, and shoots! Sanchez makes a spectacular diving save to deny Arsenal. Corner kick!"\n\n`;
-        text += `🏆 *Real Madrid vs Barcelona (40')*\n`;
-        text += `> "Real Madrid dominates midfield spaces. Bellingham slides a beautifully weighted pass through to Mbappé, but he is caught marginally offside."`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/livescore2`, { timeout: 10000 });
+            let text = `🎙️ *LIVE FOOTBALL MATCH DETAILS & EVENTS* 🎙️\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            const list = res.data?.result?.data?.list;
+            if (res.data?.status && Array.isArray(list) && list.length > 0) {
+                list.slice(0, 5).forEach((item, idx) => {
+                    const t1 = item.team1?.name || "Home";
+                    const s1 = item.team1?.score || "0";
+                    const t2 = item.team2?.name || "Away";
+                    const s2 = item.team2?.score || "0";
+                    text += `${idx + 1}. *${t1}* ${s1} - ${s2} *${t2}*\n`;
+                });
+            } else {
+                text += `No detailed commentary events available at this moment.\n`;
+            }
+
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("flive2 error:", err.message);
+            await sock.sendMessage(jid, { text: "❌ Failed to fetch detailed match events." }, { quoted: msg });
+        }
     }
 };
 
 livesportsCommand.predictions = {
     name: "predictions",
-    aliases: ["pred"],
-    description: "View sports match predictions and betting tips.",
+    aliases: ["pred", "bet"],
+    description: "View sure betting tips, odds, and match predictions.",
     category: "sports",
     execute: async ({ sock, jid, msg }) => {
-        let text = `🔮 *NEXUS SPORTS PREDICTION ENGINE* 🔮\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `📈 *EPL: Arsenal vs Chelsea*\n`;
-        text += `• *Prediction:* Home Win (Arsenal)\n`;
-        text += `• *Odds:* 1.65 | *Confidence:* 78%\n`;
-        text += `• *Tip:* Over 2.5 Goals / Saka to score\n\n`;
-        text += `📈 *La Liga: Real Madrid vs Barcelona*\n`;
-        text += `• *Prediction:* Draw / Both Teams to Score (GG)\n`;
-        text += `• *Odds:* 3.40 | *Confidence:* 60%\n\n`;
-        text += `📈 *UCL: Man City vs Bayern Munich*\n`;
-        text += `• *Prediction:* Away Win (Man City)\n`;
-        text += `• *Odds:* 2.10 | *Confidence:* 72%`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/bet`, { timeout: 10000 });
+            let text = `🔮 *SURE BET TIPS & MATCH ODDS* 🔮\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            if (res.data?.status && Array.isArray(res.data?.result) && res.data.result.length > 0) {
+                let count = 0;
+                for (const item of res.data.result) {
+                    if (count >= 6) break;
+                    const leagueName = item.league || "Matches";
+                    if (Array.isArray(item.matches) && item.matches.length > 0) {
+                        text += `🏆 *${leagueName}*\n`;
+                        item.matches.forEach((m) => {
+                            count++;
+                            const home = m.homeTeam || "Home";
+                            const away = m.awayTeam || "Away";
+                            const tip = m.prediction?.tip || "Over 1.5";
+                            const odd = m.prediction?.odd || "1.50";
+                            text += `• *${home}* vs *${away}*\n`;
+                            text += `  💡 *Tip:* ${tip} | *Odd:* ${odd}\n\n`;
+                        });
+                    }
+                }
+            } else {
+                text += `No betting tips available right now.\n`;
+            }
+
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("predictions error:", err.message);
+            await sock.sendMessage(jid, { text: "❌ Failed to fetch predictions." }, { quoted: msg });
+        }
     }
 };
 
 livesportsCommand.fstream = {
     name: "fstream",
     aliases: ["footballstreams"],
-    description: "Get direct live football streaming channel links.",
+    description: "Get active live score streams.",
     category: "sports",
     execute: async ({ sock, jid, msg }) => {
-        let text = `📺 *NEXUS FOOTBALL STREAMING LINKS* 📺\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `🔗 *EPL Streams:* http://epl-stream.io\n`;
-        text += `🔗 *La Liga Live:* http://laliga-live.com\n`;
-        text += `🔗 *UCL Stream HD:* http://ucl-stream-hd.xyz\n`;
-        text += `📺 *Premium SkySports / Bein channels:* http://premium-iptv.net\n\n`;
-        text += `⚠️ _Use an adblocker for a smoother streaming experience._`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/livescore`, { timeout: 10000 });
+            let text = `📺 *NEXUS LIVE FOOTBALL STREAMS* 📺\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            if (res.data?.status && res.data?.result?.games) {
+                const games = Object.values(res.data.result.games).slice(0, 5);
+                games.forEach((g, i) => {
+                    text += `🔗 *Match ${i + 1}:* ${g.p1} vs ${g.p2} (${g.R?.st || "FT"})\n`;
+                });
+            } else {
+                text += `No active streams available at this time.\n`;
+            }
+
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("fstream error:", err.message);
+            await sock.sendMessage(jid, { text: "❌ Failed to fetch stream details." }, { quoted: msg });
+        }
     }
 };
 
@@ -247,52 +201,87 @@ livesportsCommand.fnews = {
     description: "Get latest football news headlines.",
     category: "sports",
     execute: async ({ sock, jid, msg }) => {
-        let text = `📰 *LATEST FOOTBALL NEWS* 📰\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `🚨 *TRANSFERS:* Erling Haaland commits future to Man City, signing a new 5-year contract extension.\n\n`;
-        text += `🚨 *CHAMPIONS LEAGUE:* UEFA confirms the UCL Quarter Finals fixture draw. Real Madrid will face Bayern Munich.\n\n`;
-        text += `🚨 *INJURY UPDATE:* Martin Ødegaard returns to full first-team training after recovering from an ankle sprain.`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/football/news`, { timeout: 10000 });
+            let text = `📰 *LATEST FOOTBALL NEWS HEADLINES* 📰\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            const items = res.data?.result?.data?.items;
+            if (res.data?.status && Array.isArray(items) && items.length > 0) {
+                items.slice(0, 5).forEach((item, idx) => {
+                    const title = item.title || "Headline";
+                    const summary = item.summary ? item.summary.replace(/<[^>]*>/g, "").slice(0, 150) : "";
+                    text += `${idx + 1}. 🚨 *${title}*\n`;
+                    if (summary) text += `   ${summary}...\n\n`;
+                });
+            } else {
+                text += `No news items available right now.\n`;
+            }
+
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("fnews error:", err.message);
+            await sock.sendMessage(jid, { text: "❌ Failed to fetch football news." }, { quoted: msg });
+        }
     }
 };
 
 livesportsCommand.blive = {
     name: "blive",
     aliases: ["basketballlive", "nbalive"],
-    description: "View active live basketball scores.",
+    description: "View basketball / NBA team and event info.",
     category: "sports",
     execute: async ({ sock, jid, msg }) => {
-        let text = `🏀 *NBA LIVE SCOREBOARD* 🏀\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `🏆 *NBA Finals (Q3 - 04:12)*\n`;
-        text += `• LA Lakers 88 - 92 Golden State Warriors\n`;
-        text += `  🔥 _LeBron James 26pts, 8ast | Steph Curry 32pts, 6/9 3PM_\n\n`;
-        text += `🏆 *Regular Season (Final)*\n`;
-        text += `• Boston Celtics 112 - 105 Milwaukee Bucks\n`;
-        text += `  🔥 _Tatum 34pts | Giannis 29pts, 12reb_`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/sport/teamsearch?q=Lakers`, { timeout: 10000 });
+            let text = `🏀 *BASKETBALL / NBA LIVE INFO* 🏀\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            if (res.data?.status && Array.isArray(res.data?.result) && res.data.result.length > 0) {
+                const team = res.data.result[0];
+                text += `🏆 *Featured Team:* ${team.name}\n`;
+                text += `• *League:* ${team.league || "NBA"}\n`;
+                text += `• *Arena:* ${team.stadium || "N/A"} (${team.location || ""})\n`;
+            } else {
+                text += `No live basketball games currently reported.\n`;
+            }
+
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("blive error:", err.message);
+            await sock.sendMessage(jid, { text: "❌ Failed to fetch basketball scores." }, { quoted: msg });
+        }
     }
 };
 
 livesportsCommand.livescore = {
     name: "livescore",
     aliases: ["score", "scores"],
-    description: "View unified live scores across multiple sports.",
+    description: "View unified live scores across sports.",
     category: "sports",
     execute: async ({ sock, jid, msg }) => {
-        let text = `🏆 *NEXUS LIVE SCOREBOARD* 🏆\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `⚽ *FOOTBALL:*\n`;
-        text += `• Arsenal 2 - 1 Chelsea (74')\n`;
-        text += `• Real Madrid 1 - 0 Barcelona (38')\n\n`;
-        text += `🏀 *BASKETBALL:*\n`;
-        text += `• LA Lakers 88 - 92 Golden State Warriors (Q3)\n\n`;
-        text += `🏏 *CRICKET:*\n`;
-        text += `• India 182/4 vs Australia 140/3 (15.2 Overs)`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/livescore`, { timeout: 10000 });
+            let text = `🏆 *NEXUS LIVE SCOREBOARD* 🏆\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            if (res.data?.status && res.data?.result?.games) {
+                const games = Object.values(res.data.result.games).slice(0, 10);
+                games.forEach((g, i) => {
+                    const st = g.R?.st || "Live";
+                    const r1 = g.R?.r1 ?? "0";
+                    const r2 = g.R?.r2 ?? "0";
+                    text += `${i + 1}. *${g.p1}* ${r1} - ${r2} *${g.p2}* (${st})\n`;
+                });
+            } else {
+                text += `No live scores active at the moment.\n`;
+            }
+
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("livescore error:", err.message);
+            await sock.sendMessage(jid, { text: "❌ Failed to fetch live scores." }, { quoted: msg });
+        }
     }
 };
 
@@ -302,34 +291,65 @@ livesportsCommand.sportnews = {
     description: "Get general sports headlines.",
     category: "sports",
     execute: async ({ sock, jid, msg }) => {
-        let text = `📰 *NEXUS GENERAL SPORTS NEWS* 📰\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `🎾 *TENNIS:* Carlos Alcaraz wins the French Open in a grueling 5-set thriller against Alexander Zverev.\n\n`;
-        text += `🏎️ *FORMULA 1:* Lewis Hamilton wins the British GP at Silverstone, claiming his first victory in 2 years.\n\n`;
-        text += `🏀 *BASKETBALL:* Boston Celtics secure their 18th NBA Championship franchise title after defeating the Mavs.`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/football/news`, { timeout: 10000 });
+            let text = `📰 *NEXUS SPORTS HEADLINES* 📰\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            const items = res.data?.result?.data?.items;
+            if (res.data?.status && Array.isArray(items) && items.length > 0) {
+                items.slice(0, 5).forEach((item, idx) => {
+                    const title = item.title || "Headline";
+                    text += `${idx + 1}. 🚨 *${title}*\n`;
+                });
+            } else {
+                text += `No current sports headlines found.\n`;
+            }
+
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("sportnews error:", err.message);
+            await sock.sendMessage(jid, { text: "❌ Failed to fetch sports headlines." }, { quoted: msg });
+        }
     }
 };
 
 livesportsCommand.topscorers = {
     name: "topscorers",
     aliases: ["goals"],
-    description: "View top goal scorers across European football leagues.",
+    description: "View top goal scorers across European football leagues and UCL.",
     category: "sports",
-    execute: async ({ sock, jid, msg }) => {
-        let text = `⚽ *EUROPEAN LEAGUE TOP SCORERS* ⚽\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `🏆 *Premier League (EPL)*\n`;
-        text += `1. 🇳🇴 Erling Haaland (Man City) - 27 Goals\n`;
-        text += `2. 🏴󠁧󠁢󠁥󠁮󠁧󠁿 Cole Palmer (Chelsea) - 22 Goals\n`;
-        text += `3. 🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ollie Watkins (Aston Villa) - 19 Goals\n\n`;
-        text += `🏆 *La Liga*\n`;
-        text += `1. 🇺🇦 Artem Dovbyk (Girona) - 24 Goals\n`;
-        text += `2. 🇳🇬 Alexander Sørloth (Villarreal) - 23 Goals\n`;
-        text += `3. 🏴󠁧󠁢󠁥󠁮󠁧󠁿 Jude Bellingham (Real Madrid) - 19 Goals`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+    execute: async ({ sock, jid, args, msg }) => {
+        const inputLeague = (args[0] || "epl").toLowerCase();
+        const validLeagues = ["epl", "ucl", "laliga", "bundesliga", "seriea", "ligue1", "euros", "fifa"];
+        const league = validLeagues.includes(inputLeague) ? inputLeague : "epl";
+
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/${league}/scorers`, { timeout: 10000 });
+            let text = `⚽ *TOP GOAL SCORERS (${league.toUpperCase()})* ⚽\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            const rawData = res.data?.result;
+            const scorers = Array.isArray(rawData) ? rawData : (rawData?.topScorers || rawData?.scorers);
+
+            if (res.data?.status && Array.isArray(scorers) && scorers.length > 0) {
+                scorers.slice(0, 10).forEach((s, idx) => {
+                    const name = s.player || s.name || "Player";
+                    const team = s.team || "Team";
+                    const goals = s.goals || 0;
+                    text += `${idx + 1}. *${name}* (${team}) - ${goals} Goals\n`;
+                });
+            } else if (res.data?.error) {
+                text += `⚠️ *API Status:* ${res.data.error}\n\n_Try specifying another league e.g. \`.topscorers ucl\` or \`.topscorers laliga\`._\n`;
+            } else {
+                text += `No top scorers data returned for ${league.toUpperCase()}.\n`;
+            }
+
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("topscorers error:", err.message);
+            await sock.sendMessage(jid, { text: `❌ Failed to fetch top scorers for ${league.toUpperCase()}.` }, { quoted: msg });
+        }
     }
 };
 
@@ -338,23 +358,57 @@ livesportsCommand.standings = {
     aliases: ["table"],
     description: "View current football league standings.",
     category: "sports",
-    execute: async ({ sock, jid, msg }) => {
-        let text = `🏆 *LEAGUE STANDINGS TABLES* 🏆\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `🏴_ Premier League (EPL) Top 5:*\n`;
-        text += `1. Man City - 91 pts (Champions)\n`;
-        text += `2. Arsenal - 89 pts\n`;
-        text += `3. Liverpool - 82 pts\n`;
-        text += `4. Aston Villa - 68 pts\n`;
-        text += `5. Tottenham - 66 pts\n\n`;
-        text += `🇪🇸 *La Liga Top 5:*\n`;
-        text += `1. Real Madrid - 95 pts (Champions)\n`;
-        text += `2. Barcelona - 85 pts\n`;
-        text += `3. Girona - 81 pts\n`;
-        text += `4. Atletico Madrid - 76 pts\n`;
-        text += `5. Athletic Club - 68 pts`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+    execute: async ({ sock, jid, args, msg }) => {
+        const inputLeague = (args[0] || "epl").toLowerCase();
+        const leagueMap = {
+            epl: "epl",
+            premier: "epl",
+            ucl: "ucl",
+            championsleague: "ucl",
+            laliga: "laliga",
+            spain: "laliga",
+            bundesliga: "bundesliga",
+            germany: "bundesliga",
+            seriea: "seriea",
+            italy: "seriea",
+            ligue1: "ligue1",
+            france: "ligue1",
+            euros: "euros",
+            fifa: "fifa"
+        };
+        const endpoint = leagueMap[inputLeague] || "epl";
+
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/${endpoint}/standings`, { timeout: 10000 });
+            const comp = res.data?.result?.competition || endpoint.toUpperCase();
+            const standings = res.data?.result?.standings;
+
+            let text = `🏆 *LEAGUE STANDINGS TABLE (${comp})* 🏆\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            if (res.data?.status && Array.isArray(standings) && standings.length > 0) {
+                text += `\`Pos  Team                   P   W  D  L  Pts\`\n`;
+                text += `─────────────────────────────────────────\n`;
+                standings.slice(0, 15).forEach((t) => {
+                    const pos = String(t.position).padStart(2, " ");
+                    const teamName = t.team.length > 18 ? t.team.slice(0, 18) + "." : t.team.padEnd(19, " ");
+                    const p = String(t.played).padStart(2, " ");
+                    const w = String(t.won).padStart(2, " ");
+                    const d = String(t.draw).padStart(2, " ");
+                    const l = String(t.lost).padStart(2, " ");
+                    const pts = String(t.points).padStart(3, " ");
+                    text += `${pos}. ${teamName} ${p} ${w} ${d} ${l} ${pts}\n`;
+                });
+                text += `\n💡 _Leagues supported: epl, ucl, laliga, bundesliga, seriea, ligue1, euros, fifa_`;
+            } else {
+                text += `No standings table data found for ${endpoint.toUpperCase()}.\n`;
+            }
+
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("standings error:", err.message);
+            await sock.sendMessage(jid, { text: `❌ Failed to fetch standings for ${endpoint}.` }, { quoted: msg });
+        }
     }
 };
 
@@ -363,106 +417,162 @@ livesportsCommand.fixtures = {
     aliases: ["fixture", "matches"],
     description: "View upcoming match fixtures.",
     category: "sports",
-    execute: async ({ sock, jid, msg }) => {
-        let text = `📅 *UPCOMING MATCH FIXTURES* 📅\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `⚽ *TODAY:*\n`;
-        text += `• Man United vs Liverpool (18:30)\n`;
-        text += `• Chelsea vs Arsenal (21:00)\n`;
-        text += `• PSG vs Marseille (22:00)\n\n`;
-        text += `⚽ *TOMORROW:*\n`;
-        text += `• Inter Milan vs AC Milan (21:45)\n`;
-        text += `• Real Madrid vs Atletico Madrid (22:00)`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+    execute: async ({ sock, jid, args, msg }) => {
+        const inputLeague = (args[0] || "epl").toLowerCase();
+        const validLeagues = ["epl", "ucl", "laliga", "bundesliga", "seriea", "ligue1", "euros", "fifa"];
+        const endpoint = validLeagues.includes(inputLeague) ? inputLeague : "epl";
+
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/${endpoint}/upcomingmatches`, { timeout: 10000 });
+            const comp = res.data?.result?.competition || endpoint.toUpperCase();
+            const matches = res.data?.result?.upcomingMatches;
+
+            let text = `📅 *UPCOMING MATCH FIXTURES (${comp})* 📅\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            if (res.data?.status && Array.isArray(matches) && matches.length > 0) {
+                matches.slice(0, 10).forEach((m, idx) => {
+                    text += `${idx + 1}. *${m.homeTeam}* vs *${m.awayTeam}*\n`;
+                    text += `   🗓️ Date: ${m.date || "Upcoming"} (Matchday ${m.matchday || 1})\n\n`;
+                });
+                text += `💡 _Usage: \`.fixtures <epl|ucl|laliga|bundesliga|seriea|ligue1|euros|fifa>\`_`;
+            } else {
+                text += `No upcoming fixtures found for ${endpoint.toUpperCase()}.\n`;
+            }
+
+            await sock.sendMessage(jid, { text }, { quoted: msg });
+        } catch (err) {
+            console.error("fixtures error:", err.message);
+            await sock.sendMessage(jid, { text: `❌ Failed to fetch fixtures for ${endpoint}.` }, { quoted: msg });
+        }
     }
 };
 
 livesportsCommand.gamehistory = {
     name: "gamehistory",
     aliases: ["history"],
-    description: "View results of recent and historic matches.",
+    description: "Search match event details and game history.",
     category: "sports",
-    execute: async ({ sock, jid, msg }) => {
-        let text = `📜 *NEXUS SPORTS GAME HISTORY* 📜\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `🏆 *UCL Finals:* \n`;
-        text += `• *2024:* Real Madrid 2 - 0 Dortmund\n`;
-        text += `• *2023:* Man City 1 - 0 Inter Milan\n`;
-        text += `• *2022:* Real Madrid 1 - 0 Liverpool\n\n`;
-        text += `🏆 *World Cup Finals:* \n`;
-        text += `• *2022:* Argentina 3 - 3 France (Arg won 4-2 on pens)\n`;
-        text += `• *2018:* France 4 - 2 Croatia`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+    execute: async ({ sock, jid, args, msg }) => {
+        const query = args.join(" ").trim() || "Arsenal vs Chelsea";
+
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/sport/gameevents?q=${encodeURIComponent(query)}`, { timeout: 10000 });
+
+            if (res.data?.status && Array.isArray(res.data?.result) && res.data.result.length > 0) {
+                const event = res.data.result[0];
+                let text = `📜 *GAME EVENTS & HISTORY* 📜\n`;
+                text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+                text += `⚽ *Match:* ${event.match || query}\n`;
+                if (event.league?.name) text += `🏆 *League:* ${event.league.name}\n`;
+                if (event.season) text += `🗓️ *Season:* ${event.season}\n`;
+                if (event.teams) {
+                    const home = event.teams.home?.name || "Home";
+                    const away = event.teams.away?.name || "Away";
+                    text += `⚔️ *Matchup:* ${home} vs ${away}\n`;
+                }
+                if (event.venue?.name) text += `🏟️ *Venue:* ${event.venue.name}\n`;
+
+                const imageUrl = event.league?.badge || event.teams?.home?.badge;
+                if (imageUrl) {
+                    await sock.sendMessage(jid, { image: { url: imageUrl }, caption: text }, { quoted: msg });
+                } else {
+                    await sock.sendMessage(jid, { text }, { quoted: msg });
+                }
+            } else {
+                await sock.sendMessage(jid, { text: `📜 *Game History:* No events found for *"${query}"*.` }, { quoted: msg });
+            }
+        } catch (err) {
+            console.error("gamehistory error:", err.message);
+            await sock.sendMessage(jid, { text: "❌ Failed to fetch game history." }, { quoted: msg });
+        }
     }
 };
 
 livesportsCommand.stadium = {
     name: "stadium",
-    aliases: ["stadiums"],
-    description: "Look up details of famous stadiums.",
+    aliases: ["stadiums", "venue"],
+    description: "Search details of sports stadiums and venues.",
     category: "sports",
-    execute: async ({ sock, jid, msg }) => {
-        let text = `🏟️ *FAMOUS STADIUMS GUIDE* 🏟️\n`;
-        text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        text += `🏟️ *Santiago Bernabéu*\n`;
-        text += `• *Location:* Madrid, Spain | *Capacity:* 85,000\n`;
-        text += `• *Team:* Real Madrid | Retractable roof & pitch.\n\n`;
-        text += `🏟️ *Camp Nou*\n`;
-        text += `• *Location:* Barcelona, Spain | *Capacity:* 99,354\n`;
-        text += `• *Team:* FC Barcelona | Largest stadium in Europe.\n\n`;
-        text += `🏟️ *Wembley Stadium*\n`;
-        text += `• *Location:* London, UK | *Capacity:* 90,000\n`;
-        text += `• *Feature:* Famous Wembley Arch, home of English football.`;
-        
-        await sock.sendMessage(jid, { text }, { quoted: msg });
+    execute: async ({ sock, jid, args, msg }) => {
+        const query = args.join(" ").trim();
+        if (!query) {
+            return await sock.sendMessage(jid, { text: "⚠️ Usage: `.stadium <stadium_name>` (e.g. \`.stadium Emirates\`)" }, { quoted: msg });
+        }
+
+        try {
+            const res = await axios.get(`${KEITH_API_BASE}/sport/venuesearch?q=${encodeURIComponent(query)}`, { timeout: 10000 });
+
+            if (res.data?.status && Array.isArray(res.data?.result) && res.data.result.length > 0) {
+                const venue = res.data.result[0];
+                let text = `🏟️ *STADIUM / VENUE INFO* 🏟️\n`;
+                text += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+                text += `🏟️ *Name:* ${venue.name}\n`;
+                if (venue.alternateName) text += `*Alternate Name:* ${venue.alternateName}\n`;
+                if (venue.sport) text += `⚽ *Sport:* ${venue.sport}\n`;
+                if (venue.capacity) text += `👥 *Capacity:* ${venue.capacity}\n`;
+                if (venue.location) text += `📍 *Location:* ${venue.location}\n`;
+                if (venue.country) text += `🌍 *Country:* ${venue.country}\n`;
+                if (venue.description) text += `\n📝 *Description:* ${venue.description.slice(0, 300)}...\n`;
+
+                const imageUrl = venue.media?.thumb || venue.media?.logo;
+                if (imageUrl) {
+                    await sock.sendMessage(jid, { image: { url: imageUrl }, caption: text }, { quoted: msg });
+                } else {
+                    await sock.sendMessage(jid, { text }, { quoted: msg });
+                }
+            } else {
+                await sock.sendMessage(jid, { text: `🏟️ Stadium *"${query}"* not found.` }, { quoted: msg });
+            }
+        } catch (err) {
+            console.error("stadium error:", err.message);
+            await sock.sendMessage(jid, { text: `❌ Failed to look up stadium info: ${err.message}` }, { quoted: msg });
+        }
     }
 };
 
 livesportsCommand.team = {
     name: "team",
     aliases: ["teams", "teaminfo"],
-    description: "Look up stats, squad, and info for a football team.",
+    description: "Search stats, stadium, and info for a sports team.",
     category: "sports",
     execute: async ({ sock, jid, args, msg }) => {
         const query = args.join(" ").trim();
         if (!query) {
-            return await sock.sendMessage(jid, { text: "⚠️ Usage: `.team <team_name>` (e.g. \`.team Real Madrid\`)" }, { quoted: msg });
+            return await sock.sendMessage(jid, { text: "⚠️ Usage: `.team <team_name>` (e.g. \`.team Arsenal\`)" }, { quoted: msg });
         }
 
-        const { getSettings } = require("../../lib/settings");
         const settings = getSettings();
         const botName = settings.botName || "Nexus-MD";
 
         try {
-            const cleanTeam = encodeURIComponent(query);
-            const response = await axios.get(`https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${cleanTeam}`);
-            const team = response.data?.teams?.[0];
+            const res = await axios.get(`${KEITH_API_BASE}/sport/teamsearch?q=${encodeURIComponent(query)}`, { timeout: 10000 });
 
-            if (!team) {
-                return await sock.sendMessage(jid, { text: `❌ Team *"${query}"* not found.` }, { quoted: msg });
-            }
+            if (res.data?.status && Array.isArray(res.data?.result) && res.data.result.length > 0) {
+                const team = res.data.result[0];
+                let captionText = `🛡️ *${botName.toUpperCase()} - TEAM INFO* 🛡️\n\n`;
+                captionText += `*${team.name}* ${team.shortName ? `[${team.shortName}]` : ""}\n\n`;
+                if (team.alternateName) captionText += `*Full Name:* ${team.alternateName}\n`;
+                captionText += `⚽ *Sport:* ${team.sport || "Soccer"}\n`;
+                captionText += `🏆 *League:* ${team.league || "N/A"}\n`;
+                captionText += `📅 *Formed Year:* ${team.formedYear || "N/A"}\n`;
+                captionText += `🏟️ *Stadium:* ${team.stadium || "N/A"} (Capacity: ${team.stadiumCapacity || "N/A"})\n`;
+                captionText += `📍 *Location:* ${team.location || "N/A"}, ${team.country || ""}\n\n`;
+                if (team.description) {
+                    captionText += `📝 *About:* ${team.description.slice(0, 350)}...\n`;
+                }
 
-            let captionText = `🛡️ *${botName.toUpperCase()} - TEAM INFO* 🛡️\n\n`;
-            captionText += `*${team.strTeam}* ${team.strAlternate ? `(${team.strAlternate})` : ""}\n\n`;
-            captionText += `⚽ *Sport:* ${team.strSport || "Soccer"}\n`;
-            captionText += `🏆 *League:* ${team.strLeague || "N/A"}\n`;
-            captionText += `📅 *Formed Year:* ${team.intFormedYear || "N/A"}\n`;
-            captionText += `🏟️ *Stadium:* ${team.strStadium || "N/A"} (Capacity: ${team.intStadiumCapacity || "N/A"})\n`;
-            captionText += `📍 *Location:* ${team.strStadiumLocation || "N/A"}\n\n`;
-            if (team.strStadiumDescription) {
-                captionText += `📝 *About:* ${team.strStadiumDescription.slice(0, 300)}...`;
-            }
-
-            const imageUrl = team.strBadge || team.strLogo;
-            if (imageUrl) {
-                await sock.sendMessage(jid, { image: { url: imageUrl }, caption: captionText }, { quoted: msg });
+                const imageUrl = team.badges?.small || team.badges?.large || team.badges?.banner;
+                if (imageUrl) {
+                    await sock.sendMessage(jid, { image: { url: imageUrl }, caption: captionText }, { quoted: msg });
+                } else {
+                    await sock.sendMessage(jid, { text: captionText }, { quoted: msg });
+                }
             } else {
-                await sock.sendMessage(jid, { text: captionText }, { quoted: msg });
+                await sock.sendMessage(jid, { text: `❌ Team *"${query}"* not found.` }, { quoted: msg });
             }
         } catch (err) {
-            console.error("Team search API error:", err);
+            console.error("Team search API error:", err.message);
             await sock.sendMessage(jid, { text: `❌ Failed to look up team info: ${err.message}` }, { quoted: msg });
         }
     }
@@ -471,47 +581,43 @@ livesportsCommand.team = {
 livesportsCommand.player = {
     name: "player",
     aliases: ["players", "playerinfo"],
-    description: "Look up stats, awards, and bio for a football player.",
+    description: "Search info, bio, and stats for a sports player.",
     category: "sports",
     execute: async ({ sock, jid, args, msg }) => {
         const query = args.join(" ").trim();
         if (!query) {
-            return await sock.sendMessage(jid, { text: "⚠️ Usage: `.player <player_name>` (e.g. \`.player Messi\`)" }, { quoted: msg });
+            return await sock.sendMessage(jid, { text: "⚠️ Usage: `.player <player_name>` (e.g. \`.player Bukayo Saka\`)" }, { quoted: msg });
         }
 
-        const { getSettings } = require("../../lib/settings");
         const settings = getSettings();
         const botName = settings.botName || "Nexus-MD";
 
         try {
-            const cleanPlayer = encodeURIComponent(query.replace(/\s+/g, "_"));
-            const response = await axios.get(`https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${cleanPlayer}`);
-            const player = response.data?.player?.[0];
+            const res = await axios.get(`${KEITH_API_BASE}/sport/playersearch?q=${encodeURIComponent(query)}`, { timeout: 10000 });
 
-            if (!player) {
-                return await sock.sendMessage(jid, { text: `❌ Player *"${query}"* not found.` }, { quoted: msg });
-            }
+            if (res.data?.status && Array.isArray(res.data?.result) && res.data.result.length > 0) {
+                const player = res.data.result[0];
+                let captionText = `👤 *${botName.toUpperCase()} - PLAYER INFO* 👤\n\n`;
+                captionText += `*${player.name}*\n\n`;
+                captionText += `🏃‍♂️ *Position:* ${player.position || "N/A"}\n`;
+                captionText += `🏡 *Team:* ${player.team || "N/A"}\n`;
+                captionText += `⚽ *Sport:* ${player.sport || "Soccer"}\n`;
+                captionText += `🌍 *Nationality:* ${player.nationality || "N/A"}\n`;
+                captionText += `📅 *Birth Date:* ${player.birthDate || "N/A"}\n`;
+                captionText += `⚡ *Status:* ${player.status || "Active"}\n`;
+                captionText += `🚻 *Gender:* ${player.gender || "N/A"}\n`;
 
-            let captionText = `👤 *${botName.toUpperCase()} - PLAYER INFO* 👤\n\n`;
-            captionText += `*${player.strPlayer}*\n\n`;
-            captionText += `🏃‍♂️ *Position:* ${player.strPosition || "N/A"}\n`;
-            captionText += `🏡 *Team:* ${player.strTeam || "N/A"}\n`;
-            captionText += `🌍 *Nationality:* ${player.strNationality || "N/A"}\n`;
-            captionText += `📅 *Birth Date:* ${player.dateBorn || "N/A"}\n`;
-            captionText += `👕 *Number:* ${player.strNumber || "N/A"}\n`;
-            captionText += `⚡ *Status:* ${player.strStatus || "Active"}\n\n`;
-            if (player.strDescriptionEN) {
-                captionText += `📝 *Bio:* ${player.strDescriptionEN.slice(0, 300)}...`;
-            }
-
-            const imageUrl = player.strThumb || player.strCutout;
-            if (imageUrl) {
-                await sock.sendMessage(jid, { image: { url: imageUrl }, caption: captionText }, { quoted: msg });
+                const imageUrl = player.thumbnail || player.cutout;
+                if (imageUrl) {
+                    await sock.sendMessage(jid, { image: { url: imageUrl }, caption: captionText }, { quoted: msg });
+                } else {
+                    await sock.sendMessage(jid, { text: captionText }, { quoted: msg });
+                }
             } else {
-                await sock.sendMessage(jid, { text: captionText }, { quoted: msg });
+                await sock.sendMessage(jid, { text: `❌ Player *"${query}"* not found.` }, { quoted: msg });
             }
         } catch (err) {
-            console.error("Player search API error:", err);
+            console.error("Player search API error:", err.message);
             await sock.sendMessage(jid, { text: `❌ Failed to look up player info: ${err.message}` }, { quoted: msg });
         }
     }

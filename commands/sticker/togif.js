@@ -3,9 +3,16 @@ const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+let ffmpegPath = "ffmpeg";
+try {
+    ffmpegPath = require("ffmpeg-static") || "ffmpeg";
+} catch (e) {
+    ffmpegPath = "ffmpeg";
+}
+
 module.exports = {
     name: "togif",
-    description: "Convert video to GIF.",
+    description: "Convert video or animated sticker to GIF.",
     category: "sticker",
     async execute({ sock, jid, msg }) {
         const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage || msg.message;
@@ -25,13 +32,18 @@ module.exports = {
                 { logger: console }
             );
 
-            const inputPath = path.join(__dirname, `../tmp/input_${Date.now()}.mp4`);
-            const outputPath = path.join(__dirname, `../tmp/output_${Date.now()}.gif`);
+            const tempDir = path.join(__dirname, "../../temp_media");
+            if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+
+            const timestamp = Date.now();
+            const inputPath = path.join(tempDir, `input_${timestamp}.mp4`);
+            const outputPath = path.join(tempDir, `output_${timestamp}.gif`);
             
             fs.writeFileSync(inputPath, buffer);
 
-            // Professional FFmpeg GIF conversion settings
-            exec(`ffmpeg -i ${inputPath} -vf "fps=10,scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 ${outputPath}`, { timeout: 15000 }, async (err) => {
+            const ffmpegCmd = `"${ffmpegPath}" -i "${inputPath}" -vf "fps=10,scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 "${outputPath}"`;
+
+            exec(ffmpegCmd, { timeout: 30000 }, async (err) => {
                 if (err) {
                     console.error("FFmpeg GIF error:", err);
                     await sock.sendMessage(jid, { text: "❌ GIF creation failed." });

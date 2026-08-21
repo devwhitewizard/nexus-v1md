@@ -3,14 +3,23 @@ const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+let ffmpegPath = "ffmpeg";
+try {
+    ffmpegPath = require("ffmpeg-static") || "ffmpeg";
+} catch (e) {
+    ffmpegPath = "ffmpeg";
+}
+
 module.exports = {
     name: "toimg",
     aliases: ["toimage", "toview"],
     description: "Convert sticker to image.",
     category: "sticker",
     async execute({ sock, jid, msg }) {
-        const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-        if (!quoted || !quoted.stickerMessage) {
+        const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage || msg.message;
+        const stickerMsg = quoted?.stickerMessage;
+
+        if (!stickerMsg) {
             return await sock.sendMessage(jid, { text: "⚠️ Reply to a sticker to convert it to an image!" });
         }
 
@@ -24,13 +33,18 @@ module.exports = {
                 { logger: console }
             );
 
-            const inputPath = path.join(__dirname, `../tmp/input_${Date.now()}.webp`);
-            const outputPath = path.join(__dirname, `../tmp/output_${Date.now()}.png`);
+            const tempDir = path.join(__dirname, "../../temp_media");
+            if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+
+            const timestamp = Date.now();
+            const inputPath = path.join(tempDir, `input_${timestamp}.webp`);
+            const outputPath = path.join(tempDir, `output_${timestamp}.png`);
             
             fs.writeFileSync(inputPath, buffer);
 
-            // Using ffmpeg to convert webp to png
-            exec(`ffmpeg -i ${inputPath} ${outputPath}`, { timeout: 15000 }, async (err) => {
+            const ffmpegCmd = `"${ffmpegPath}" -i "${inputPath}" -y "${outputPath}"`;
+
+            exec(ffmpegCmd, { timeout: 15000 }, async (err) => {
                 if (err) {
                     console.error("FFmpeg error:", err);
                     await sock.sendMessage(jid, { text: "❌ Conversion failed." });

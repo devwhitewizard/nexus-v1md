@@ -5,10 +5,11 @@ const jsonStore = require("../../nexus/jsonStore");
 
 module.exports = {
     name: "gcstatus",
-    aliases: ["togcstatus", "groupstatus", "gcs"],
-    description: "Post a group status (Admins only) or view active status (All members)",
+    aliases: ["togcstatus", "groupstatus", "gcs", "setgcstatus"],
+    description: "Post a group status & update group icon (Admins only) or view active status (All members)",
     category: "group",
     isGroupOnly: true,
+    isBotAdmin: true,
     execute: async (ctx) => {
         const { sock, jid, msg, args, sender } = ctx;
 
@@ -19,10 +20,10 @@ module.exports = {
 
         const quoted = contextInfo?.quotedMessage;
         const inputContent = args.join(" ").trim();
-        const isPostingAttempt = !!quoted || inputContent.length > 0;
+        const isPostingAttempt = !!quoted || inputContent.length > 0 || !!msg.message?.imageMessage;
 
         // ═══════════════════════════════════════════════════════════
-        // 1. POST A NEW GROUP STATUS (Group Admins Only)
+        // 1. POST A NEW GROUP STATUS & UPDATE GROUP ICON (Admins Only)
         // ═══════════════════════════════════════════════════════════
         if (isPostingAttempt) {
             const userIsAdmin = await isAdmin(sender, jid, sock);
@@ -38,7 +39,18 @@ module.exports = {
             let mediaType = "text";
             let originalCaption = "";
 
-            if (quoted) {
+            // Direct attached image/video or quoted message
+            const directMsg = msg.message?.imageMessage || msg.message?.videoMessage;
+            
+            if (directMsg) {
+                mediaType = msg.message?.imageMessage ? "image" : "video";
+                originalCaption = directMsg.caption || "";
+                try {
+                    mediaBuffer = await downloadMediaMessage(msg, "buffer", {});
+                } catch (dlErr) {
+                    console.error("⚠️ Failed to download direct media for gcstatus:", dlErr.message);
+                }
+            } else if (quoted) {
                 if (quoted.imageMessage) {
                     mediaType = "image";
                     originalCaption = quoted.imageMessage.caption || "";
@@ -69,6 +81,18 @@ module.exports = {
                 }
             }
 
+            // Attempt to update Group Icon if an image is provided
+            let iconUpdated = false;
+            if (mediaType === "image" && mediaBuffer) {
+                try {
+                    await sock.updateProfilePicture(jid, mediaBuffer);
+                    iconUpdated = true;
+                    console.log(`🖼️ Group profile picture updated for ${jid}`);
+                } catch (iconErr) {
+                    console.warn(`⚠️ Could not update group profile picture: ${iconErr.message}`);
+                }
+            }
+
             const statusText = inputContent || originalCaption;
             const adminNum = sender.split("@")[0].split(":")[0];
             const timeStr = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
@@ -77,8 +101,9 @@ module.exports = {
             statusBody += `━━━━━━━━━━━━━━━━━━━\n\n`;
             if (statusText) statusBody += `${statusText}\n\n`;
             statusBody += `👤 *Posted By Admin:* @${adminNum}\n`;
-            statusBody += `⌚ *Time:* ${timeStr}\n\n`;
-            statusBody += `> *Members can type .gcstatus anytime to view this status*`;
+            statusBody += `⌚ *Time:* ${timeStr}\n`;
+            if (iconUpdated) statusBody += `🖼️ *Group Icon:* Updated with status photo!\n`;
+            statusBody += `\n> *Members can type .gcstatus anytime to view this status*`;
 
             try {
                 let sentMsg = null;
@@ -111,7 +136,8 @@ module.exports = {
                     adminNum,
                     postedAt: Date.now(),
                     mediaType,
-                    hasMedia: !!mediaBuffer
+                    hasMedia: !!mediaBuffer,
+                    iconUpdated
                 };
                 jsonStore.set(statusStoreKey, activeStatus);
 
@@ -131,7 +157,7 @@ module.exports = {
 
         if (!currentStatus) {
             return await sock.sendMessage(jid, { 
-                text: "ℹ️ *No active group status found.*\n\n_Group Admins can post a status update by replying to a message/media with `.gcstatus` or typing `.gcstatus <message>`._" 
+                text: "ℹ️ *No active group status found.*\n\n_Group Admins can post a status update by sending/replying to a photo with `.gcstatus` or typing `.gcstatus <message>`._" 
             }, { quoted: msg });
         }
 

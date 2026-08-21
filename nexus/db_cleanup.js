@@ -3,7 +3,13 @@
  * Drops orphan SQLite *_backup tables left behind by failed Sequelize alter syncs.
  * Run once: node db_cleanup.js
  */
-const sqlite3 = require('sqlite3').verbose();
+let sqlite3 = null;
+try {
+    sqlite3 = require('sqlite3').verbose();
+} catch (e) {
+    console.error('❌ SQLite native binary unavailable on this host:', e.message);
+    process.exit(0);
+}
 const path = require('path');
 
 const dbPath = path.join(__dirname, 'database', 'nexus.db');

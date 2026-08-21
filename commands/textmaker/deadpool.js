@@ -1,7 +1,7 @@
 const mumaker = require('mumaker');
 module.exports = {
   name: 'deadpool',
-  aliases: ['dp', 'deadpooltext'],
+  aliases: ['dpt', 'deadpooltext'],
   category: 'textmaker',
   description: 'Create Deadpool style text effect',
   usage: '.deadpool <text>',
