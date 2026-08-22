@@ -2,7 +2,7 @@ const { generateTextEffect } = require('../../lib/textmaker');
 
 module.exports = {
   name: 'purple',
-  aliases: ['violet', 'glow'],
+  aliases: [],
   category: 'textmaker',
   description: 'Create purple text effect',
   usage: '.purple <text>',
@@ -19,14 +19,10 @@ module.exports = {
 
       await sock.sendMessage(jid, { text: "⏳ *Generating your purple effect...* Please wait." }, { quoted: msg });
       
-      const imageUrl = await generateTextEffect('purple', text);
-      
-      if (!result || !result.image) {
-        throw new Error('No image URL received from the API');
-      }
+      const imageBuffer = await generateTextEffect('purple', text);
       
       await sock.sendMessage(jid, {
-        image: { url: imageUrl },
+        image: imageBuffer,
         caption: `🔮 *PURPLE GLOW EFFECT*\n\n💎 *Text:* ${text}\n🛡️ *Powered by Nexus-1MD*`
       }, { quoted: msg });
       

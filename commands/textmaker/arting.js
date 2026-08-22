@@ -1,7 +1,7 @@
 const { generateTextEffect } = require('../../lib/textmaker');
 module.exports = {
   name: 'arting',
-  aliases: ['art', 'arttext'],
+  aliases: [],
   category: 'textmaker',
   description: 'Create artistic text effect',
   usage: '.arting <text>',
@@ -10,9 +10,9 @@ module.exports = {
       const text = args.join(' ');
       if (!text) return await sock.sendMessage(jid, { text: '❌ Example: `.arting Nexus`' }, { quoted: msg });
       await sock.sendMessage(jid, { text: '⏳ *Generating arting effect...*' }, { quoted: msg });
-      const imageUrl = await generateTextEffect('arting', text);
+      const imageBuffer = await generateTextEffect('arting', text);
       
-      await sock.sendMessage(jid, { image: { url: imageUrl }, caption: `🎭 *ARTING EFFECT*\n\n💎 *Text:* ${text}\n🛡️ *Powered by Nexus-1MD*` }, { quoted: msg });
+      await sock.sendMessage(jid, { image: imageBuffer, caption: `🎭 *ARTING EFFECT*\n\n💎 *Text:* ${text}\n🛡️ *Powered by Nexus-1MD*` }, { quoted: msg });
     } catch (e) { await sock.sendMessage(jid, { text: `❌ *Error:* ${e.message}` }, { quoted: msg }); }
   }
 };

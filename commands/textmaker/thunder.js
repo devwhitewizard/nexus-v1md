@@ -2,7 +2,7 @@ const { generateTextEffect } = require('../../lib/textmaker');
 
 module.exports = {
   name: 'thunder',
-  aliases: ['lightning'],
+  aliases: [],
   category: 'textmaker',
   description: 'Create thunder text effect',
   usage: '.thunder <text>',
@@ -19,14 +19,10 @@ module.exports = {
 
       await sock.sendMessage(jid, { text: "⏳ *Generating your thunder effect...* Please wait." }, { quoted: msg });
       
-      const imageUrl = await generateTextEffect('thunder', text);
-      
-      if (!result || !result.image) {
-        throw new Error('No image URL received from the API');
-      }
+      const imageBuffer = await generateTextEffect('thunder', text);
       
       await sock.sendMessage(jid, {
-        image: { url: imageUrl },
+        image: imageBuffer,
         caption: `✨ *THUNDER EFFECT*\n\n💎 *Text:* ${text}\n🛡️ *Powered by Nexus-1MD*`
       }, { quoted: msg });
       

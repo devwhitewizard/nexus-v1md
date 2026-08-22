@@ -2,7 +2,7 @@ const { generateTextEffect } = require('../../lib/textmaker');
 
 module.exports = {
   name: 'sand',
-  aliases: ['beach'],
+  aliases: [],
   category: 'textmaker',
   description: 'Create sand text effect',
   usage: '.sand <text>',
@@ -19,10 +19,10 @@ module.exports = {
 
       await sock.sendMessage(jid, { text: "⏳ *Generating your sand effect...* Please wait." }, { quoted: msg });
       
-      const imageUrl = await generateTextEffect('sand', text);
+      const imageBuffer = await generateTextEffect('sand', text);
       
       await sock.sendMessage(jid, {
-        image: { url: imageUrl },
+        image: imageBuffer,
         caption: `🏖️ *SAND EFFECT*\n\n💎 *Text:* ${text}\n🛡️ *Powered by Nexus-1MD*`
       }, { quoted: msg });
       

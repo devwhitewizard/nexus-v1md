@@ -2,7 +2,7 @@ const { generateTextEffect } = require('../../lib/textmaker');
 
 module.exports = {
   name: 'snow',
-  aliases: ['ice', 'winter'],
+  aliases: [],
   category: 'textmaker',
   description: 'Create snow 3D text effect',
   usage: '.snow <text>',
@@ -19,14 +19,10 @@ module.exports = {
 
       await sock.sendMessage(jid, { text: "⏳ *Generating your snow effect...* Please wait." }, { quoted: msg });
       
-      const imageUrl = await generateTextEffect('snow', text);
-      
-      if (!result || !result.image) {
-        throw new Error('No image URL received from the API');
-      }
+      const imageBuffer = await generateTextEffect('snow', text);
       
       await sock.sendMessage(jid, {
-        image: { url: imageUrl },
+        image: imageBuffer,
         caption: `❄️ *SNOW EFFECT*\n\n💎 *Text:* ${text}\n🛡️ *Powered by Nexus-1MD*`
       }, { quoted: msg });
       

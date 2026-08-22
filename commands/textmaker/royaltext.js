@@ -1,7 +1,7 @@
 const { generateTextEffect } = require('../../lib/textmaker');
 module.exports = {
   name: 'royaltext',
-  aliases: ['royal', 'kingtext'],
+  aliases: [],
   category: 'textmaker',
   description: 'Create royal text effect',
   usage: '.royaltext <text>',
@@ -10,9 +10,9 @@ module.exports = {
       const text = args.join(' ');
       if (!text) return await sock.sendMessage(jid, { text: '❌ Example: `.royaltext Nexus`' }, { quoted: msg });
       await sock.sendMessage(jid, { text: '⏳ *Generating royal text effect...*' }, { quoted: msg });
-      const imageUrl = await generateTextEffect('royaltext', text);
+      const imageBuffer = await generateTextEffect('royaltext', text);
       
-      await sock.sendMessage(jid, { image: { url: imageUrl }, caption: `👑 *ROYAL TEXT EFFECT*\n\n💎 *Text:* ${text}\n🛡️ *Powered by Nexus-1MD*` }, { quoted: msg });
+      await sock.sendMessage(jid, { image: imageBuffer, caption: `👑 *ROYAL TEXT EFFECT*\n\n💎 *Text:* ${text}\n🛡️ *Powered by Nexus-1MD*` }, { quoted: msg });
     } catch (e) { await sock.sendMessage(jid, { text: `❌ *Error:* ${e.message}` }, { quoted: msg }); }
   }
 };
