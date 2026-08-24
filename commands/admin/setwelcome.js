@@ -10,8 +10,8 @@ module.exports = {
         const welcomeMsg = args.join(" ");
         if (!welcomeMsg) {
             return await sock.sendMessage(jid, { 
-                text: "❓ *Usage:* `.setwelcome Welcome @user to @group!`\n\n" +
-                      "Available variables: `@user`, `@group`" 
+                text: "❓ *Usage:* `.setwelcome <message>`\n\n" +
+                      "Available variables: `@user`, `@group`, `{count}`, `{date}`, `{time}`, `{desc}`" 
             });
         }
 

@@ -662,41 +662,99 @@ async function connectionLogic() {
             if (!isActive) return;
             if (!metadata) return;
 
-            const time = new Date().toLocaleTimeString("en-GB", { hour12: false });
+            const timeStr = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+            const dateStr = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
             const groupName = metadata.subject || "";
-            const groupDesc = metadata.desc?.toString() || "";
+            const groupDesc = metadata.desc?.toString()?.trim() || "Welcome to the official group community.";
             const memberCount = metadata.participants?.length || 0;
+
+            const botBranding = (settings.botName || "NEXUS TECH").toUpperCase();
+
+            const defaultWelcomeTemplate =
+`╔═════════════════════════════════════╗
+║ 🎉 WELCOME! 🎉                      ║
+╚═════════════════════════════════════╝
+
+👋 Hey @user! Welcome to *@group* 🏆
+
+📋 _🚀 @group_
+
+{desc}
+
+👥 You are member *#{count}*
+📅 Joined: *{date}* at *{time}*
+
+✅ *Quick tips:*
+ • Type *.menu* to see all commands
+ • Be respectful to all members
+ • Have fun! 🔥
+
+__________________________________________________
+🔊 *Reach us on:* WhatsApp group & channel
+
+│ _${botBranding} ⚡_`;
+
+            const defaultGoodbyeTemplate =
+`╔═════════════════════════════════════╗
+║ 👋 GOODBYE! 😢                      ║
+╚═════════════════════════════════════╝
+
+Goodbye @user from *@group*! We hope to see you back soon.
+
+👥 Remaining members: *#{count}*
+⌚ Left at: *{time}*
+
+│ _${botBranding} ⚡_`;
 
             for (const participant of participants) {
                 const userMention = `@${participant.split("@")[0]}`;
 
                 if (action === "add") {
-                    const msgTemplate = jsonStore.get(`welcome_msg_${id}`, null) || settings.welcomeMsg || "Hi @user, welcome to *@group*! 👋";
+                    let msgTemplate = jsonStore.get(`welcome_msg_${id}`, null) || settings.welcomeMsg;
+                    if (!msgTemplate || msgTemplate.includes("Hi @user, welcome to *@group*! 👋")) {
+                        msgTemplate = defaultWelcomeTemplate;
+                    }
+
                     const msg = msgTemplate
                         .replace(/@user/g, userMention)
+                        .replace(/{user}/g, userMention)
                         .replace(/{group}/g, groupName)
                         .replace(/@group/g, groupName)
                         .replace(/{count}/g, memberCount)
-                        .replace(/{time}/g, time)
+                        .replace(/{date}/g, dateStr)
+                        .replace(/{time}/g, timeStr)
                         .replace(/{desc}/g, groupDesc);
 
-                    await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => { });
+                    const ppUrl = await sock.profilePictureUrl(participant, "image").catch(() => sock.profilePictureUrl(id, "image").catch(() => null));
+                    if (ppUrl) {
+                        await sock.sendMessage(id, { image: { url: ppUrl }, caption: msg, mentions: [participant] }).catch(async () => {
+                            await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => { });
+                        });
+                    } else {
+                        await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => { });
+                    }
                 } else if (action === "remove") {
-                    const msgTemplate = jsonStore.get(`goodbye_msg_${id}`, null) || settings.goodbyeMsg || "Goodbye @user, we hope to see you back soon! 😢";
+                    let msgTemplate = jsonStore.get(`goodbye_msg_${id}`, null) || settings.goodbyeMsg;
+                    if (!msgTemplate || msgTemplate.includes("Goodbye @user, we hope to see you back soon! 😢")) {
+                        msgTemplate = defaultGoodbyeTemplate;
+                    }
+
                     const msg = msgTemplate
                         .replace(/@user/g, userMention)
+                        .replace(/{user}/g, userMention)
                         .replace(/{group}/g, groupName)
                         .replace(/@group/g, groupName)
                         .replace(/{count}/g, memberCount)
-                        .replace(/{time}/g, time)
+                        .replace(/{date}/g, dateStr)
+                        .replace(/{time}/g, timeStr)
                         .replace(/{desc}/g, groupDesc);
 
                     await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => { });
                 } else if (action === "promote" && settings.eventsPromote) {
-                    const msg = `🎉 *Promotion Notice:*\n\n${userMention} has been promoted to Admin in this group.\n\n⌚ *Time:* ${time}`;
+                    const msg = `🎉 *Promotion Notice:*\n\n${userMention} has been promoted to Admin in this group.\n\n⌚ *Time:* ${timeStr}`;
                     await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => { });
                 } else if (action === "demote" && settings.eventsPromote) {
-                    const msg = `⚠️ *Demotion Notice:*\n\n${userMention} is no longer an Admin in this group.\n\n⌚ *Time:* ${time}`;
+                    const msg = `⚠️ *Demotion Notice:*\n\n${userMention} is no longer an Admin in this group.\n\n⌚ *Time:* ${timeStr}`;
                     await sock.sendMessage(id, { text: msg, mentions: [participant] }).catch(() => { });
                 }
             }

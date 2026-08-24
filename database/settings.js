@@ -46,7 +46,7 @@ if (sequelize) {
         welcome: { type: DataTypes.BOOLEAN, defaultValue: false },
         goodbye: { type: DataTypes.BOOLEAN, defaultValue: false },
         welcomeMsg: { 
-            type: DataTypes.STRING, 
+            type: DataTypes.TEXT, 
             defaultValue: 'Hi @user, welcome to *@group*! 👋' 
         },
         goodbyeMsg: { 
