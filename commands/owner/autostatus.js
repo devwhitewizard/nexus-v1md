@@ -1,5 +1,20 @@
 const { getSettings, updateSettings } = require("../../lib/settings");
 
+/**
+ * Helper to parse emoji list from user input string.
+ * Supports comma-separated ("🔥, ❤️, ✨"), space-separated ("🔥 ❤️ ✨"), or continuous ("🔥❤️✨").
+ */
+function parseEmojiList(input) {
+    if (!input) return [];
+    const rawTokens = input.split(/[\s,]+/).filter(Boolean);
+    const result = [];
+    for (const token of rawTokens) {
+        const characters = Array.from(token).map(c => c.trim()).filter(Boolean);
+        result.push(...characters);
+    }
+    return Array.from(new Set(result));
+}
+
 module.exports = {
     name: "autostatus",
     aliases: ["stat", "autostat", "setstatusemoji", "statusemoji", "statusemojis"],
@@ -12,15 +27,17 @@ module.exports = {
 
         // 1. Direct command alias for setting status emojis (.statusemoji 🔥,❤️,✨)
         if (commandName && (commandName.includes("emoji") || commandName === "setstatusemoji")) {
-            const emojiInput = args.join(" ").trim();
-            if (!emojiInput) {
+            const rawInput = args.join(" ").trim();
+            if (!rawInput) {
                 return await sock.sendMessage(jid, {
                     text: `📌 *Current Status Reaction Emojis:* ${settings.statusLikeEmojis}\n\n💡 *Usage:* \`.statusemoji 🔥,❤️,✨,😎\` to set your own custom emojis.`
                 }, { quoted: msg });
             }
-            await updateSettings({ statusLikeEmojis: emojiInput });
+            const parsedList = parseEmojiList(rawInput);
+            const emojiString = parsedList.length > 0 ? parsedList.join(", ") : rawInput;
+            await updateSettings({ statusLikeEmojis: emojiString });
             return await sock.sendMessage(jid, {
-                text: `✅ *Status Reaction Emojis Updated!*\n\nNew reaction list: ${emojiInput}`
+                text: `✅ *Status Reaction Emojis Updated!*\n\nNew reaction list: ${emojiString}`
             }, { quoted: msg });
         }
 
@@ -54,10 +71,12 @@ module.exports = {
         }
 
         if (action === "setemojis" || action === "emojis" || action === "emoji") {
-            const emojis = args.slice(1).join(" ");
-            if (!emojis) return await sock.sendMessage(jid, { text: "⚠️ Please provide your emojis (e.g. `.autostatus setemojis 🔥,❤️,✨`)." }, { quoted: msg });
-            await updateSettings({ statusLikeEmojis: emojis });
-            return await sock.sendMessage(jid, { text: `✅ *Auto-Like Emojis Updated*\n\nNew list: ${emojis}` }, { quoted: msg });
+            const rawEmojis = args.slice(1).join(" ");
+            if (!rawEmojis) return await sock.sendMessage(jid, { text: "⚠️ Please provide your emojis (e.g. `.autostatus setemojis 🔥,❤️,✨`)." }, { quoted: msg });
+            const parsedList = parseEmojiList(rawEmojis);
+            const emojisString = parsedList.length > 0 ? parsedList.join(", ") : rawEmojis;
+            await updateSettings({ statusLikeEmojis: emojisString });
+            return await sock.sendMessage(jid, { text: `✅ *Auto-Like Emojis Updated*\n\nNew list: ${emojisString}` }, { quoted: msg });
         }
 
         if (action === "view") {

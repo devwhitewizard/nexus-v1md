@@ -3,6 +3,12 @@
 </p>
 
 <p align="center">
+  <a href="https://heroku.com/deploy?template=https://github.com/devwhitewizard/nexus-v1md">
+    <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku">
+  </a>
+</p>
+
+<p align="center">
   <marquee behavior="alternate" scrollamount="2" width="60%">
     <font color="#00e5ff" size="3"><b>✨ ONLINE ✨</b></font>
   </marquee>
@@ -70,7 +76,44 @@ To configure Nexus-1MD, duplicate the `.env.example` file, rename it to `.env`, 
 
 ## 🚀 Steps to Deploy
 
-### Local / VPS Installation
+### 🟣 Option 1: One-Click Deploy on Heroku (Recommended)
+
+Click the button below to instantly deploy **Nexus-1MD** on Heroku:
+
+<p align="left">
+  <a href="https://heroku.com/deploy?template=https://github.com/devwhitewizard/nexus-v1md">
+    <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku">
+  </a>
+</p>
+
+<details open>
+<summary><b>📖 Heroku Step-by-Step Deployment Guide</b></summary>
+
+#### 1. Generate Your Session ID
+- Run the bot locally or pairing mode to pair your WhatsApp account.
+- Copy your generated `SESSION_ID` string (starts with `NEXUS~`).
+
+#### 2. Click the Deploy Button
+- Click the **[Deploy to Heroku](https://heroku.com/deploy?template=https://github.com/devwhitewizard/nexus-v1md)** button above or in the top banner.
+
+#### 3. Configure Environment Variables
+In the Heroku app configuration form, fill in:
+- `SESSION_ID` (**Required**): Paste your generated session string.
+- `SUDO` (**Required**): Primary manager WhatsApp number with country code (e.g. `254712345678`).
+- `PREFIX` (Optional): Command prefix (default is `.`).
+- `MODE` (Optional): `public` or `private`.
+- `HEROKU_APP_NAME` (Optional): Your app name for automated `.update` command support.
+- `HEROKU_API_KEY` (Optional): Your API key from Heroku Account Settings for `.update` command support.
+
+#### 4. Deploy & Run
+- Click **Deploy App** and wait for Heroku to finish building.
+- Go to the **Resources** tab in Heroku Dashboard and ensure the `web` dyno is toggled **ON**.
+- View logs via Heroku Dashboard or CLI (`heroku logs --tail -a <app-name>`) to confirm `✅ Bot connected and stable!`.
+</details>
+
+---
+
+### 💻 Option 2: Local / VPS Installation
 
 Ensure you have [Node.js](https://nodejs.org/) v18+ installed on your system.
 

@@ -51,12 +51,28 @@ const saveMessage = async (m, sock) => {
         
         let mediaPath = null;
         const msgId = m.key.id;
-        const message = m.message.viewOnceMessageV2?.message || m.message.viewOnceMessage?.message || m.message;
+        
+        let message = m.message;
+        while (message && (
+            message.ephemeralMessage || 
+            message.viewOnceMessageV2 || 
+            message.viewOnceMessage || 
+            message.viewOnceMessageV2Extension || 
+            message.documentWithCaptionMessage
+        )) {
+            if (message.ephemeralMessage) message = message.ephemeralMessage.message;
+            else if (message.viewOnceMessageV2) message = message.viewOnceMessageV2.message;
+            else if (message.viewOnceMessage) message = message.viewOnceMessage.message;
+            else if (message.viewOnceMessageV2Extension) message = message.viewOnceMessageV2Extension.message;
+            else if (message.documentWithCaptionMessage) message = message.documentWithCaptionMessage.message;
+            else break;
+        }
         
         const mediaType = message.imageMessage ? "image" : 
-                         message.videoMessage ? "video" : 
+                         (message.videoMessage || message.ptvMessage) ? "video" : 
                          message.audioMessage ? "audio" : 
-                         message.stickerMessage ? "sticker" : null;
+                         message.stickerMessage ? "sticker" : 
+                         message.documentMessage ? "document" : null;
 
         const settings = getSettings();
         const isViewOnce = m.message.viewOnceMessageV2 || m.message.viewOnceMessage;
@@ -66,12 +82,22 @@ const saveMessage = async (m, sock) => {
 
         if (mediaType && sock && shouldDownload) {
             try {
-                const mediaMsg = message[`${mediaType}Message`];
+                const mediaMsg = message.imageMessage || message.videoMessage || message.ptvMessage || 
+                                 message.audioMessage || message.stickerMessage || message.documentMessage;
                 const size = mediaMsg?.fileLength ? parseInt(mediaMsg.fileLength, 10) : 0;
-                const maxDownloadSize = 15 * 1024 * 1024; // Capped at 15MB to prevent CPU/memory spikes on panels
+                const maxDownloadSize = 25 * 1024 * 1024; // Capped at 25MB
 
                 if (!size || size < maxDownloadSize) {
-                    const ext = mediaType === "image" ? "jpg" : mediaType === "video" ? "mp4" : mediaType === "audio" ? "mp3" : "webp";
+                    let ext = "bin";
+                    if (mediaType === "image") ext = "jpg";
+                    else if (mediaType === "video") ext = "mp4";
+                    else if (mediaType === "audio") ext = mediaMsg.mimetype?.includes("ogg") ? "ogg" : "mp3";
+                    else if (mediaType === "sticker") ext = "webp";
+                    else if (mediaType === "document") {
+                        const rawFileName = mediaMsg.fileName || "file";
+                        ext = path.extname(rawFileName).replace(".", "") || "bin";
+                    }
+
                     const stream = await downloadContentFromMessage(mediaMsg, mediaType);
                     const chunks = [];
                     for await (const chunk of stream) {
@@ -83,7 +109,9 @@ const saveMessage = async (m, sock) => {
                     await fs.promises.writeFile(filePath, buffer);
                     mediaPath = filePath;
                 }
-            } catch (err) { } // Silently handle media download errors to reduce log noise
+            } catch (err) {
+                console.error("⚠️ Media download error in saveMessage:", err.message);
+            }
         }
 
         // 🛡️ CRITICAL: Only attempt DB operation if database is actually ONLINE
@@ -97,22 +125,16 @@ const saveMessage = async (m, sock) => {
                 content: JSON.stringify(m.message),
                 mediaPath: mediaPath,
                 timestamp: m.messageTimestamp,
-            }).catch(() => {
-                // Silently discard log if DB connection was lost mid-operation
-            });
+            }).catch(() => {});
         } else {
             // 💾 Fast isolated cache — does NOT touch the main storage.json
-            // Only store the minimum data needed for anti-delete (text + mediaPath)
-            const textContent = (message.conversation || message.extendedTextMessage?.text || 
-                                 message.imageMessage?.caption || message.videoMessage?.caption || "");
             messageCache.setLog(m.key.id, {
                 msgId: m.key.id,
                 remoteJid: m.key.remoteJid,
                 participant: m.key.participant || m.key.remoteJid,
                 pushName: m.pushName,
                 messageType: Object.keys(m.message)[0],
-                // Store only text content instead of full raw proto to cut size by ~90%
-                content: textContent ? { conversation: textContent } : m.message,
+                content: m.message,
                 mediaPath: mediaPath,
                 timestamp: m.messageTimestamp,
             });

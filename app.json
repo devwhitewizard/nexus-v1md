@@ -1,30 +1,58 @@
 {
-  "name": "Nexus-MD",
-  "description": "A powerful, multi-functional WhatsApp automation bot designed to elevate the general chat experience with smart tools and utilities.",
+  "name": "Nexus-1MD",
+  "description": "A lightweight, customizable, multi-functional WhatsApp automation bot built with Baileys.",
+  "repository": "https://github.com/devwhitewizard/nexus-v1md",
+  "logo": "https://raw.githubusercontent.com/devwhitewizard/nexus-v1md/main/assets/nexus-logo.svg",
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "baileys",
+    "nexus-1md",
+    "automation",
+    "userbot"
+  ],
+  "website": "https://github.com/devwhitewizard/nexus-v1md",
+  "success_url": "/",
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
   "env": {
     "SESSION_ID": {
-      "description": "Your unique bot session ID (starts with NEXUS~).",
+      "description": "Your unique bot session ID string generated on login (starts with NEXUS~).",
       "required": true,
       "type": "string"
     },
     "SUDO": {
-      "description": "The Super-Admin phone number with country code (e.g. 254797715445). Can run system commands.",
+      "description": "Primary Super-Admin phone number with country code (e.g. 254797715445).",
       "required": true,
       "type": "string"
     },
     "OWNERS": {
-      "description": "Additional admin phone numbers, separated by commas (e.g., 254711111111,254722222222).",
+      "description": "Additional owner phone numbers separated by commas (e.g. 254711111111,254722222222).",
+      "required": false,
+      "type": "string"
+    },
+    "PAIRING_NUMBER": {
+      "description": "Phone number with country code to generate a pairing code instead of scanning a QR code.",
       "required": false,
       "type": "string"
     },
     "PREFIX": {
-      "description": "The command prefix (default is .)",
+      "description": "Command trigger prefix (default is .)",
       "required": false,
       "type": "string",
       "value": "."
     },
     "MODE": {
-      "description": "Bot mode (public or private).",
+      "description": "Bot access mode (public or private).",
       "required": false,
       "type": "string",
       "value": "public"
