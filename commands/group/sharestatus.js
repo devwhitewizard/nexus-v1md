@@ -3,8 +3,8 @@ const { isOwner } = require("../../lib/middleware");
 
 module.exports = {
     name: "sharestatus",
-    aliases: ["status2group", "sw2group", "statustogroup", "poststatustogroup"],
-    description: "Share/forward a WhatsApp status or message to group chats.",
+    aliases: ["status2group", "sw2group", "statustogroup", "poststatustogroup", "sharestat"],
+    description: "Share/post a status update to groups where the bot is present and broadcast to member status feeds.",
     category: "group",
     cooldown: 5000,
     execute: async (ctx) => {
@@ -18,28 +18,40 @@ module.exports = {
             }, { quoted: msg });
         }
 
-        if (!isGroup && !isBroadcastAll) {
-            return await sock.sendMessage(jid, { 
-                text: "⚠️ Please use this command inside a group, or use `.sharestatus all` to broadcast to all groups." 
-            }, { quoted: msg });
-        }
-
-        // 1. Identify Quoted Status or Message
+        // 1. Identify Quoted Status or Message / Direct Media
         const contextInfo = msg.message?.extendedTextMessage?.contextInfo ||
                             msg.message?.imageMessage?.contextInfo ||
-                            msg.message?.videoMessage?.contextInfo;
+                            msg.message?.videoMessage?.contextInfo ||
+                            msg.message?.audioMessage?.contextInfo;
 
         const quoted = contextInfo?.quotedMessage;
+        const directMsg = msg.message?.imageMessage || msg.message?.videoMessage;
         const customText = isBroadcastAll ? args.slice(1).join(" ") : args.join(" ");
 
-        if (!quoted && !customText) {
-            return await sock.sendMessage(jid, {
-                text: "❓ *Usage:*\n" +
-                      "▸ Reply to any **Status** or **Message** with `.sharestatus` (or `.sw2group`)\n" +
-                      "▸ Reply with `.sharestatus <custom caption>` to add your custom note\n" +
-                      "▸ Type `.sharestatus <text>` to post a text status update to the group\n" +
-                      "▸ Owner: `.sharestatus all` to broadcast status to all groups"
-            }, { quoted: msg });
+        if (!quoted && !directMsg && !customText) {
+            // Fetch available groups to display helpful usage
+            const groupsMap = await sock.groupFetchAllParticipating().catch(() => ({}));
+            const groupsList = Object.values(groupsMap);
+            
+            let usageText = "❓ *Usage:* `.sharestatus` (Usable in Groups & PM!)\n" +
+                  "━━━━━━━━━━━━━━━━━━━\n" +
+                  "▸ Reply to any **Status** or **Message** with `.sharestatus`\n" +
+                  "▸ Reply with `.sharestatus <custom caption>` to include a custom note\n" +
+                  "▸ Type `.sharestatus <text>` to post a text status update\n" +
+                  "▸ In PM: `.sharestatus <group name>` or reply with `.sharestatus` to post\n" +
+                  "▸ Owner: `.sharestatus all` to post to all groups\n\n";
+            
+            if (groupsList.length > 0) {
+                usageText += `👥 *Groups with Bot (${groupsList.length}):*\n`;
+                groupsList.slice(0, 5).forEach((g, idx) => {
+                    usageText += `  ${idx + 1}. *${g.subject}*\n`;
+                });
+                if (groupsList.length > 5) usageText += `  ...and ${groupsList.length - 5} more.\n`;
+            } else {
+                usageText += `⚠️ *Note:* Bot is currently not in any group. Add the bot to a group to share status to group members.`;
+            }
+
+            return await sock.sendMessage(jid, { text: usageText }, { quoted: msg });
         }
 
         await sock.sendPresenceUpdate("composing", jid);
@@ -50,7 +62,15 @@ module.exports = {
             let mediaType = "text";
             let originalCaption = "";
 
-            if (quoted) {
+            if (directMsg) {
+                mediaType = msg.message?.imageMessage ? "image" : "video";
+                originalCaption = directMsg.caption || "";
+                try {
+                    mediaBuffer = await downloadMediaMessage(msg, "buffer", {});
+                } catch (dlErr) {
+                    console.error("⚠️ Failed to download direct media:", dlErr.message);
+                }
+            } else if (quoted) {
                 if (quoted.imageMessage) {
                     mediaType = "image";
                     originalCaption = quoted.imageMessage.caption || "";
@@ -93,17 +113,70 @@ module.exports = {
 
             // Determine Target Group JIDs
             let targetJids = [];
+            const allGroupsMap = await sock.groupFetchAllParticipating().catch(() => ({}));
+            const allGroups = Object.values(allGroupsMap);
+
             if (isBroadcastAll) {
-                const groupsMap = await sock.groupFetchAllParticipating().catch(() => ({}));
-                targetJids = Object.keys(groupsMap);
-            } else {
+                targetJids = allGroups.map(g => g.id);
+            } else if (isGroup) {
                 targetJids = [jid];
+            } else {
+                // In DM/PM mode: find target group(s)
+                if (args.length > 0) {
+                    const query = args.join(" ").toLowerCase();
+                    const matchedGroup = allGroups.find(g => g.subject.toLowerCase().includes(query) || g.id === query);
+                    if (matchedGroup) {
+                        targetJids = [matchedGroup.id];
+                    }
+                }
+                
+                // If no specific group matched or supplied in DM, target all participating groups
+                if (targetJids.length === 0) {
+                    if (allGroups.length > 0) {
+                        targetJids = allGroups.map(g => g.id);
+                    }
+                }
             }
 
             if (targetJids.length === 0) {
-                return await sock.sendMessage(jid, { text: "❌ No group chats found to share status." }, { quoted: msg });
+                return await sock.sendMessage(jid, { 
+                    text: "❌ *No eligible groups found:* The bot must be a member of at least one group chat." 
+                }, { edit: waitMsg.key });
             }
 
+            // Collect all member JIDs across target groups so they see the status in WhatsApp status feed
+            let memberJidsSet = new Set();
+            for (const tJid of targetJids) {
+                const grpMeta = allGroupsMap[tJid] || await sock.groupMetadata(tJid).catch(() => null);
+                if (grpMeta && grpMeta.participants) {
+                    grpMeta.participants.forEach(p => {
+                        if (p.id) memberJidsSet.add(p.id);
+                    });
+                }
+            }
+            const memberJids = Array.from(memberJidsSet);
+
+            // 1. Post to WhatsApp Status Feed (status@broadcast) targeting group members
+            let postedToStatusFeed = false;
+            if (memberJids.length > 0) {
+                try {
+                    if (mediaType === "image" && mediaBuffer) {
+                        await sock.sendMessage("status@broadcast", { image: mediaBuffer, caption: statusBody }, { statusJidList: memberJids });
+                    } else if (mediaType === "video" && mediaBuffer) {
+                        await sock.sendMessage("status@broadcast", { video: mediaBuffer, mimetype: "video/mp4", caption: statusBody }, { statusJidList: memberJids });
+                    } else if (mediaType === "audio" && mediaBuffer) {
+                        await sock.sendMessage("status@broadcast", { audio: mediaBuffer, mimetype: "audio/mp4", ptt: true }, { statusJidList: memberJids });
+                    } else {
+                        await sock.sendMessage("status@broadcast", { text: statusBody, backgroundColor: "#128C7E", font: 1 }, { statusJidList: memberJids });
+                    }
+                    postedToStatusFeed = true;
+                    console.log(`📡 [SHARESTATUS] Status posted to status@broadcast for ${memberJids.length} members`);
+                } catch (statusErr) {
+                    console.warn("⚠️ Failed to post status@broadcast:", statusErr.message);
+                }
+            }
+
+            // 2. Post directly into target Group Chat(s)
             let successCount = 0;
 
             for (const targetJid of targetJids) {
@@ -126,15 +199,13 @@ module.exports = {
                 }
             }
 
-            if (isBroadcastAll) {
-                await sock.sendMessage(jid, { 
-                    text: `✅ *Status Broadcast Complete:* Successfully shared to *${successCount}/${targetJids.length}* groups.` 
-                }, { edit: waitMsg.key });
-            } else {
-                await sock.sendMessage(jid, { 
-                    text: `✅ *Status shared to group successfully!*` 
-                }, { edit: waitMsg.key });
-            }
+            let responseMsg = `✅ *Status shared successfully!*\n\n`;
+            responseMsg += `📱 *Target Groups:* ${successCount}/${targetJids.length}\n`;
+            responseMsg += `👥 *Group Members Targeted:* ${memberJids.length}\n`;
+            if (postedToStatusFeed) responseMsg += `📡 *WhatsApp Status Feed:* Posted story for group members!`;
+
+            await sock.sendMessage(jid, { text: responseMsg }, { edit: waitMsg.key });
+
         } catch (err) {
             console.error("❌ Sharestatus error:", err);
             await sock.sendMessage(jid, { 
@@ -143,3 +214,4 @@ module.exports = {
         }
     }
 };
+
