@@ -1,214 +1,260 @@
 const axios = require("axios");
 
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+/** Parse Google News RSS XML into an array of {title, link, pubDate, source} */
+const parseGoogleRSS = (xml) => {
+    const items = [];
+    const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+    let match;
+    while ((match = itemRegex.exec(xml)) !== null) {
+        const block = match[1];
+        const get = (tag) => {
+            const m = new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>|<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`).exec(block);
+            return m ? (m[1] || m[2] || "").trim() : "";
+        };
+        const linkM = /<link>([\s\S]*?)<\/link>|<link\s*\/>/.exec(block);
+        const link = linkM ? linkM[1]?.trim() || "" : "";
+        const sourceM = /<source[^>]*>([^<]*)<\/source>/.exec(block);
+        items.push({
+            title: get("title"),
+            link,
+            pubDate: get("pubDate"),
+            source: sourceM ? sourceM[1].trim() : ""
+        });
+    }
+    return items;
+};
+
+/** Fetch Google News RSS for a search query */
+const googleNewsSearch = async (query, hl = "en-US", gl = "US", ceid = "US:en") => {
+    const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=${hl}&gl=${gl}&ceid=${ceid}`;
+    const { data } = await axios.get(url, { timeout: 12000, headers: { "User-Agent": "Mozilla/5.0" } });
+    return parseGoogleRSS(data);
+};
+
+/** Fetch Google News RSS for a named topic URL */
+const googleNewsTopic = async (topicPath) => {
+    const url = `https://news.google.com/rss/${topicPath}`;
+    const { data } = await axios.get(url, { timeout: 12000, headers: { "User-Agent": "Mozilla/5.0" } });
+    return parseGoogleRSS(data);
+};
+
+/** Format a list of RSS articles into a WhatsApp-ready string */
+const formatArticles = (articles, header, limit = 7) => {
+    let text = `${header}\n━━━━━━━━━━━━━━━━━━━\n\n`;
+    articles.slice(0, limit).forEach((a, i) => {
+        text += `*#${i + 1}:* ${a.title}`;
+        if (a.source) text += `  _(${a.source})_`;
+        text += `\n`;
+        if (a.link) text += `🔗 ${a.link}\n`;
+        text += `\n`;
+    });
+    text += `━━━━━━━━━━━━━━━━━━━`;
+    return text;
+};
+
 const KEITH_API_BASE = "https://apiskeith2-production-3020.up.railway.app";
 
-// Fallback helper using Saurav.tech NewsAPI (previous API)
-const getFallbackNews = async (sourceType = "cnn") => {
-    const sourceUrls = {
-        cnn: "https://saurav.tech/NewsAPI/everything/cnn.json",
-        bbc: "https://saurav.tech/NewsAPI/everything/bbc-news.json",
-        verge: "https://saurav.tech/NewsAPI/everything/the-verge.json"
-    };
-
-    const targetUrl = sourceUrls[sourceType] || sourceUrls.cnn;
-    try {
-        const { data } = await axios.get(targetUrl, { timeout: 10000 });
-        const articles = data?.articles || [];
-        if (articles.length === 0) return null;
-
-        let response = `📰 *NEWS HEADLINES (${sourceType.toUpperCase()})*\n━━━━━━━━━━━━━━━━━━━\n\n`;
-        articles.slice(0, 6).forEach((news, i) => {
-            response += `*#${i + 1}:* ${news.title}\n`;
-            if (news.url) response += `🔗 ${news.url}\n`;
-            response += `\n`;
-        });
-        response += `━━━━━━━━━━━━━━━━━━━\n_Source: NewsAPI Backup_`;
-        return response;
-    } catch (e) {
-        return null;
-    }
-};
+// ─── Command ────────────────────────────────────────────────────────────────
 
 module.exports = {
     name: "news",
     aliases: ["headlines", "technews", "bbcnews", "citizennews", "cnn"],
-    description: "Get latest news headlines from BBC, NTV, Citizen, KBC, Tech, or search Kenya news (with fallback API).",
+    description: "Get latest news headlines from BBC, NTV, Citizen, KBC, Tech, CNN, or search any topic.",
     category: "news",
-    async execute({ sock, jid, msg, args }) {
+
+    async execute({ sock, jid, msg, args, commandName }) {
         const input = args.join(" ").trim();
         const source = args[0]?.toLowerCase();
 
+        const KNOWN_SOURCES = ["bbc", "ntv", "kbc", "citizen", "tech", "cnn", "verge", "kenyans"];
+
         try {
-            if (source === "bbc") {
+            // ── BBC ──────────────────────────────────────────────────────────
+            if (source === "bbc" || commandName === "bbcnews") {
+                let articles = [];
+                // Try Keith API first
                 try {
                     const res = await axios.get(`${KEITH_API_BASE}/news/bbc`, { timeout: 10000 });
                     const stories = res.data?.result?.topStories || [];
                     if (stories.length > 0) {
-                        let response = `📰 *BBC NEWS HEADLINES*\n━━━━━━━━━━━━━━━━━━━\n\n`;
+                        let text = `📰 *BBC NEWS HEADLINES*\n━━━━━━━━━━━━━━━━━━━\n\n`;
                         stories.slice(0, 7).forEach((item, i) => {
-                            response += `*#${i + 1}:* ${item.title}\n`;
-                            if (item.description) response += `📝 ${item.description.slice(0, 120)}...\n`;
-                            if (item.url) response += `🔗 ${item.url}\n`;
-                            response += `\n`;
+                            text += `*#${i + 1}:* ${item.title}\n`;
+                            if (item.description) text += `📝 ${item.description.slice(0, 120)}...\n`;
+                            if (item.url) text += `🔗 ${item.url}\n`;
+                            text += `\n`;
                         });
-                        return await sock.sendMessage(jid, { text: response }, { quoted: msg });
+                        text += `━━━━━━━━━━━━━━━━━━━`;
+                        return await sock.sendMessage(jid, { text }, { quoted: msg });
                     }
-                } catch (e) {
-                    console.warn("Keith BBC API error, trying fallback...");
-                }
+                } catch (_) {}
+                // Google RSS fallback
+                articles = await googleNewsSearch("BBC News site:bbc.com OR site:bbc.co.uk");
+                if (articles.length === 0) articles = await googleNewsTopic("headlines?hl=en-US&gl=US&ceid=US:en");
+                if (articles.length === 0) return await sock.sendMessage(jid, { text: "❌ No BBC news found." }, { quoted: msg });
+                return await sock.sendMessage(jid, { text: formatArticles(articles, "📰 *BBC NEWS HEADLINES*") }, { quoted: msg });
+            }
 
-                // Fallback to previous API
-                const fallbackText = await getFallbackNews("bbc");
-                if (fallbackText) return await sock.sendMessage(jid, { text: fallbackText }, { quoted: msg });
-                return await sock.sendMessage(jid, { text: "❌ No BBC news articles found." }, { quoted: msg });
-
-            } else if (source === "ntv") {
+            // ── NTV ──────────────────────────────────────────────────────────
+            if (source === "ntv") {
                 try {
                     const res = await axios.get(`${KEITH_API_BASE}/news/ntv`, { timeout: 10000 });
                     const articles = res.data?.result?.articles || [];
                     if (articles.length > 0) {
-                        let response = `📰 *NTV KENYA NEWS*\n━━━━━━━━━━━━━━━━━━━\n\n`;
+                        let text = `📰 *NTV KENYA NEWS*\n━━━━━━━━━━━━━━━━━━━\n\n`;
                         articles.slice(0, 7).forEach((item, i) => {
-                            response += `*#${i + 1}:* ${item.title}\n`;
-                            if (item.summary) response += `📝 ${item.summary.slice(0, 120)}...\n`;
-                            if (item.link) response += `🔗 ${item.link}\n`;
-                            response += `\n`;
+                            text += `*#${i + 1}:* ${item.title}\n`;
+                            if (item.summary) text += `📝 ${item.summary.slice(0, 120)}...\n`;
+                            if (item.link) text += `🔗 ${item.link}\n`;
+                            text += `\n`;
                         });
-                        return await sock.sendMessage(jid, { text: response }, { quoted: msg });
+                        text += `━━━━━━━━━━━━━━━━━━━`;
+                        return await sock.sendMessage(jid, { text }, { quoted: msg });
                     }
-                } catch (e) {
-                    console.warn("Keith NTV API error, trying fallback...");
-                }
+                } catch (_) {}
+                // Google RSS fallback
+                const articles = await googleNewsSearch("NTV Kenya news site:ntvkenya.co.ke OR NTV Kenya");
+                if (articles.length === 0) return await sock.sendMessage(jid, { text: "❌ No NTV news found." }, { quoted: msg });
+                return await sock.sendMessage(jid, { text: formatArticles(articles, "📰 *NTV KENYA NEWS*") }, { quoted: msg });
+            }
 
-                const fallbackText = await getFallbackNews("cnn");
-                if (fallbackText) return await sock.sendMessage(jid, { text: fallbackText }, { quoted: msg });
-                return await sock.sendMessage(jid, { text: "❌ No NTV news articles found." }, { quoted: msg });
-
-            } else if (source === "kbc") {
+            // ── KBC ──────────────────────────────────────────────────────────
+            if (source === "kbc") {
                 try {
                     const res = await axios.get(`${KEITH_API_BASE}/news/kbc`, { timeout: 10000 });
                     const items = res.data?.result?.breakingNews || res.data?.result?.featuredArticles || [];
                     if (items.length > 0) {
-                        let response = `📰 *KBC TV NEWS*\n━━━━━━━━━━━━━━━━━━━\n\n`;
+                        let text = `📰 *KBC TV NEWS*\n━━━━━━━━━━━━━━━━━━━\n\n`;
                         items.slice(0, 7).forEach((item, i) => {
-                            response += `*#${i + 1}:* ${item.title}\n`;
-                            if (item.url) response += `🔗 ${item.url}\n`;
-                            response += `\n`;
+                            text += `*#${i + 1}:* ${item.title}\n`;
+                            if (item.url) text += `🔗 ${item.url}\n`;
+                            text += `\n`;
                         });
-                        return await sock.sendMessage(jid, { text: response }, { quoted: msg });
+                        text += `━━━━━━━━━━━━━━━━━━━`;
+                        return await sock.sendMessage(jid, { text }, { quoted: msg });
                     }
-                } catch (e) {
-                    console.warn("Keith KBC API error, trying fallback...");
-                }
+                } catch (_) {}
+                const articles = await googleNewsSearch("KBC Kenya news site:kbc.co.ke OR KBC Channel 1");
+                if (articles.length === 0) return await sock.sendMessage(jid, { text: "❌ No KBC news found." }, { quoted: msg });
+                return await sock.sendMessage(jid, { text: formatArticles(articles, "📰 *KBC TV NEWS*") }, { quoted: msg });
+            }
 
-                const fallbackText = await getFallbackNews("cnn");
-                if (fallbackText) return await sock.sendMessage(jid, { text: fallbackText }, { quoted: msg });
-                return await sock.sendMessage(jid, { text: "❌ No KBC news articles found." }, { quoted: msg });
-
-            } else if (source === "citizen") {
+            // ── CITIZEN ──────────────────────────────────────────────────────
+            if (source === "citizen" || commandName === "citizennews") {
                 try {
                     const res = await axios.get(`${KEITH_API_BASE}/news/citizen`, { timeout: 10000 });
                     const stories = res.data?.result?.topStories || res.data?.result?.pinnedStories || [];
                     if (stories.length > 0) {
-                        let response = `📰 *CITIZEN DIGITAL NEWS*\n━━━━━━━━━━━━━━━━━━━\n\n`;
+                        let text = `📰 *CITIZEN DIGITAL NEWS*\n━━━━━━━━━━━━━━━━━━━\n\n`;
                         stories.slice(0, 7).forEach((item, i) => {
-                            response += `*#${i + 1}:* ${item.title || item.name}\n`;
-                            if (item.url) response += `🔗 ${item.url}\n`;
-                            response += `\n`;
+                            text += `*#${i + 1}:* ${item.title || item.name}\n`;
+                            if (item.url) text += `🔗 ${item.url}\n`;
+                            text += `\n`;
                         });
-                        return await sock.sendMessage(jid, { text: response }, { quoted: msg });
+                        text += `━━━━━━━━━━━━━━━━━━━`;
+                        return await sock.sendMessage(jid, { text }, { quoted: msg });
                     }
-                } catch (e) {
-                    console.warn("Keith Citizen API error, trying fallback...");
-                }
+                } catch (_) {}
+                const articles = await googleNewsSearch("Citizen Digital Kenya site:citizentv.co.ke OR Citizen TV Kenya");
+                if (articles.length === 0) return await sock.sendMessage(jid, { text: "❌ No Citizen news found." }, { quoted: msg });
+                return await sock.sendMessage(jid, { text: formatArticles(articles, "📰 *CITIZEN DIGITAL NEWS*") }, { quoted: msg });
+            }
 
-                const fallbackText = await getFallbackNews("cnn");
-                if (fallbackText) return await sock.sendMessage(jid, { text: fallbackText }, { quoted: msg });
-                return await sock.sendMessage(jid, { text: "❌ No Citizen news articles found." }, { quoted: msg });
-
-            } else if (source === "tech" || source === "verge") {
+            // ── TECH / VERGE ─────────────────────────────────────────────────
+            if (source === "tech" || source === "verge" || commandName === "technews") {
                 try {
                     const res = await axios.get(`${KEITH_API_BASE}/news/tech`, { timeout: 10000 });
                     const articles = res.data?.result?.featuredArticles || res.data?.result?.articles || [];
                     if (articles.length > 0) {
-                        let response = `💻 *LATEST TECH NEWS*\n━━━━━━━━━━━━━━━━━━━\n\n`;
+                        let text = `💻 *LATEST TECH NEWS*\n━━━━━━━━━━━━━━━━━━━\n\n`;
                         articles.slice(0, 7).forEach((item, i) => {
-                            response += `*#${i + 1}:* ${item.title}\n`;
-                            if (item.description) response += `📝 ${item.description.slice(0, 120)}...\n`;
-                            if (item.link || item.url) response += `🔗 ${item.link || item.url}\n`;
-                            response += `\n`;
+                            text += `*#${i + 1}:* ${item.title}\n`;
+                            if (item.description) text += `📝 ${item.description.slice(0, 120)}...\n`;
+                            if (item.link || item.url) text += `🔗 ${item.link || item.url}\n`;
+                            text += `\n`;
                         });
-                        return await sock.sendMessage(jid, { text: response }, { quoted: msg });
+                        text += `━━━━━━━━━━━━━━━━━━━`;
+                        return await sock.sendMessage(jid, { text }, { quoted: msg });
                     }
-                } catch (e) {
-                    console.warn("Keith Tech API error, trying fallback...");
-                }
+                } catch (_) {}
+                // Google Tech RSS topic
+                const articles = await googleNewsTopic("topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp0YVdjU0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US:en");
+                if (articles.length > 0) return await sock.sendMessage(jid, { text: formatArticles(articles, "💻 *LATEST TECH NEWS*") }, { quoted: msg });
+                const fallback = await googleNewsSearch("latest technology news AI gadgets");
+                if (fallback.length === 0) return await sock.sendMessage(jid, { text: "❌ No tech news found." }, { quoted: msg });
+                return await sock.sendMessage(jid, { text: formatArticles(fallback, "💻 *LATEST TECH NEWS*") }, { quoted: msg });
+            }
 
-                const fallbackText = await getFallbackNews("verge");
-                if (fallbackText) return await sock.sendMessage(jid, { text: fallbackText }, { quoted: msg });
-                return await sock.sendMessage(jid, { text: "❌ No tech news articles found." }, { quoted: msg });
+            // ── CNN ──────────────────────────────────────────────────────────
+            if (source === "cnn" || commandName === "cnn") {
+                const articles = await googleNewsSearch("CNN news site:cnn.com");
+                if (articles.length === 0) return await sock.sendMessage(jid, { text: "❌ No CNN news found." }, { quoted: msg });
+                return await sock.sendMessage(jid, { text: formatArticles(articles, "📺 *CNN NEWS*") }, { quoted: msg });
+            }
 
-            } else if (source === "cnn") {
-                const fallbackText = await getFallbackNews("cnn");
-                if (fallbackText) return await sock.sendMessage(jid, { text: fallbackText }, { quoted: msg });
-                return await sock.sendMessage(jid, { text: "❌ No CNN news articles found." }, { quoted: msg });
-
-            } else if (source === "kenyans" || (input && !["bbc", "ntv", "kbc", "citizen", "tech", "cnn", "verge"].includes(source))) {
-                const searchQuery = source === "kenyans" ? (args.slice(1).join(" ") || "Kenya") : input;
+            // ── TOPIC SEARCH (any unrecognized keyword) ───────────────────────
+            if (input && !KNOWN_SOURCES.includes(source)) {
+                const query = input; // full user input as the topic
+                let articles = [];
+                // Try Keith Kenyans search first
                 try {
-                    const res = await axios.get(`${KEITH_API_BASE}/news/kenyans/search?q=${encodeURIComponent(searchQuery)}`, { timeout: 10000 });
+                    const res = await axios.get(`${KEITH_API_BASE}/news/kenyans/search?q=${encodeURIComponent(query)}`, { timeout: 10000 });
                     const results = res.data?.result?.results || [];
-
                     if (results.length > 0) {
-                        let response = `📰 *NEWS SEARCH: "${searchQuery.toUpperCase()}"*\n━━━━━━━━━━━━━━━━━━━\n\n`;
+                        let text = `📰 *NEWS: "${query.toUpperCase()}"*\n━━━━━━━━━━━━━━━━━━━\n\n`;
                         results.slice(0, 7).forEach((item, i) => {
-                            response += `*#${i + 1}:* ${item.title}\n`;
-                            if (item.url) response += `🔗 ${item.url}\n`;
-                            response += `\n`;
+                            text += `*#${i + 1}:* ${item.title}\n`;
+                            if (item.url) text += `🔗 ${item.url}\n`;
+                            text += `\n`;
                         });
-                        return await sock.sendMessage(jid, { text: response }, { quoted: msg });
+                        text += `━━━━━━━━━━━━━━━━━━━\n_Source: Kenyans.co.ke_`;
+                        return await sock.sendMessage(jid, { text }, { quoted: msg });
                     }
-                } catch (e) {
-                    console.warn("Keith Kenyans Search API error, trying fallback...");
+                } catch (_) {}
+
+                // Google News RSS — the real powerhouse for topic search
+                articles = await googleNewsSearch(query);
+                if (articles.length === 0) {
+                    return await sock.sendMessage(jid, { text: `❌ No news results found for *"${query}"*. Try a different keyword.` }, { quoted: msg });
                 }
+                return await sock.sendMessage(jid, {
+                    text: formatArticles(articles, `🔍 *NEWS: "${query.toUpperCase()}"*`)
+                }, { quoted: msg });
+            }
 
-                // Fallback to CNN/BBC if search fails
-                const fallbackText = await getFallbackNews("cnn");
-                if (fallbackText) return await sock.sendMessage(jid, { text: fallbackText }, { quoted: msg });
-                return await sock.sendMessage(jid, { text: `❌ No news results found for *"${searchQuery}"*.` }, { quoted: msg });
-
-            } else {
-                // Default: Try Keith BBC first
+            // ── DEFAULT (no args / unknown) ───────────────────────────────────
+            {
+                // Try Keith BBC
                 try {
                     const res = await axios.get(`${KEITH_API_BASE}/news/bbc`, { timeout: 10000 });
                     const stories = res.data?.result?.topStories || [];
-
                     if (stories.length > 0) {
-                        let response = `📰 *TOP GLOBAL NEWS (BBC)*\n━━━━━━━━━━━━━━━━━━━\n\n`;
+                        let text = `📰 *TOP GLOBAL NEWS (BBC)*\n━━━━━━━━━━━━━━━━━━━\n\n`;
                         stories.slice(0, 6).forEach((item, i) => {
-                            response += `*#${i + 1}:* ${item.title}\n`;
-                            if (item.url) response += `🔗 ${item.url}\n\n`;
+                            text += `*#${i + 1}:* ${item.title}\n`;
+                            if (item.url) text += `🔗 ${item.url}\n\n`;
                         });
-                        response += `━━━━━━━━━━━━━━━━━━━\n`;
-                        response += `💡 *Usage:* \`.news <bbc|ntv|citizen|kbc|tech|cnn|verge|query>\`\n`;
-                        response += `_Example: \`.news tech\` or \`.news Ruto\`_`;
-
-                        return await sock.sendMessage(jid, { text: response }, { quoted: msg });
+                        text += `━━━━━━━━━━━━━━━━━━━\n`;
+                        text += `💡 *Usage:* \`.news <bbc|ntv|citizen|kbc|tech|cnn|verge|topic>\`\n`;
+                        text += `_Example: \`.news tech\` or \`.news Ruto\` or \`.news AI\`_`;
+                        return await sock.sendMessage(jid, { text }, { quoted: msg });
                     }
-                } catch (e) {
-                    console.warn("Keith Default BBC API error, trying fallback...");
-                }
+                } catch (_) {}
 
-                // Fallback to previous API (CNN)
-                const fallbackText = await getFallbackNews("cnn");
-                if (fallbackText) return await sock.sendMessage(jid, { text: fallbackText }, { quoted: msg });
-                return await sock.sendMessage(jid, { text: "❌ Error fetching news headlines." }, { quoted: msg });
+                // Google Top Headlines
+                const articles = await googleNewsTopic("headlines?hl=en-US&gl=US&ceid=US:en");
+                if (articles.length === 0) return await sock.sendMessage(jid, { text: "❌ Could not fetch news right now. Try again." }, { quoted: msg });
+                let text = formatArticles(articles, "📰 *TOP GLOBAL HEADLINES*", 6);
+                text += `\n\n💡 *Usage:* \`.news <bbc|ntv|citizen|kbc|tech|cnn|verge|topic>\`\n`;
+                text += `_Example: \`.news tech\` or \`.news Ruto\` or \`.news AI\`_`;
+                return await sock.sendMessage(jid, { text }, { quoted: msg });
             }
+
         } catch (err) {
-            console.error("News command global error:", err.message);
-            const fallbackText = await getFallbackNews("cnn");
-            if (fallbackText) return await sock.sendMessage(jid, { text: fallbackText }, { quoted: msg });
-            await sock.sendMessage(jid, { text: "❌ Error fetching news headlines from API." }, { quoted: msg });
+            console.error("News command error:", err.message);
+            await sock.sendMessage(jid, { text: "❌ Error fetching news. Please try again." }, { quoted: msg });
         }
     }
 };
