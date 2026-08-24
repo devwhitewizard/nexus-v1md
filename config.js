@@ -1,6 +1,8 @@
+const pkg = require("./package.json");
+
 module.exports = {
-    // Bot version
-    version: "1.0.2",
+    // Bot version (dynamically read from package.json)
+    version: pkg.version || "1.0.0",
 
     // Bot owners (Full JIDs or raw numbers)
     ownerNumbers: [
