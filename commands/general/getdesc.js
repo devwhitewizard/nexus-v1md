@@ -27,6 +27,9 @@ module.exports = {
             for (const cmd of catCmds) {
                 info += `┃ 🔹 *.${cmd.name}*`;
                 if (cmd.description) info += ` — ${cmd.description}`;
+                if (cmd.aliases && cmd.aliases.length > 0) {
+                    info += `\n┃   ↳ *Aliases:* ${cmd.aliases.map(a => `.${a}`).join(", ")}`;
+                }
                 info += "\n";
             }
             info += `┃\n┃ 📊 *Total:* ${catCmds.length} command${catCmds.length !== 1 ? "s" : ""}\n`;
@@ -46,9 +49,10 @@ module.exports = {
         info += `┃ 🔹 *Command:* .${cmd.name}\n`;
         info += `┃ 📝 *Description:* ${cmd.description || "No description provided."}\n`;
         if (cmd.category) info += `┃ 🏷️ *Category:* ${cmd.category.toUpperCase()}\n`;
-        if (cmd.aliases && cmd.aliases.length > 0) {
-            info += `┃ 🔤 *Aliases:* ${cmd.aliases.map(a => `.${a}`).join(", ")}\n`;
-        }
+        const aliasList = (cmd.aliases && cmd.aliases.length > 0)
+            ? cmd.aliases.map(a => `.${a}`).join(", ")
+            : "None";
+        info += `┃ 🔤 *Aliases:* ${aliasList}\n`;
         if (cmd.isOwnerOnly) info += `┃ 🔒 *Permission:* Owner Only\n`;
         else if (cmd.isAdminOnly) info += `┃ 🛡️ *Permission:* Admin Only\n`;
         else if (cmd.isGroupOnly) info += `┃ 👥 *Permission:* Group Only\n`;
