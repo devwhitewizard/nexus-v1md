@@ -125,12 +125,12 @@ const USAGE_HINTS = {
     hidetag: "<message>",
 
     // News
-    news: "<bbc|ntv|citizen|kbc|tech|cnn|query>",
-    headlines: "<source>",
-    technews: "[query]",
-    bbcnews: "[query]",
-    citizennews: "[query]",
-    cnn: "[query]",
+    news: "<topic>",
+    bbcnews: "",
+    citizennews: "",
+    technews: "",
+    cnn: "",
+    headlines: "",
 
     // Sports
     player: "<name>",
@@ -272,7 +272,7 @@ module.exports = {
                     card += `│ > Command: .${foundCmd.name}${hint ? " " + hint : ""}\n`;
                     if (foundCmd.description) card += `│ > What it does: ${foundCmd.description}\n`;
                     if (foundCmd.category) card += `│ > Category: ${meta.icon} ${meta.label}\n`;
-                    if (foundCmd.aliases && foundCmd.aliases.length)
+                    if (foundCmd.aliases && foundCmd.aliases.length && !foundCmd.hideAliases)
                         card += `│ > Aliases: ${foundCmd.aliases.map(a => `.${a}`).join(", ")}\n`;
                     card += `└─────────────────────────────`;
                     return await sendButtonMessage(sock, jid, card, botName, channelButtons, null, ctx.msg);

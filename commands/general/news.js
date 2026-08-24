@@ -61,7 +61,8 @@ const KEITH_API_BASE = "https://apiskeith2-production-3020.up.railway.app";
 module.exports = {
     name: "news",
     aliases: ["headlines", "technews", "bbcnews", "citizennews", "cnn"],
-    description: "Get latest news headlines from BBC, NTV, Citizen, KBC, Tech, CNN, or search any topic.",
+    hideAliases: true,
+    description: "Search any news topic — e.g. .news Ruto or .news AI",
     category: "news",
 
     async execute({ sock, jid, msg, args, commandName }) {
@@ -224,31 +225,22 @@ module.exports = {
                 }, { quoted: msg });
             }
 
-            // ── DEFAULT (no args / unknown) ───────────────────────────────────
+            // ── DEFAULT (no args) — show topic guide ─────────────────────────
             {
-                // Try Keith BBC
-                try {
-                    const res = await axios.get(`${KEITH_API_BASE}/news/bbc`, { timeout: 10000 });
-                    const stories = res.data?.result?.topStories || [];
-                    if (stories.length > 0) {
-                        let text = `📰 *TOP GLOBAL NEWS (BBC)*\n━━━━━━━━━━━━━━━━━━━\n\n`;
-                        stories.slice(0, 6).forEach((item, i) => {
-                            text += `*#${i + 1}:* ${item.title}\n`;
-                            if (item.url) text += `🔗 ${item.url}\n\n`;
-                        });
-                        text += `━━━━━━━━━━━━━━━━━━━\n`;
-                        text += `💡 *Usage:* \`.news <bbc|ntv|citizen|kbc|tech|cnn|verge|topic>\`\n`;
-                        text += `_Example: \`.news tech\` or \`.news Ruto\` or \`.news AI\`_`;
-                        return await sock.sendMessage(jid, { text }, { quoted: msg });
-                    }
-                } catch (_) {}
-
-                // Google Top Headlines
-                const articles = await googleNewsTopic("headlines?hl=en-US&gl=US&ceid=US:en");
-                if (articles.length === 0) return await sock.sendMessage(jid, { text: "❌ Could not fetch news right now. Try again." }, { quoted: msg });
-                let text = formatArticles(articles, "📰 *TOP GLOBAL HEADLINES*", 6);
-                text += `\n\n💡 *Usage:* \`.news <bbc|ntv|citizen|kbc|tech|cnn|verge|topic>\`\n`;
-                text += `_Example: \`.news tech\` or \`.news Ruto\` or \`.news AI\`_`;
+                const text =
+                    `📰 *NEWS SEARCH*\n━━━━━━━━━━━━━━━━━━━\n\n` +
+                    `Use *.news <topic>* to search any news topic.\n\n` +
+                    `*Examples:*\n` +
+                    `  • \`.news Ruto\`\n` +
+                    `  • \`.news AI\`\n` +
+                    `  • \`.news Kenya floods\`\n\n` +
+                    `*Dedicated commands:*\n` +
+                    `  • \`.bbcnews\` — BBC headlines\n` +
+                    `  • \`.citizennews\` — Citizen TV\n` +
+                    `  • \`.technews\` — Tech news\n` +
+                    `  • \`.cnn\` — CNN news\n` +
+                    `  • \`.headlines\` — Top global\n` +
+                    `━━━━━━━━━━━━━━━━━━━`;
                 return await sock.sendMessage(jid, { text }, { quoted: msg });
             }
 
