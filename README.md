@@ -1,5 +1,5 @@
 <p align="center">
-<img align="center" height="auto" src="assets/nexus-logo.svg">
+<img align="center" height="auto" src="https://raw.githubusercontent.com/devwhitewizard/Nexus-MD/main/assets/botnexus.png">
 </p>
 
 <br/>
