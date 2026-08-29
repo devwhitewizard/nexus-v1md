@@ -61,6 +61,17 @@
 </a>
 </p>
 
+<p align="center">
+<strong>RENDER</strong><br>
+<a href="https://render.com/deploy?repo=https://github.com/devwhitewizard/nexus-v1md">
+<img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" height="35">
+</a>
+</p>
+
+<p align="center">
+<a href="https://nexus-md.vercel.app/"><img src="https://img.shields.io/badge/📖%20View%20More%20Steps-nexus--md.vercel.app-00e5ff?style=for-the-badge&logoColor=white"></a>
+</p>
+
 ---
 
 ## ⚙️ Local Setup
