@@ -43,9 +43,21 @@
 <a href="https://github.com/devwhitewizard/nexus-v1md"><img src="https://img.shields.io/badge/Star-Nexus%20MD-00e5ff?style=for-the-badge&logo=github&logoColor=black"></a>
 </p>
 
+<p align="center">
+<strong>4. GET SESSION ID 🔑</strong><br>
+<a href="https://nexus-paircode-1.onrender.com/"><img src="https://img.shields.io/badge/Get%20Session%20ID-nexus--paircode-00e5ff?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAxQTExIDExIDAgMCAwIDEgMTJhMTEgMTEgMCAwIDAgMTEgMTFBMTEgMTEgMCAwIDAgMjMgMTJBMTEgMTEgMCAwIDAgMTIgMU0xMiAzYTkgOSAwIDAgMSA5IDlhOSA5IDAgMCAxLTkgOWE5IDkgMCAwIDEtOS05YTkgOSAwIDAgMSA5LTltMC0yYTcgNyAwIDAgMC03IDdhNyA3IDAgMCAwIDcgN2E3IDcgMCAwIDAgNy03YTcgNyAwIDAgMC03LTd6Ii8+PC9zdmc+&logoColor=black"></a>
+</p>
+
 ---
 
 ## 🚀 Deploy
+
+<p align="center">
+<strong>GET YOUR SESSION ID FIRST 🔑</strong><br>
+<a href="https://nexus-paircode-1.onrender.com/">
+<img src="https://img.shields.io/badge/🔑%20Get%20Session%20ID-nexus--paircode--1.onrender.com-00e5ff?style=for-the-badge" alt="Get Session ID">
+</a>
+</p>
 
 <p align="center">
 <strong>HEROKU</strong><br>
