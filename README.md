@@ -81,6 +81,27 @@
 </p>
 
 <p align="center">
+<strong>BOT HOSTING</strong><br>
+<a href="https://bot-hosting.net/a/p/cmtemlp1s01dag8qcc2xypibg/deploy">
+<img src="https://img.shields.io/badge/Deploy-Bot%20Hosting-7c4dff?style=for-the-badge&logo=serverfault&logoColor=white" alt="Deploy to Bot Hosting" height="35">
+</a>
+</p>
+
+<p align="center">
+<strong>KATABUMP</strong><br>
+<a href="https://dashboard.katabump.com/dashboard#203630">
+<img src="https://img.shields.io/badge/Deploy-Katabump-ff6b35?style=for-the-badge&logo=cloud&logoColor=white" alt="Deploy to Katabump" height="35">
+</a>
+</p>
+
+<p align="center">
+<strong>📦 DOWNLOAD BOT FILES</strong><br>
+<a href="https://github.com/devwhitewizard/nexus-v1md/archive/refs/heads/main.zip">
+<img src="https://img.shields.io/badge/⬇️%20Download-Bot%20Files%20(.zip)-00e5ff?style=for-the-badge&logo=github&logoColor=black" alt="Download Bot Files">
+</a>
+</p>
+
+<p align="center">
 <a href="https://nexus-md.vercel.app/"><img src="https://img.shields.io/badge/📖%20View%20More%20Steps-nexus--md.vercel.app-00e5ff?style=for-the-badge&logoColor=white"></a>
 </p>
 
