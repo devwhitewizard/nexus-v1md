@@ -96,8 +96,6 @@ npm start
 | `MODE` | ❌ | `public` or `private` |
 | `PAIRING_NUMBER` | ❌ | Phone number for pairing code login |
 | `DATABASE_URL` | ❌ | PostgreSQL URL (falls back to SQLite) |
-| `GROQ_API_KEY` | ❌ | GROQ AI key |
-| `OPENAI_API_KEY` | ❌ | OpenAI key |
 
 ---
 
