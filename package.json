@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "nexus-md": "git+https://github.com/devwhitewizard/Nexus-MD.git",
     "@whiskeysockets/baileys": "^7.0.0-rc13",
     "axios": "^1.16.1",
     "dotenv": "^17.4.2",
