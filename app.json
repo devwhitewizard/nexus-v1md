@@ -31,12 +31,17 @@
       "type": "string"
     },
     "SUDO": {
-      "description": "Primary Super-Admin phone number with country code (e.g. 254797715445).",
+      "description": "Primary Super-Admin phone number with country code (e.g. 254702781244).",
       "required": true,
       "type": "string"
     },
     "OWNERS": {
       "description": "Additional owner phone numbers separated by commas (e.g. 254711111111,254722222222).",
+      "required": false,
+      "type": "string"
+    },
+    "PAIRING_NUMBER": {
+      "description": "Phone number with country code to generate a pairing code instead of scanning a QR code.",
       "required": false,
       "type": "string"
     },
