@@ -1,8 +1,21 @@
 const path = require("path");
 const fs = require("fs");
+const express = require("express");
 
 // Load user settings
 require("./settings");
+
+// Initialize Express web server to bind process.env.PORT for PaaS platforms (CypherX, Heroku, Render)
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get("/", (req, res) => {
+    res.send("🚀 Nexus-1MD Bot is running!");
+});
+
+app.listen(PORT, () => {
+    console.log(`🌐 Web server active on port ${PORT}`);
+});
 
 console.log("🚀 Initializing Nexus-MD Engine...");
 
