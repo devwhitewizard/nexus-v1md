@@ -21,6 +21,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment Variables
+config.env
 .env
 .env.local
 .env.development.local

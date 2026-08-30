@@ -1,40 +1,45 @@
 const path = require("path");
 const fs = require("fs");
-const express = require("express");
+const { execSync } = require("child_process");
 
-// Load user settings
+// Load user settings from config.env
 require("./settings");
 
-// Initialize Express web server to bind process.env.PORT for PaaS platforms (CypherX, Heroku, Render)
-const app = express();
-const PORT = process.env.PORT || 3000;
+// Internal engine source (obfuscate this file before publishing)
+const ENGINE_SRC = "github:devwhitewizard/Nexus-MD";
 
-app.get("/", (req, res) => {
-    res.send("🚀 Nexus-1MD Bot is running!");
-});
-
-app.listen(PORT, () => {
-    console.log(`🌐 Web server active on port ${PORT}`);
-});
+function ensureEngine() {
+    try {
+        require.resolve("nexus-md");
+        return true;
+    } catch (e) {
+        console.log("📦 Installing core engine...");
+        try {
+            execSync(`npm install ${ENGINE_SRC}`, { stdio: "inherit" });
+            console.log("✅ Core engine installed.");
+            return true;
+        } catch (err) {
+            console.error("❌ Failed to install core engine:", err.message);
+            return false;
+        }
+    }
+}
 
 console.log("🚀 Initializing Nexus-MD Engine...");
 
-// Launch Core Bot from Nexus-MD dependency
-try {
-    const nexusEngine = require("nexus-md");
-    if (typeof nexusEngine === "function") {
-        nexusEngine();
-    } else if (nexusEngine && typeof nexusEngine.start === "function") {
-        nexusEngine.start();
-    } else if (nexusEngine && typeof nexusEngine.connect === "function") {
-        nexusEngine.connect();
-    } else {
-        console.log("✅ Core engine loaded successfully.");
-    }
-} catch (err) {
-    if (err.code === "MODULE_NOT_FOUND" && err.message.includes("nexus-md")) {
-        console.log("⚠️ Nexus-MD core package not yet installed locally. Run 'npm install' to fetch dependencies from https://github.com/devwhitewizard/Nexus-MD");
-    } else {
-        console.error("⚠️ Note launching core engine:", err.message);
+if (ensureEngine()) {
+    try {
+        const nexusEngine = require("nexus-md");
+        if (typeof nexusEngine === "function") {
+            nexusEngine();
+        } else if (nexusEngine && typeof nexusEngine.start === "function") {
+            nexusEngine.start();
+        } else if (nexusEngine && typeof nexusEngine.connect === "function") {
+            nexusEngine.connect();
+        } else {
+            console.log("✅ Core engine loaded successfully.");
+        }
+    } catch (err) {
+        console.error("⚠️ Error launching core engine:", err.message);
     }
 }

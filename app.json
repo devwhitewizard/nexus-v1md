@@ -40,11 +40,6 @@
       "required": false,
       "type": "string"
     },
-    "PAIRING_NUMBER": {
-      "description": "Phone number with country code to generate a pairing code instead of scanning a QR code.",
-      "required": false,
-      "type": "string"
-    },
     "PREFIX": {
       "description": "Command trigger prefix (default is .)",
       "required": false,
