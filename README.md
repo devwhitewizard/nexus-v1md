@@ -113,7 +113,7 @@
 git clone https://github.com/devwhitewizard/nexus-v1md.git
 cd nexus-v1md
 npm install
-# fill in SUDO and SESSION_ID (uses config.env instead of .env)
+# Edit config.env and fill in your SUDO and SESSION_ID
 npm start
 ```
 
