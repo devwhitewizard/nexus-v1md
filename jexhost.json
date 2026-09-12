@@ -1,25 +1,25 @@
 {
-  "bot-name": "Jexploit",
-  "owner-verification": "devkelvin903@gmail.com",
-  "tagline": "Advanced Whatsapp bot made with much love from Uganda",
-  "documentation-link": "https://github.com/Kevintech-hub/Jexploit-Bot#readme",
-  "session-helper-url": "https://xploitdevkevin-pairing-site.onrender.com/",
+  "bot-name": "Nexus-Md",
+  "owner-verification": "nexuswizard162@gmail.com",
+  "tagline": "Advanced Whatsapp bot",
+  "documentation-link": "https://github.com/devwhitewizard/nexus-v1md#readme",
+  "session-helper-url": "https://nexus-paircode-1.onrender.com/",
 
   "env": {
     "SESSION_ID": {
-      "description": "Session id must start with: JEXPLOIT-BOT~, JEXPLOIT-BOT:~, VESPER-BOT~, VESPER-BOT:~, or kevin~",
+      "description": "Session id must start with Nexus~",
       "required": true,
       "value": ""
     },
     "OWNER_NAME": {
       "description": "Put Owner Name Here",
       "required": true,
-      "value": "Kevin Tech"
+      "value": "Whitewizard"
     },
     "OWNER_NUMBER": {
       "description": "Put only one Owner Number Here",
       "required": true,
-      "value": "256742932677"
+      "value": "254101010101"
     },
     "MODE": {
       "description": "'public' to respond to everyone, 'private' to respond to the owner only",
