@@ -1,0 +1,30 @@
+{
+  "bot-name": "Jexploit",
+  "owner-verification": "devkelvin903@gmail.com",
+  "tagline": "Advanced Whatsapp bot made with much love from Uganda",
+  "documentation-link": "https://github.com/Kevintech-hub/Jexploit-Bot#readme",
+  "session-helper-url": "https://xploitdevkevin-pairing-site.onrender.com/",
+
+  "env": {
+    "SESSION_ID": {
+      "description": "Session id must start with: JEXPLOIT-BOT~, JEXPLOIT-BOT:~, VESPER-BOT~, VESPER-BOT:~, or kevin~",
+      "required": true,
+      "value": ""
+    },
+    "OWNER_NAME": {
+      "description": "Put Owner Name Here",
+      "required": true,
+      "value": "Kevin Tech"
+    },
+    "OWNER_NUMBER": {
+      "description": "Put only one Owner Number Here",
+      "required": true,
+      "value": "256742932677"
+    },
+    "MODE": {
+      "description": "'public' to respond to everyone, 'private' to respond to the owner only",
+      "required": false,
+      "value": "public"
+    }
+  }
+}
