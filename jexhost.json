@@ -7,7 +7,7 @@
 
   "env": {
     "SESSION_ID": {
-      "description": "Session id must start with Nexus~",
+      "description": "Session id must start with NEXUS~",
       "required": true,
       "value": ""
     },
