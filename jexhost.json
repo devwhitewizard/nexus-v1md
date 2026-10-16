@@ -3,7 +3,7 @@
   "owner-verification": "nexuswizard162@gmail.com",
   "tagline": "Advanced Whatsapp bot",
   "documentation-link": "https://github.com/devwhitewizard/nexus-v1md#readme",
-  "session-helper-url": "https://nexus-paircode-1.onrender.com/",
+  "session-helper-url": "https://nexus.whitewizard.top/",
 
   "env": {
     "SESSION_ID": {
@@ -18,8 +18,8 @@
     },
     "OWNER_NUMBER": {
       "description": "Put only one Owner Number Here",
-      "required": true,
-      "value": "254101010101"
+      "required": false,
+      "value": "254700000000"
     },
     "MODE": {
       "description": "'public' to respond to everyone, 'private' to respond to the owner only",
