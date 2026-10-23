@@ -13,7 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nexus-md": "1.0.3",
+    "nexus-md": "github:devwhitewizard/Nexus-MD#main",
     "dotenv": "^17.4.2",
     "form-data": "^4.0.6",
     "jimp": "^1.6.1",
