@@ -19,7 +19,7 @@
     "jsqr": "^1.4.0",
     "link-preview-js": "^3.2.0",
     "mumaker": "^2.0.0",
-    "nexus-md": "github:devwhitewizard/Nexus-MD#0518e697df851d3c80e60374a17a1bf875ea7117",
+    "nexus-md": "github:devwhitewizard/Nexus-MD#5c074f79573026e93cfdf15ec983eec2efe0054a",
     "node-cache": "^5.1.2",
     "nodemon": "^3.1.14",
     "pg": "^8.21.0",
